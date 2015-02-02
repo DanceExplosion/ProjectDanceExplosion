@@ -15,8 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test.txt">
+    <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
       <Filter>Resource Files</Filter>
-    </Text>
+    </Image>
   </ItemGroup>
 </Project>
