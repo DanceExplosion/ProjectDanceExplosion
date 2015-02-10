@@ -13,12 +13,16 @@ class Mesh
 {
 public:
 	Mesh();
+	~Mesh();
 	Mesh(aiMesh* m);
 	int GetNumVertices(aiMesh* m);
 	int GetNumVertices();
 	int GetNumFaces(aiMesh* m);
 	int GetNumFaces();
+	//returns Mesh for model
+	aiMesh* GetAllModelData();
 private:
 	int numVertices;
 	int numFaces;
+	aiMesh* modelData;
 };

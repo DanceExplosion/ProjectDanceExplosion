@@ -30,7 +30,7 @@ float camY;
 int xCircle = 1, yCircle = 1;
 
 // Model
-Mesh model;
+std::vector<Mesh> model;
 std::vector<float> vertexData;
 
 void LoadModelData()
@@ -59,15 +59,19 @@ void LoadModelData()
 
 	std::cout << "Number of models in file: " << scene->mNumMeshes << std::endl;
 	// Pulling required data from scene
-	aiMesh* mesh1 = scene->mMeshes[0];
+	for (int i = 0; i <scene->mNumMeshes; i++)
+	{
+		aiMesh* mesh1 = scene->mMeshes[i];
+		model.push_back(Mesh(mesh1));
+	}
 
-	model = Mesh(mesh1);
-
-	int numVertices = mesh1->mNumFaces * 3; // NEVER USE mNumVertices - it is inaccurate and drives you crazy
+	int numVertices = model.at(0).GetNumFaces() * 3; // NEVER USE mNumVertices - it is inaccurate and drives you crazy
 	int count = 0;
-	//std::vector<float> vertexData;
+	
+	aiMesh* mesh1 = model.at(0).GetAllModelData();
+
 	// for each face in mesh
-	for (unsigned int i = 0; i < mesh1->mNumFaces; i++)
+	for (unsigned int i = 0; i < model.at(0).GetNumFaces(); i++)
 	{
 		const aiFace& currentFace = mesh1->mFaces[i];
 
@@ -77,9 +81,9 @@ void LoadModelData()
 			aiVector3D pos = mesh1->mVertices[currentFace.mIndices[j]];
 			// pull vertex.x, y & z to a more convenient location
 			// vertices require scaling to fit in window
-			vertexData.push_back(pos.x * 0.08f);
-			vertexData.push_back(pos.y * 0.08f);
-			vertexData.push_back(pos.z * 0.08f);
+			vertexData.push_back(pos.x);// * 0.08f);
+			vertexData.push_back(pos.y);// * 0.08f);
+			vertexData.push_back(pos.z);// * 0.08f);
 		}
 	}
 }
@@ -105,7 +109,7 @@ void RenderScene()
 	glBindVertexArray(vao);
 
 	// vertex buffer		each face has 3 vertices, each vertex has 3 parts, each part is 8 bytes long?
-	int bufferSize = model.GetNumFaces() * 3 * 3 * 4;
+	int bufferSize = model.at(0).GetNumFaces() * 3 * 3 * 4;
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -123,13 +127,13 @@ void RenderScene()
 		0,				// VertexArrayAttrib
 		3,				// size
 		GL_FLOAT,		// type
-		GL_FALSE,		// normalised?
+		GL_TRUE,		// normalised?
 		0,				// stride
 		(void*)0		// array buffer offset
 		);
 
 	// each face has 3 vertices
-	int numVertices = model.GetNumFaces() * 3;
+	int numVertices = model.at(0).GetNumFaces() * 3;
 
 	glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	glutSwapBuffers();
@@ -152,14 +156,14 @@ void MoveCamera(int x, int y)
 	yCircle += y;
 	if( y == 0 )// move in X and Z axis
 	{
-		camX = 10.0f * cos(xCircle * 3.14f / 180.0f);
-		camZ = 10.0f * sin(xCircle * 3.14f / 180.0f);
+		camX = 120.0f * cos(xCircle * 3.14f / 180.0f);
+		camZ = 120.0f * sin(xCircle * 3.14f / 180.0f);
 	}
 	else // move in X, Y and Z axis
 	{
-		camX = 10.0f * cos(xCircle * 3.14f / 180.0f);
-		camY = 10.0f * sin(yCircle * 3.14f / 180.0f);
-		camZ = 10.0f * sin(xCircle * 3.14f / 180.0f);
+		camX = 120.0f * cos(xCircle * 3.14f / 180.0f);
+		camY = 120.0f * sin(yCircle * 3.14f / 180.0f);
+		camZ = 120.0f * sin(xCircle * 3.14f / 180.0f);
 	}
 
 	if ((xCircle > 360.0f) || (xCircle < -360.0f))

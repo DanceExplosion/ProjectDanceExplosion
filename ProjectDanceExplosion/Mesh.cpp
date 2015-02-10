@@ -1,11 +1,18 @@
 #include "Mesh.h"
 
 Mesh::Mesh(){}
+Mesh::~Mesh(){}
 
 Mesh::Mesh(aiMesh* m)
 {
 	numVertices = m->mNumVertices;
 	numFaces = m->mNumFaces;
+	modelData = m;
+}
+
+aiMesh* Mesh::GetAllModelData()
+{
+	return modelData;
 }
 
 int Mesh::GetNumFaces()
