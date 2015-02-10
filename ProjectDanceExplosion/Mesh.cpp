@@ -8,7 +8,9 @@ Mesh::Mesh(aiMesh* m)
 	numVertices = m->mNumFaces * 3; // more accurate than m->mNumVerticies
 	numFaces = m->mNumFaces;
 	modelData = m;
+	// will evert model have verticies? or should we check for them?
 	StoreVertexData();
+	// can check for other data and store accordingly
 }
 
 void Mesh::StoreVertexData()
@@ -49,5 +51,6 @@ int Mesh::GetNumVertices()
 
 float* Mesh::GetVertexData()
 {
+	// reference first element of vector
 	return &vertexData.at(0);
 }

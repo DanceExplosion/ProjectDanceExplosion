@@ -78,3 +78,40 @@ Mesh
 			  |
 		----------------------
 	ShaderLoader		    Mesh
+---------------------------------------------------------------
+Drawing Models Explained
+
+Assimp loads a file as an aiScene type.
+This aiScene contains multiple aiMeshes.
+aiMeshes contain vertices, normals, texture coordinates,
+ a skeleton and other fun stuff.
+So for Nanosuit, Assimp would have 1 aiScene with 10 aiMeshes.
+The aiMeshes contain all the data we need to draw a model.
+So here's how we do that:
+
+Main::LoadModel
+ For every aiMesh in scene create a Mesh object
+ This Mesh object is stored in <vector>modelList
+  Mesh object created using Mesh::Mesh(aiMesh* m) -> see below
+ The number of aiMeshs in aiScene is stored in numMeshes
+
+Main::RenderScene()
+ Creates 1 MVP
+ Creates 1 vao
+ For loop moves though <vector>modelList
+	creates unique vbo for each model in modelList
+	buffers vertex data in vbo
+	 vertex data obtained using Mesh::GetVertexData()
+	passes vbo into shaders
+	draws vbo (ya don't say?)
+
+Mesh::Mesh(aiMesh* m)
+ When a Mesh is created:
+	its number of vertices is calculated
+	its number of faces is stored
+	its vertesData is stored in an understandable format
+
+Mesh::GetVertexData()
+ Returns a pointer to the first element of vertexData vector
+ Apparantly this is enough to buffer all the data in the vector
+  - I shall not argue, it's incredibly handy!

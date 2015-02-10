@@ -27,9 +27,11 @@ GLuint basicProgram;
 glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
+float camY;
 
 // Models
-std::vector<Mesh> model;
+std::vector<Mesh> modelList;
+int numModels;
 
 void LoadModelData()
 {
@@ -54,13 +56,14 @@ void LoadModelData()
 	else
 		std::cout << "File loaded successfully" <<std::endl;
 
+	numModels = scene->mNumMeshes;
+	std::cout << "Number of models in file: " << numModels << std::endl;
 
-	std::cout << "Number of models in file: " << scene->mNumMeshes << std::endl;
 	// Pulling required data from scene
 	for (int i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh1 = scene->mMeshes[i];
-		model.push_back(Mesh(mesh1));
+		modelList.push_back(Mesh(mesh1));
 	}
 }
 
@@ -82,54 +85,55 @@ void RenderScene()
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-	
-	// vertex buffer		
-	int bufferSize = model.at(0).GetNumVertices() * 3 * 4; // each vertex has 3 parts, each part is 4 bytes long?
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize, model.at(0).GetVertexData(), GL_STATIC_DRAW);
-
-
 
 	//bind BasicVertexShader.MVP to this.matrixId
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
 	
 	// USING SHADERS
 	glUniformMatrix4fv(matrixId, 1, GL_FALSE, &MVP[0][0]);
-	// pass vertex data
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(
-		0,				// VertexArrayAttrib
-		3,				// size
-		GL_FLOAT,		// type
-		GL_TRUE,		// normalised?
-		0,				// stride
-		(void*)0		// array buffer offset
-		);
+	
+	for(int i = 0; i < numModels; i++)
+	{
+		// vertex buffer		
+		int bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts(x, y & z), each part is 4 bytes long
+		GLuint vbo;
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetVertexData(), GL_STATIC_DRAW);
 
-	// 
-	int numVertices = model.at(0).GetNumVertices();
+		int numVertices = modelList.at(i).GetNumVertices();
 
-	glDrawArrays(GL_TRIANGLES, 0, numVertices);
+		// pass vertex data
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glVertexAttribPointer(
+			0,				// VertexArrayAttrib
+			3,				// size
+			GL_FLOAT,		// type
+			GL_FALSE,		// normalised?
+			0,				// stride
+			(void*)0		// array buffer offset
+			);
+
+		glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+		// disable & delete vbo
+		glDisableVertexAttribArray(0);
+		glDeleteBuffers(1, &vbo);
+	}
+
 	glutSwapBuffers();
 
 	glDisable(GL_DEPTH_TEST);
-
-	// disable vbo
-	glDisableVertexAttribArray(0);
+		
 	// delete vao & vbo
 	glDeleteBuffers(1, &vao);
-	glDeleteBuffers(1, &vbo);
 }
 
 // Calculate view matrix
 void MoveCamera(int x, int y)
 {
-	float camX, camZ;	
-	// camY needs a default value
-	float camY = 0.0f;
+	float camX, camZ;
 
 	// change cameraRadius if model cannot be seen
 	float cameraRadius = 120.0f;
@@ -211,6 +215,8 @@ void initCamera()
 		1500.0f			// max of view frustrum
 		);
 
+	// camY needs a default value
+	camY = 0.0f;
 	// view matrix
 	MoveCamera(0,0);
 }
