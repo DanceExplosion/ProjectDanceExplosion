@@ -65,3 +65,16 @@ this is how my tutorial did it.
 
 CODE STRUCTURE
 
+Main
+ - all OpenGL stuff, renderScene method, camera setup, keyboard control
+
+ShaderLoader
+ - our GLSL compiler-type thing, taken from http://in2gpu.com/2014/10/29/shaders-basics/
+
+Mesh
+ - pulls data out of aiMesh and stores it in a better format
+
+			Main
+			  |
+		----------------------
+	ShaderLoader		    Mesh

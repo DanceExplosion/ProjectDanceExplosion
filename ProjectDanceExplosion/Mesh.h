@@ -7,6 +7,7 @@
 
 // Other libraries
 #include <iostream>
+#include <vector>
 
 /* Used to access elements of a mesh */
 class Mesh
@@ -15,14 +16,17 @@ public:
 	Mesh();
 	~Mesh();
 	Mesh(aiMesh* m);
-	int GetNumVertices(aiMesh* m);
 	int GetNumVertices();
-	int GetNumFaces(aiMesh* m);
 	int GetNumFaces();
-	//returns Mesh for model
+	// returns Mesh for model
 	aiMesh* GetAllModelData();
+	// return pointer to vertexData
+	float* GetVertexData();
 private:
 	int numVertices;
 	int numFaces;
 	aiMesh* modelData;
+	std::vector<float> vertexData;
+	// pulls data from aiMesh's stucture and stores it in a lovely vector for us
+	void StoreVertexData();
 };

@@ -26,12 +26,10 @@ GLuint basicProgram;
 // Camera
 glm::mat4 projection;
 glm::mat4 view;
-float camY;
 int xCircle = 1, yCircle = 1;
 
-// Model
+// Models
 std::vector<Mesh> model;
-std::vector<float> vertexData;
 
 void LoadModelData()
 {
@@ -59,32 +57,10 @@ void LoadModelData()
 
 	std::cout << "Number of models in file: " << scene->mNumMeshes << std::endl;
 	// Pulling required data from scene
-	for (int i = 0; i <scene->mNumMeshes; i++)
+	for (int i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh1 = scene->mMeshes[i];
 		model.push_back(Mesh(mesh1));
-	}
-
-	int numVertices = model.at(0).GetNumFaces() * 3; // NEVER USE mNumVertices - it is inaccurate and drives you crazy
-	int count = 0;
-	
-	aiMesh* mesh1 = model.at(0).GetAllModelData();
-
-	// for each face in mesh
-	for (unsigned int i = 0; i < model.at(0).GetNumFaces(); i++)
-	{
-		const aiFace& currentFace = mesh1->mFaces[i];
-
-		// each face has 3 vertices
-		for (unsigned int j = 0; j < 3; j++)
-		{
-			aiVector3D pos = mesh1->mVertices[currentFace.mIndices[j]];
-			// pull vertex.x, y & z to a more convenient location
-			// vertices require scaling to fit in window
-			vertexData.push_back(pos.x);// * 0.08f);
-			vertexData.push_back(pos.y);// * 0.08f);
-			vertexData.push_back(pos.z);// * 0.08f);
-		}
 	}
 }
 
@@ -95,10 +71,9 @@ void RenderScene()
 	glEnable(GL_DEPTH_TEST);
 
 	// model's model matrix
-	glm::mat4 modelMatrix = glm::mat4(1.0f);//glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -10.0f, 0.0f));
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	// calculating MVP
 	glm::mat4 MVP = projection * view * modelMatrix;
-
 
 	// set shader program
 	glUseProgram(basicProgram);
@@ -107,13 +82,15 @@ void RenderScene()
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-
-	// vertex buffer		each face has 3 vertices, each vertex has 3 parts, each part is 8 bytes long?
-	int bufferSize = model.at(0).GetNumFaces() * 3 * 3 * 4;
+	
+	// vertex buffer		
+	int bufferSize = model.at(0).GetNumVertices() * 3 * 4; // each vertex has 3 parts, each part is 4 bytes long?
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize, vertexData.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, model.at(0).GetVertexData(), GL_STATIC_DRAW);
+
+
 
 	//bind BasicVertexShader.MVP to this.matrixId
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
@@ -132,8 +109,8 @@ void RenderScene()
 		(void*)0		// array buffer offset
 		);
 
-	// each face has 3 vertices
-	int numVertices = model.at(0).GetNumFaces() * 3;
+	// 
+	int numVertices = model.at(0).GetNumVertices();
 
 	glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	glutSwapBuffers();
@@ -151,18 +128,23 @@ void RenderScene()
 void MoveCamera(int x, int y)
 {
 	float camX, camZ;	
+	// camY needs a default value
+	float camY = 0.0f;
+
+	// change cameraRadius if model cannot be seen
+	float cameraRadius = 120.0f;
 
 	xCircle += x + y;
 	yCircle += y;
 	if( y == 0 )// move in X and Z axis
 	{
-		camX = 120.0f * cos(xCircle * 3.14f / 180.0f);
-		camZ = 120.0f * sin(xCircle * 3.14f / 180.0f);
+		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
+		camZ = cameraRadius * sin(xCircle * 3.14f / 180.0f);
 	}
 	else // move in X, Y and Z axis
 	{
-		camX = 120.0f * cos(xCircle * 3.14f / 180.0f);
-		camY = 120.0f * sin(yCircle * 3.14f / 180.0f);
+		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
+		camY = cameraRadius * sin(yCircle * 3.14f / 180.0f);
 		camZ = 120.0f * sin(xCircle * 3.14f / 180.0f);
 	}
 
@@ -229,8 +211,6 @@ void initCamera()
 		1500.0f			// max of view frustrum
 		);
 
-	// camY needs a default value
-	camY = 0;
 	// view matrix
 	MoveCamera(0,0);
 }
