@@ -115,3 +115,37 @@ Mesh::GetVertexData()
  Returns a pointer to the first element of vertexData vector
  Apparantly this is enough to buffer all the data in the vector
   - I shall not argue, it's incredibly handy!
+
+
+
+
+------------------------------------------------------CLARKES OBSERVATIONS---------------------------------------------------------
+
+I've been looking at how assimp structures the imported model and have been experimenting with various things
+
+
+- Bones don't seem to be present in the mesh at the moment. only Nodes. I believe Bones are what we need for motion and Nodes can be turned into Bones
+
+- the aiMesh class holds the vertices and the bones (aiBone), 
+- As well as various other things (textures etc. but that's not important for the moment).
+
+- the bone holds the transformation and the nodes that are affected by it
+
+- we need to pass the vertices in (as we already do), then transform them using the appropriate bone
+
+- My current thoughts are:
+	- Create an array the size of the vertices that contains the transformations for each vertex
+		- Probably VERY slow and messy
+	
+	- Pass the transformation array in, as well as the bones affected and see which transformation the vertex should use
+		- for example, vertices 100-200 are affected by bone 1
+		- we have a uniform counter that ++s every iteration of the shader (don't think this is possible)
+		- there's a loop that goes through the bone list and sees where the current vertex applies
+		- it transforms the vertex by the bone's matrix
+
+	- A combination: pass in the array of bones and the bone Index that we should use for that vertex, then transform it
+		- so we have our array of floats for the vetices and an array of ints for the bon indices and pass them in
+		- we also pass in the bone array, as a Uniform variable, and just transform the vertex by bone[index]
+		- I like the sound of this one best.
+		- the array of indices only needs to be created initially, and doesn't need to be updated
+		- the bones are the only things that need updating actually, as we shouldn't be transforming the vertices every frame.
