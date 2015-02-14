@@ -124,7 +124,7 @@ Mesh::GetVertexData()
 I've been looking at how assimp structures the imported model and have been experimenting with various things
 
 
-- Bones don't seem to be present in the mesh at the moment. only Nodes. I believe Bones are what we need for motion and Nodes can be turned into Bones
+- EDIT: Bones are present in the model. The model I was looking at before just didn't have any.
 
 - the aiMesh class holds the vertices and the bones (aiBone), 
 - As well as various other things (textures etc. but that's not important for the moment).
