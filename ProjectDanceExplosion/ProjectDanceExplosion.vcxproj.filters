@@ -21,9 +21,18 @@
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
+    <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
+    <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />
+    <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
+    <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
+    <None Include="Models\Stick Figure\Stick_Figure_little.max" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -51,5 +60,8 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="Models\Stick Figure\Stick_Figure_by_Swp.OBJ" />
   </ItemGroup>
 </Project>

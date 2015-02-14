@@ -27,7 +27,7 @@ GLuint basicProgram;
 glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
-float camY;
+float camX = 0, camY = 0, zoom = -4;
 
 // Models
 std::vector<Mesh> modelList;
@@ -36,12 +36,12 @@ int numModels;
 void LoadModelData()
 {
 	// set background colour //black
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.3, 0.3, 0.6, 0.0);
 
 	// Assimp file importer
 	Assimp::Importer importer;
 
-	std::string file = "teapot.obj";
+	std::string file = "Models/Stick Figure/Stick_Figure_by_Swp.dae";
 	const char* filePath = file.c_str();
 
 	const aiScene* scene = importer.ReadFile(filePath,
@@ -55,15 +55,20 @@ void LoadModelData()
 		std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
 	else
 		std::cout << "File loaded successfully" <<std::endl;
+	int anim = scene->mNumAnimations;
+	numModels = (scene->mNumMeshes);
+	aiNode *const node = scene->mRootNode;
+	
 
-	numModels = scene->mNumMeshes;
 	std::cout << "Number of models in file: " << numModels << std::endl;
 
 	// Pulling required data from scene
-	for (int i = 0; i < scene->mNumMeshes; i++)
+	for (int i = 0; i < numModels; i++)
 	{
 		aiMesh* mesh1 = scene->mMeshes[i];
+		std::cout << "Number of bones in file: " << mesh1[0].mNumBones << std::endl;
 		modelList.push_back(Mesh(mesh1));
+		
 	}
 }
 
@@ -131,8 +136,9 @@ void RenderScene()
 }
 
 // Calculate view matrix
-void MoveCamera(int x, int y)
+void MoveCamera(/*int x, int y*/)
 {
+	/*
 	float camX, camZ;
 
 	// change cameraRadius if model cannot be seen
@@ -143,26 +149,28 @@ void MoveCamera(int x, int y)
 	if( y == 0 )// move in X and Z axis
 	{
 		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
-		camZ = cameraRadius * sin(xCircle * 3.14f / 180.0f);
+		camZ = (cameraRadius * sin(xCircle * 3.14f / 180.0f))+zoom;
 	}
 	else // move in X, Y and Z axis
 	{
 		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
 		camY = cameraRadius * sin(yCircle * 3.14f / 180.0f);
-		camZ = 120.0f * sin(xCircle * 3.14f / 180.0f);
+		camZ = (120.0f * sin(xCircle * 3.14f / 180.0f))+zoom;
 	}
 
 	if ((xCircle > 360.0f) || (xCircle < -360.0f))
 		xCircle %= 360;
 
 	// camera position in world space
-	glm::vec3 pos = glm::vec3(camX , camY, camZ);
-	
+	glm::vec3 pos = glm::vec3(camX , camY, zoom);
+	*/
 	view = glm::lookAt(
-		pos,				// camera position in world space
+		glm::vec3(0,0, zoom),// camera position in world space
 		glm::vec3(0, 0, 0), // where camera is viewing in world space
 		glm::vec3(0, 1, 0)  // Y is up (in world space)
 		);
+	view = glm::rotate(view,camX,glm::vec3(0.0f,1.0f,0.0f));
+	view = glm::rotate(view,camY,glm::vec3(1.0f,0.0f,0.0f));
 
 	// redraw scene immediately
 	glutPostRedisplay();
@@ -188,16 +196,28 @@ void CameraControls(int key, int x , int y)
 	switch (key)
 	{
 	case GLUT_KEY_UP:
-		MoveCamera(0, 5);
+		camY += 0.3f;
+		MoveCamera();
 		break;
 	case GLUT_KEY_DOWN:
-		MoveCamera(0,-5);
+		camY -= 0.3f;
+		MoveCamera();
 		break;
 	case GLUT_KEY_RIGHT:
-		MoveCamera(-5,0);
+		camX += 0.3f;
+		MoveCamera();
 		break;
 	case GLUT_KEY_LEFT:
-		MoveCamera(5,0);
+		camX -= 0.3f;
+		MoveCamera();
+		break;
+	case GLUT_KEY_SHIFT_L:
+		zoom += 0.75f;
+		MoveCamera();
+		break;
+	case GLUT_KEY_CTRL_L:
+		zoom -= 0.75f;
+		MoveCamera();
 		break;
 	default:
 		break;
@@ -218,7 +238,7 @@ void initCamera()
 	// camY needs a default value
 	camY = 0.0f;
 	// view matrix
-	MoveCamera(0,0);
+	MoveCamera();
 }
 
 // compiling shader code
