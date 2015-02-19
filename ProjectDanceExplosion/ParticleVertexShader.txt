@@ -1,0 +1,20 @@
+#version 330 core
+
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 particlePosition;
+layout(location = 2) in vec4 particleColour;
+
+
+out vec4 pColour;
+
+//the View and Projection Matrix
+uniform mat4 VP;
+
+void main(){	
+	
+	//set the vertex position to the appropriate position plus the particle's position
+	gl_Position =  VP*vec4(vertexPosition+particlePosition,1);
+	
+	//pass the colour straight through
+	pColour = particleColour;
+}

@@ -44,12 +44,21 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt">
       <Filter>Source Files\Shaders</Filter>
     </Text>
     <Text Include="BasicVertexShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="ParticleFragmentShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="ParticleVertexShader.txt">
       <Filter>Source Files\Shaders</Filter>
     </Text>
   </ItemGroup>
@@ -60,8 +69,8 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="Models\Stick Figure\Stick_Figure_by_Swp.OBJ" />
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
