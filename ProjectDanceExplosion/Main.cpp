@@ -132,7 +132,7 @@ void RenderScene()
 	
 	//glDisable(GL_DEPTH_TEST);
 	pEmitter.PEmitterUpdate();
-	pEmitter.PEmitterDraw(projection*view);
+	pEmitter.PEmitterDraw(view, projection*view);
 
 
 	pEmitter.PEMitterCleanup();

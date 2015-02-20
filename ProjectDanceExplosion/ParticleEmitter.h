@@ -36,7 +36,7 @@ public:
 	void PEmitterUpdate();
 
 	//Draw Function
-	void PEmitterDraw(glm::mat4 vpmatrix);
+	void PEmitterDraw(glm::mat4 viewMatrix, glm::mat4 vpmatrix);
 
 	//CleanUp of Arrays
 	void PEMitterCleanup();

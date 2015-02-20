@@ -61,7 +61,6 @@ typedef struct Particle{
 			// Update Position based off velocity 
 			velocity += acc;
 			position += velocity;
-			velocity = glm::vec3(0,0,0);
 	};
 
 	// Checks if a particle is dead
@@ -96,10 +95,10 @@ int oldTime = 0;
 // Variables for Buffers
 GLuint billboard_vertex_buffer, particles_position_buffer, particles_colour_buffer;
 static const GLfloat g_vertex_buffer_data[] = {
-	-0.5f, -0.5f, 0,
-	0.5f, -0.5f, 0,
-	-0.5f, 0.5f, 0,
-	0.5f, 0.5f, 0,
+	-0.1f, -0.1f, 0,
+	0.1f, -0.1f, 0,
+	-0.1f, 0.1f, 0,
+	0.1f, 0.1f, 0,
 };
 
 // Position and Colour data arrays for loading into buffers
@@ -213,7 +212,10 @@ void ParticleEmitter::PEmitterUpdate(){
 		int particleIndex = FindUnusedParticle();
 		ParticleContainer[particleIndex].lifetime = p_lifetime;
 		ParticleContainer[particleIndex].position = position;
-		ParticleContainer[particleIndex].velocity = p_velocity;
+		ParticleContainer[particleIndex].velocity = p_velocity*glm::vec3(
+															(rand()%2000 - 1000.0f)/1000.0f,
+															(rand()%2000 - 1000.0f)/1000.0f,
+															(rand()%2000 - 1000.0f)/1000.0f);
 		ParticleContainer[particleIndex].acc = p_acc;
 
 		// Generates a random colour for each particle
@@ -269,10 +271,11 @@ void ParticleEmitter::PEmitterUpdate(){
 
 }
 
-void ParticleEmitter::PEmitterDraw(glm::mat4 vp_maxtrix){
+void ParticleEmitter::PEmitterDraw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 
 	// Draw Function for the Particle Emitter
-
+	glm::vec3 CameraRight_worldspace = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+	glm::vec3  CameraUp_worldspace = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
 #pragma region Drawing of Buffers
 
 	// Checks ParticlesCount is greater than 0
@@ -312,7 +315,12 @@ void ParticleEmitter::PEmitterDraw(glm::mat4 vp_maxtrix){
 
 	// Vertex shader
 	GLuint VP_Matrix_ID = glGetUniformLocation(programID, "VP");
+	GLuint CamRight_ID = glGetUniformLocation(programID, "CamRight_W");
+	GLuint CamUp_ID = glGetUniformLocation(programID, "CamUp_W");
+
 	glUniformMatrix4fv(VP_Matrix_ID, 1, GL_FALSE, &vp_maxtrix[0][0]);
+	glUniform3f(CamRight_ID, CameraRight_worldspace.x,CameraRight_worldspace.y,CameraRight_worldspace.z);
+	glUniform3f(CamUp_ID, CameraUp_worldspace.x,CameraUp_worldspace.y,CameraUp_worldspace.z);
 
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(0);
