@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="ReferencedPackages11fe2420-349f-43d4-ab76-6106afff3c5c" PageTemplate="tool" DisplayName="Referenced Packages" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="DevIL" DisplayName="DevIL" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Linkage-DevIL" DisplayName="Linkage" Description="Which version of the .lib file to link to this library" Category="DevIL">
+      <EnumValue Name="" DisplayName="Dynamic Library (DLL)" />
+    </EnumProperty>
+  </Rule>
+</ProjectSchemaDefinitions>

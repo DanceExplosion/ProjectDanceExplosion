@@ -16,6 +16,9 @@ next to it, right click and select "Include in project"
 Build project, then run project
 
 -------- Possible Fix Number 2 -----------
+THIS SOLUTION WON'T WORK - IGNORE!
+  This is being kept purely so we don't try it again
+
 With project open:
 Tools -> NuGet Package Management -> Package Manager Console
 
@@ -149,3 +152,24 @@ I've been looking at how assimp structures the imported model and have been expe
 		- I like the sound of this one best.
 		- the array of indices only needs to be created initially, and doesn't need to be updated
 		- the bones are the only things that need updating actually, as we shouldn't be transforming the vertices every frame.
+------------------------------------------------------------------
+aiMesh->mNumVertices Vs aiMesh->mFaces * 3
+(as much for me to understand why as anything)
+
+mNumVertices stores the number of different vertices in an aiMesh
+so: (* = vertex)
+  (a)*   *(b)
+
+	*   *
+      (c)   (d) => 4 different vertices
+
+aiMesh->mFaces * 3 is the total number of vertices used in the model
+so:
+        (a)* - *(b)
+	    \ / \
+	     * - *
+      	    (c) (d) => 2 triangles/faces (abc & cdb)
+			total number of vertices used = 6
+why do we need total number of vertices? I'm not sure
+ Something strange is going on here...
+ 

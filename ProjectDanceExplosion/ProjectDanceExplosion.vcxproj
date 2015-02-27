@@ -47,6 +47,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -68,6 +69,13 @@
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Models\GreenArrow\GreenArrow.dae" />
+    <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
+    <None Include="Models\IronMan\Iron_Man.dae" />
+    <None Include="Models\IronMan\Iron_Man_D.tga" />
+    <None Include="Models\Nightwing187\Nightwing187.dae" />
+    <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
+    <None Include="Models\Optimus\Optimus.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />
@@ -79,6 +87,7 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -87,10 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ShaderLoader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="Models\Stick Figure\Stick_Figure_by_Swp.OBJ" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -102,6 +109,8 @@
     <Import Project="..\packages\freeglut.redist.2.8.1.15\build\native\freeglut.redist.targets" Condition="Exists('..\packages\freeglut.redist.2.8.1.15\build\native\freeglut.redist.targets')" />
     <Import Project="..\packages\freeglut.2.8.1.15\build\native\freeglut.targets" Condition="Exists('..\packages\freeglut.2.8.1.15\build\native\freeglut.targets')" />
     <Import Project="..\packages\glm.0.9.6.1\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.6.1\build\native\glm.targets')" />
+    <Import Project="..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets" Condition="Exists('..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets')" />
+    <Import Project="..\packages\DevIL.1.7.8\build\native\DevIL.targets" Condition="Exists('..\packages\DevIL.1.7.8\build\native\DevIL.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -115,5 +124,7 @@
     <Error Condition="!Exists('..\packages\freeglut.redist.2.8.1.15\build\native\freeglut.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freeglut.redist.2.8.1.15\build\native\freeglut.redist.targets'))" />
     <Error Condition="!Exists('..\packages\freeglut.2.8.1.15\build\native\freeglut.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\freeglut.2.8.1.15\build\native\freeglut.targets'))" />
     <Error Condition="!Exists('..\packages\glm.0.9.6.1\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.6.1\build\native\glm.targets'))" />
+    <Error Condition="!Exists('..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\DevIL.1.7.8\build\native\DevIL.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DevIL.1.7.8\build\native\DevIL.targets'))" />
   </Target>
 </Project>

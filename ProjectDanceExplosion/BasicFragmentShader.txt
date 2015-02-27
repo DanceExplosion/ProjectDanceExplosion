@@ -1,9 +1,15 @@
 #version 330 core
 
-in vec3 colour;
+in vec4 colour;
+in vec4 lighting;
+in vec2 textureCoords;
+
+uniform sampler2D textureSampler;
+
 out vec4 finalColour;
 
 void main()
 {
-	finalColour = vec4(colour, 1.0);
+	finalColour = texture(textureSampler, textureCoords) * lighting;
+	//finalColour = colour;// * lighting;
 }

@@ -27,7 +27,7 @@ GLuint basicProgram;
 glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
-float camX = 0, camY = 0, zoom = -4;
+float camX = 0, camY = 0, zoom = -4;//-800;
 
 // Models
 std::vector<Mesh> modelList;
@@ -36,39 +36,59 @@ int numModels;
 void LoadModelData()
 {
 	// set background colour //black
-	glClearColor(0.3, 0.3, 0.6, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	// Assimp file importer
 	Assimp::Importer importer;
 
-	std::string file = "Models/Stick Figure/Stick_Figure_by_Swp.dae";
+	std::string fileRoot = "Models/";
+	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	//std::string file = fileRoot + "Optimus/Optimus.dae";
+	//std::string file = fileRoot + "Robin188/Robin188.dae";
+	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
+	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
+	//std::string file = fileRoot + "C3P0/C3P0.dae";
+
 	const char* filePath = file.c_str();
 
 	const aiScene* scene = importer.ReadFile(filePath,
 								aiProcess_CalcTangentSpace |
 								aiProcess_Triangulate |
 								aiProcess_JoinIdenticalVertices |
+								aiProcess_SortByPType |
+								aiProcess_GenNormals |
+								aiProcess_GenUVCoords |
 								aiProcess_SortByPType
 								);
+
 	// error checking
 	if(!scene)
 		std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
 	else
 		std::cout << "File loaded successfully" <<std::endl;
+	
 	int anim = scene->mNumAnimations;
 	numModels = (scene->mNumMeshes);
-	aiNode *const node = scene->mRootNode;
+	int numTextures = scene->mNumMaterials;
 	
-
 	std::cout << "Number of models in file: " << numModels << std::endl;
+	std::cout << "Number of external textures in file: " << numTextures << std::endl;
+	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
+	std::cout << ""<< std::endl;
 
 	// Pulling required data from scene
 	for (int i = 0; i < numModels; i++)
 	{
 		aiMesh* mesh1 = scene->mMeshes[i];
-		std::cout << "Number of bones in file: " << mesh1[0].mNumBones << std::endl;
-		modelList.push_back(Mesh(mesh1));
+		aiBone* bone1 = mesh1->mBones[0];
+		std::cout << "Number of bones in model "<< i << " : "<< mesh1->mNumBones << std::endl;
+		std::cout << "Number of faces in model "<< i << " : "<< mesh1->mNumFaces << std::endl;
 		
+		if (mesh1->HasTextureCoords(0))
+			modelList.push_back(Mesh(mesh1, scene->mMaterials[mesh1->mMaterialIndex]));
+		else
+			modelList.push_back(Mesh(mesh1, NULL));
 	}
 }
 
@@ -97,6 +117,7 @@ void RenderScene()
 	// USING SHADERS
 	glUniformMatrix4fv(matrixId, 1, GL_FALSE, &MVP[0][0]);
 	
+
 	for(int i = 0; i < numModels; i++)
 	{
 		// vertex buffer		
@@ -106,7 +127,31 @@ void RenderScene()
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetVertexData(), GL_STATIC_DRAW);
 
-		int numVertices = modelList.at(i).GetNumVertices();
+		// Texturing
+		// texture buffer
+		bufferSize = modelList.at(i).GetNumVertices() * 2 * 4; // each texture coordinate has 2 parts(x & y), each part is 4 bytes long
+		GLuint texturebuffer;
+		glGenBuffers(1, &texturebuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetTextureCoords(), GL_STATIC_DRAW);
+		
+
+		// normal buffer
+		bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each normal has 3 parts(x, y & z), each part is 4 bytes long
+		GLuint normalbuffer;
+		glGenBuffers(1, &normalbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetNormalData(), GL_STATIC_DRAW);
+
+		// find correct texture for model
+		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
+
+		// bind fragmentShader.textureSampler to this.textureSampler
+		GLuint textureSampler = glGetUniformLocation(basicProgram, "textureSampler");
+		// pass in texture data
+		glUniform1i(textureSampler, 0);
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -120,18 +165,54 @@ void RenderScene()
 			(void*)0		// array buffer offset
 			);
 
+		// pass texture coordinate data
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
+		glVertexAttribPointer(
+			1,				// VertexArrayAttrib
+			2,				// size
+			GL_FLOAT,		// type
+			GL_TRUE,		// normalised?
+			0,				// stride
+			(void*)0		// array buffer offset
+			);
+
+		// pass texture coordinate data
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+		glVertexAttribPointer(
+			2,				// VertexArrayAttrib
+			3,				// size
+			GL_FLOAT,		// type
+			GL_TRUE,		// normalised?
+			0,				// stride
+			(void*)0		// array buffer offset
+			);
+
+		// draw model
+		int numVertices = modelList.at(i).GetNumVertices();
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-		// disable & delete vbo
+		// TEXTURING
+		glBindTexture(GL_TEXTURE_2D, NULL);
+		glActiveTexture(NULL);
+
+		// disable & delete vbo, texturebuffer & normalbuffer
 		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+
 		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &texturebuffer);
+		glDeleteBuffers(1, &normalbuffer);
 	}
 
 	glutSwapBuffers();
 
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
 		
-	// delete vao & vbo
+	// delete vao
 	glDeleteBuffers(1, &vao);
 }
 
@@ -165,12 +246,12 @@ void MoveCamera(/*int x, int y*/)
 	glm::vec3 pos = glm::vec3(camX , camY, zoom);
 	*/
 	view = glm::lookAt(
-		glm::vec3(0,0, zoom),// camera position in world space
+		glm::vec3(6, 0, zoom),// camera position in world space
 		glm::vec3(0, 0, 0), // where camera is viewing in world space
 		glm::vec3(0, 1, 0)  // Y is up (in world space)
 		);
-	view = glm::rotate(view,camX,glm::vec3(0.0f,1.0f,0.0f));
-	view = glm::rotate(view,camY,glm::vec3(1.0f,0.0f,0.0f));
+	view = glm::rotate(view, camX, glm::vec3(0.0f,1.0f,0.0f));
+	view = glm::rotate(view, camY, glm::vec3(1.0f,0.0f,0.0f));
 
 	// redraw scene immediately
 	glutPostRedisplay();
@@ -255,7 +336,7 @@ void main(int argc, char** argv)
 
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(700, 100);// window position
-	glutInitWindowSize(800, 800); // window siz3e
+	glutInitWindowSize(800, 800); // window size
 	window = glutCreateWindow("Project DanceExplosion");
 
 	// GLEW must be intialized after the window has been created
@@ -269,7 +350,7 @@ void main(int argc, char** argv)
 	initShaders();
 	// setting up MVP
 	initCamera();
-	// loading first model of file
+	// loading models from file
 	LoadModelData();
 
 	//

@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="DevIL_redist_init;DevIL_redist_init_2">
+  <PropertyGroup Label="Default initializers for properties">
+    <Linkage-DevIL_redist Condition="'$(Linkage-DevIL_redist)' == ''">dynamic</Linkage-DevIL_redist>
+    <CallingConvention-DevIL_redist Condition="'$(CallingConvention-DevIL_redist)' == ''">cdecl</CallingConvention-DevIL_redist>
+  </PropertyGroup>
+  <Target Name="DevIL_redist_init">
+    <DevIL_redist_Contains Text="Linkage-dynamic" Library="DevIL_redist" Value="dynamic" Condition="'$(Linkage-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="Linkage-static" Library="DevIL_redist" Value="static" Condition="'$(Linkage-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="Linkage-ltcg" Library="DevIL_redist" Value="ltcg" Condition="'$(Linkage-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="Linkage-sxs" Library="DevIL_redist" Value="sxs" Condition="'$(Linkage-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="CallingConvention-cdecl" Library="DevIL_redist" Value="cdecl" Condition="'$(CallingConvention-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="CallingConvention-stdcall" Library="DevIL_redist" Value="stdcall" Condition="'$(CallingConvention-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="CallingConvention-fastcall" Library="DevIL_redist" Value="fastcall" Condition="'$(CallingConvention-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="CallingConvention-thiscall" Library="DevIL_redist" Value="thiscall" Condition="'$(CallingConvention-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-DevIL_redist" />
+    </DevIL_redist_Contains>
+    <DevIL_redist_Contains Text="CallingConvention-clrcall" Library="DevIL_redist" Value="clrcall" Condition="'$(CallingConvention-DevIL_redist)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-DevIL_redist" />
+    </DevIL_redist_Contains>
+  </Target>
+  <Target Name="DevIL_redist_init_2">
+    <SetEnv Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" Name="PATH" Prefix="true" Value="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release">
+      <Output TaskParameter="OutputEnvironmentVariable" PropertyName="PATH" />
+    </SetEnv>
+    <SetEnv Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" Name="PATH" Prefix="true" Value="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release">
+      <Output TaskParameter="OutputEnvironmentVariable" PropertyName="PATH" />
+    </SetEnv>
+    <SetEnv Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" Name="PATH" Prefix="true" Value="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug">
+      <Output TaskParameter="OutputEnvironmentVariable" PropertyName="PATH" />
+    </SetEnv>
+    <SetEnv Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" Name="PATH" Prefix="true" Value="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug">
+      <Output TaskParameter="OutputEnvironmentVariable" PropertyName="PATH" />
+    </SetEnv>
+  </Target>
+  <ItemGroup Label="x64 and dynamic and v110 and Release" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )">
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\DevIL.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\ILU.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\ILUT.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup Label="Win32 and dynamic and v110 and Release" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )">
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\DevIL.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\ILU.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\ILUT.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup Label="x64 and dynamic and v110 and Debug" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )">
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\DevIL.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\ILU.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\ILUT.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup Label="Win32 and dynamic and v110 and Debug" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )">
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\DevIL.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\ILU.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\ILUT.dll" Condition="(('$(AppContainerApplication.ToLower())' == 'true')) OR (('$(TargetPlatformIdentifier.ToLower())' == 'windows phone' And '$(TargetPlatformVersion)' == '8.0'))">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)\default-propertiesui.xml" />
+  </ItemGroup>
+  <Target Name="DevIL_redist_AfterBuild" AfterTargets="AfterBuild" />
+  <Target Name="DevIL_redist_AfterBuild_x64_and_dynamic_and_v110_and_Release" Label="x64 and dynamic and v110 and Release" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="DevIL_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\DevIL.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\ILU.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Release\ILUT.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="DevIL_redist_AfterBuild_Win32_and_dynamic_and_v110_and_Release" Label="Win32 and dynamic and v110 and Release" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="DevIL_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\DevIL.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\ILU.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Release\ILUT.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="DevIL_redist_AfterBuild_x64_and_dynamic_and_v110_and_Debug" Label="x64 and dynamic and v110 and Debug" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="DevIL_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\DevIL.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\ILU.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\dynamic\v110\Debug\ILUT.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="DevIL_redist_AfterBuild_Win32_and_dynamic_and_v110_and_Debug" Label="Win32 and dynamic and v110 and Debug" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-DevIL_redist.ToLower())' == 'dynamic' And ( $(PlatformToolset.ToLower().IndexOf('v110')) &gt; -1 Or '$(PlatformToolset.ToLower())' == 'windowskernelmodedriver8.0' Or '$(PlatformToolset.ToLower())' == 'windowsapplicationfordrivers8.0' Or '$(PlatformToolset.ToLower())' == 'windowsusermodedriver8.0' ) And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="DevIL_redist_AfterBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\DevIL.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\ILU.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../..//build/native/bin/Win32\dynamic\v110\Debug\ILUT.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <UsingTask TaskName="DevIL_redist_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
+    <ParameterGroup>
+      <Text Output="false" ParameterType="System.String" />
+      <Library Output="false" Required="true" ParameterType="System.String" />
+      <Value Output="false" Required="true" ParameterType="System.String" />
+      <Result Output="true" ParameterType="System.String" />
+    </ParameterGroup>
+    <Task>
+      <Code>Result = ((Text ?? "").Split(';').Contains(Library) ) ? Value : String.Empty;</Code>
+    </Task>
+  </UsingTask>
+</Project>
