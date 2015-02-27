@@ -62,6 +62,12 @@
     <Text Include="BasicVertexShader.txt">
       <Filter>Source Files\Shaders</Filter>
     </Text>
+    <Text Include="ParticleFragmentShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="ParticleVertexShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderLoader.h">

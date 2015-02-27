@@ -18,10 +18,16 @@
 // Inner Project Classes
 #include "ShaderLoader.h"
 #include "Mesh.h"
+#include "ParticleEMitter.h"
 
 // OpenGl Essentials
 GLuint window;
-GLuint basicProgram;
+GLuint basicProgram, particleProgram;
+GLuint vao;
+GLuint modelVertexBuffer;
+
+
+ParticleEmitter pEmitter = ParticleEmitter();
 
 // Camera
 glm::mat4 projection;
@@ -36,7 +42,7 @@ int numModels;
 void LoadModelData()
 {
 	// set background colour //black
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.3f, 0.3f, 0.6f, 0.0f);
 
 	// Assimp file importer
 	Assimp::Importer importer;
@@ -106,10 +112,7 @@ void RenderScene()
 	// set shader program
 	glUseProgram(basicProgram);
 
-	// Buffering & linking variables for Shaders
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	
 
 	//bind BasicVertexShader.MVP to this.matrixId
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
@@ -122,9 +125,8 @@ void RenderScene()
 	{
 		// vertex buffer		
 		int bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts(x, y & z), each part is 4 bytes long
-		GLuint vbo;
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glGenBuffers(1, &modelVertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, modelVertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetVertexData(), GL_STATIC_DRAW);
 
 		// Texturing
@@ -155,7 +157,7 @@ void RenderScene()
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, modelVertexBuffer);
 		glVertexAttribPointer(
 			0,				// VertexArrayAttrib
 			3,				// size
@@ -206,6 +208,14 @@ void RenderScene()
 		glDeleteBuffers(1, &texturebuffer);
 		glDeleteBuffers(1, &normalbuffer);
 	}
+	
+	
+	//glDisable(GL_DEPTH_TEST);
+	pEmitter.PEmitterUpdate();
+	pEmitter.PEmitterDraw(view, projection*view);
+
+
+	pEmitter.PEMitterCleanup();
 
 	glutSwapBuffers();
 
@@ -214,6 +224,7 @@ void RenderScene()
 		
 	// delete vao
 	glDeleteBuffers(1, &vao);
+	//glDisable(GL_DEPTH_TEST);
 }
 
 // Calculate view matrix
@@ -327,6 +338,7 @@ void initShaders()
 {
 	ShaderLoader loader;
 	basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
+	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 }
 
 void main(int argc, char** argv)
@@ -338,7 +350,6 @@ void main(int argc, char** argv)
 	glutInitWindowPosition(700, 100);// window position
 	glutInitWindowSize(800, 800); // window size
 	window = glutCreateWindow("Project DanceExplosion");
-
 	// GLEW must be intialized after the window has been created
 	GLenum glewOK = glewInit();
 	if (!glewOK == GLEW_OK)
@@ -346,6 +357,14 @@ void main(int argc, char** argv)
 	else
 		std::cout << "glew running" << std::endl;
 	
+	
+
+	// Buffering & linking variables for Shaders
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &modelVertexBuffer);
+
 	// loading shaders
 	initShaders();
 	// setting up MVP
@@ -353,12 +372,25 @@ void main(int argc, char** argv)
 	// loading models from file
 	LoadModelData();
 
+	//Create a particle emitter
+	pEmitter = ParticleEmitter(particleProgram,		// Shader
+		glm::vec3(0, 0, 1.4f),						// Start Position
+		glm::vec3(0, 0.01, 0.01),					// Velocity
+		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
+		900.0f,										// Lifetime
+		glm::vec4(1, 0, 0, 0.5));					// Colour
+
 	//
-	glutDisplayFunc(RenderScene);
+	glutIdleFunc(RenderScene);
+	//glutDisplayFunc(RenderScene);
 
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
 
 	glutMainLoop();
+	
+	
+	// delete vao & vbo
+	glDeleteBuffers(1, &vao);
 }

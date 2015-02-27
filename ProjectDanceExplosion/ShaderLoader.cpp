@@ -55,10 +55,9 @@ GLuint ShaderLoader::CreateShader(GLenum shaderType, std::string source, char sh
 
 GLuint ShaderLoader::CreateProgram(char* vertexShaderFileName, char* fragmentShaderFileName)
 {
+
 	std::string vertexShaderCode = ReadShader(vertexShaderFileName);
 	std::string fragmentShaderCode = ReadShader(fragmentShaderFileName);
-
-	glewInit();
 
 	GLuint vertexShader = CreateShader(GL_VERTEX_SHADER, vertexShaderCode, 'v');
 	GLuint fragmentShader = CreateShader(GL_FRAGMENT_SHADER, fragmentShaderCode, 'f');

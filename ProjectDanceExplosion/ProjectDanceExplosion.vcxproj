@@ -93,6 +93,8 @@
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt" />
     <Text Include="BasicVertexShader.txt" />
+    <Text Include="ParticleFragmentShader.txt" />
+    <Text Include="ParticleVertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h" />

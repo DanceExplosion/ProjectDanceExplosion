@@ -1,0 +1,13 @@
+#version 330 core
+
+// incredibly simple fragment shader that just fills the particle with the colour
+
+in vec4 pColour;
+
+
+out vec4 color;
+
+
+void main(){
+	color = pColour;
+}
