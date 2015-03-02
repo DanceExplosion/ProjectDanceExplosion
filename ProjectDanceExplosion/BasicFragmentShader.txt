@@ -10,6 +10,6 @@ out vec4 finalColour;
 
 void main()
 {
-	finalColour = texture(textureSampler, textureCoords) * lighting;
+	finalColour = texture(textureSampler, textureCoords);// * lighting;
 	//finalColour = colour;// * lighting;
 }

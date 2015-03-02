@@ -26,9 +26,9 @@ GLuint basicProgram, particleProgram;
 
 
 ParticleEmitter pEmitter = ParticleEmitter();
-ParticleEmitter pEmitter2 = ParticleEmitter();
+/*ParticleEmitter pEmitter2 = ParticleEmitter();
 ParticleEmitter pEmitter3 = ParticleEmitter();
-ParticleEmitter pEmitter4 = ParticleEmitter();
+ParticleEmitter pEmitter4 = ParticleEmitter();*/
 
 // Camera
 glm::mat4 projection;
@@ -50,13 +50,13 @@ void LoadModelData()
 	Assimp::Importer importer;
 
 	std::string fileRoot = "Models/";
-	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
+	std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
-	std::string file = fileRoot + "Robin188/Robin188.dae";
+	//std::string file = fileRoot + "Robin188/Robin188.dae";
 
 	const char* filePath = file.c_str();
 
@@ -219,19 +219,19 @@ void RenderScene()
 
 	// Particle updates
 	pEmitter.PEmitterUpdate();
-	pEmitter2.PEmitterUpdate();
+	/*pEmitter2.PEmitterUpdate();
 	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();*/
 
 	pEmitter.PEmitterDraw(view, projection * view);
-	pEmitter2.PEmitterDraw(view, projection * view);
+	/*pEmitter2.PEmitterDraw(view, projection * view);
 	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();*/
 
 	pEmitter.PEMitterCleanup();
-	pEmitter2.PEMitterCleanup();
+	/*pEmitter2.PEMitterCleanup();
 	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();*/
 
 	glutSwapBuffers();
 		
@@ -415,7 +415,7 @@ void main(int argc, char** argv)
 
 
 	//Create a second particle emitter
-	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+/*	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
 		glm::vec3(0, 0, 1.9f),						// Start Position
 		glm::vec3(0, 0.01, 0.01),					// Velocity
 		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
@@ -437,7 +437,7 @@ void main(int argc, char** argv)
 		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
 		900.0f,										// Lifetime
 		glm::vec4(1, 0, 0, 0.5));					// Colour
-
+		*/
 	
 	glutIdleFunc(RenderScene);
 
