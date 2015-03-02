@@ -6,13 +6,13 @@
   </asset>
   <library_images>
     <image id="Image">
-      <init_from>file:///Bear_Fur_D.tga</init_from>
+      <init_from>file://Bear_Brown/Bear_Fur_D.tga</init_from>
     </image>
     <image id="Image1">
-      <init_from>file:///Bear_Eye_D.tga</init_from>
+      <init_from>file://Bear_Brown/Bear_Eye_D.tga</init_from>
     </image>
     <image id="Image2">
-      <init_from>file:///Bear_D.tga</init_from>
+      <init_from>file://Bear_Brown/Bear_D.tga</init_from>
     </image>
   </library_images>
   <library_materials>

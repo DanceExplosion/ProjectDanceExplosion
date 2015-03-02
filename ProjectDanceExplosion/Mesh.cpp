@@ -89,10 +89,8 @@ void Mesh::StoreNormalData(int index)
 // assigning 
 void Mesh::StoreTextureData(aiMaterial* mat)
 {
-	std::cout << "Texture Index: " << modelData->mMaterialIndex << std::endl;	
-
-	/*// What kind of textures?
-	unsigned int numTextures = mat->GetTextureCount(aiTextureType_DIFFUSE);
+	// What kind of textures?
+	/*unsigned int numTextures = mat->GetTextureCount(aiTextureType_DIFFUSE);
 	std::cout <<"	Number of diffuse textures detected: " << numTextures << std::endl;
 	numTextures = mat->GetTextureCount(aiTextureType_AMBIENT);
 	std::cout <<"	Number of ambient textures detected: " << numTextures << std::endl;
@@ -121,26 +119,22 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	numTextures = mat->GetTextureCount(aiTextureType_NONE);
 	std::cout <<"	Number of NONE? textures detected: " << numTextures << std::endl;*/
 
-	// static texture loading
-	// in two parts for reasons...
+	std::cout << "Texture Index: " << modelData->mMaterialIndex << std::endl;
 
-	//std::string fileRoot = "Models/Nightwing187";
-	std::string fileRoot = "Models/IronMan";
-	//std::string fileRoot = "Models/Optimus";
-	//std::string fileRoot = "Models/Robin188";
-	//std::string fileRoot = "Models/GreenArrow";
-	//std::string fileRoot = "Models/Bear_Brown";
-	//std::string fileRoot = "Models/C3P0";
+	std::string fileRoot = "Models/";
 
-	//std::string filePath = fileRoot + "/Nightwing_DIFFUSE.tga";
-	std::string filePath = fileRoot + "/Iron_Man_D.tga";
-	//std::string filePath = fileRoot + "/Optimus_Diffuse.png";
-	//std::string filePath = fileRoot + "/Robin_DIFFUSE.tga";
-	//std::string filePath = fileRoot + "/GreenArrow_DIFFUSE.tga";
-	//std::string filePath = fileRoot + "/Bear_Fur_D.tga";
-	//std::string filePath = fileRoot + "/Bear_D.tga";
-	//std::string filePath = fileRoot + "/C3P0_Body_D.tga";
+	aiString path;
+	if(mat->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
+		std::cout << "Path: " << path.data << std::endl;
+	else
+	{
+		//check diffuse texture definitely exists for this model
+		std::cout << "Diffuse texture Count: " << mat->GetTextureCount(aiTextureType_DIFFUSE) << std::endl;
+	}
 
+	std::string filePath = fileRoot + path.data;
+
+	std::cout << "filePath: " << filePath << std::endl;
 	// initialising DevIL libraries
 	ilInit();
 	iluInit();

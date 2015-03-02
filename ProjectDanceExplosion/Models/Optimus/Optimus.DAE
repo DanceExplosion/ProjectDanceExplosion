@@ -17,7 +17,7 @@
   </asset>
   <library_images>
     <image id="Map__13-image" name="Map__13">
-      <init_from>file://RB_Optimus_SpecPwr_DifLum_EnrGlowTest2.png</init_from>
+      <init_from>file://Optimus/Optimus_DIFFUSE.png</init_from>
     </image>
     <image id="Map__4-image" name="Map__4">
       <init_from>file://RB_Optimus_SpecPwr_DifLum_EnrGlow.png</init_from>

@@ -6,10 +6,10 @@
   </asset>
   <library_images>
     <image id="Image">
-      <init_from>file:///C3P0_body_D.tga</init_from>
+      <init_from>file://C3P0/C3P0_body_D.tga</init_from>
     </image>
     <image id="Image1">
-      <init_from>file:///C3P0_head_D.tga</init_from>
+      <init_from>file://C3P0/C3P0_head_D.tga</init_from>
     </image>
   </library_images>
   <library_materials>

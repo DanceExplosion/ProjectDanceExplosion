@@ -6,10 +6,10 @@
   </asset>
   <library_images>
     <image id="Image">
-      <init_from>DCHRNPCICOHER131_MATDCHRNPCICOHER130_MAT</init_from>
+      <init_from>GreenArrow/GreenArrow_DIFFUSE.tga</init_from>
     </image>
     <image id="Image1">
-      <init_from>DCHRNPCICOHER131_HAIR_MATDCHRNPCICOHER130_HAIR_MAT</init_from>
+      <init_from>GreenArrow/GreenArrow_DIFFUSE.tga</init_from>
     </image>
   </library_images>
   <library_materials>

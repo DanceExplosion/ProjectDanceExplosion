@@ -50,13 +50,13 @@ void LoadModelData()
 	Assimp::Importer importer;
 
 	std::string fileRoot = "Models/";
-	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
-	std::string file = fileRoot + "IronMan/Iron_Man.dae";
-	//std::string file = fileRoot + "Optimus/Optimus.dae";
-	//std::string file = fileRoot + "Robin188/Robin188.dae";
-	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
+	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
+	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	//std::string file = fileRoot + "Optimus/Optimus.dae";
+	std::string file = fileRoot + "Robin188/Robin188.dae";
 
 	const char* filePath = file.c_str();
 
