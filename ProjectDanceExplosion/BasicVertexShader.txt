@@ -21,7 +21,7 @@ void main()
 
 	// Diffuse Light
 	vec3 diffuseIntensity = vec3(max(0.0, dot(normal, -pos)));
-	vec4 diffuseLight =  vec4(0.1, 0.1, 0.1, 1.0) * vec4(diffuseIntensity, 1.0);
+	vec4 diffuseLight =  vec4(0.2, 0.2, 0.2, 1.0) * vec4(diffuseIntensity, 1.0);
 
 	lighting = ambientLight + diffuseLight;
 

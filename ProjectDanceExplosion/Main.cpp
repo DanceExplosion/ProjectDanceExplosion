@@ -20,11 +20,9 @@
 #include "Mesh.h"
 #include "ParticleEMitter.h"
 
-// OpenGl Essentials
+// OpenGL Essentials
 GLuint window;
 GLuint basicProgram, particleProgram;
-GLuint vao;
-GLuint modelVertexBuffer;
 
 
 ParticleEmitter pEmitter = ParticleEmitter();
@@ -38,6 +36,7 @@ float camX = 0, camY = 0, zoom = -4;//-800;
 // Models
 std::vector<Mesh> modelList;
 int numModels;
+//GLuint vao, vertexBuffer;
 
 void LoadModelData()
 {
@@ -110,9 +109,7 @@ void RenderScene()
 	glm::mat4 MVP = projection * view * modelMatrix;
 
 	// set shader program
-	glUseProgram(basicProgram);
-
-	
+	glUseProgram(basicProgram);	
 
 	//bind BasicVertexShader.MVP to this.matrixId
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
@@ -120,16 +117,21 @@ void RenderScene()
 	// USING SHADERS
 	glUniformMatrix4fv(matrixId, 1, GL_FALSE, &MVP[0][0]);
 	
+	// buffers
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLuint vertexBuffer;
 
 	for(int i = 0; i < numModels; i++)
 	{
 		// vertex buffer		
 		int bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts(x, y & z), each part is 4 bytes long
-		glGenBuffers(1, &modelVertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, modelVertexBuffer);
+		glGenBuffers(1, &vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetVertexData(), GL_STATIC_DRAW);
 
-		// Texturing
 		// texture buffer
 		bufferSize = modelList.at(i).GetNumVertices() * 2 * 4; // each texture coordinate has 2 parts(x & y), each part is 4 bytes long
 		GLuint texturebuffer;
@@ -145,11 +147,11 @@ void RenderScene()
 		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetNormalData(), GL_STATIC_DRAW);
 
+		// Texturing
 		// find correct texture for model
 		glEnable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
-
 		// bind fragmentShader.textureSampler to this.textureSampler
 		GLuint textureSampler = glGetUniformLocation(basicProgram, "textureSampler");
 		// pass in texture data
@@ -157,7 +159,7 @@ void RenderScene()
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, modelVertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		glVertexAttribPointer(
 			0,				// VertexArrayAttrib
 			3,				// size
@@ -204,27 +206,25 @@ void RenderScene()
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
 
-		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &vertexBuffer);
 		glDeleteBuffers(1, &texturebuffer);
 		glDeleteBuffers(1, &normalbuffer);
 	}
 	
-	
-	//glDisable(GL_DEPTH_TEST);
+	// Unload model shader program, pEmitter uses its own 
+	glUseProgram(0);
+
+	// Particle updates
 	pEmitter.PEmitterUpdate();
-	pEmitter.PEmitterDraw(view, projection*view);
-
-
+	pEmitter.PEmitterDraw(view, projection * view);
 	pEmitter.PEMitterCleanup();
 
 	glutSwapBuffers();
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D);
 		
 	// delete vao
 	glDeleteBuffers(1, &vao);
-	//glDisable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
 }
 
 // Calculate view matrix
@@ -359,11 +359,11 @@ void main(int argc, char** argv)
 	
 	
 
-	// Buffering & linking variables for Shaders
+	/*// Buffering & linking variables for Shaders
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	glGenBuffers(1, &modelVertexBuffer);
+	glGenBuffers(1, &vertexBuffer);*/
 
 	// loading shaders
 	initShaders();
@@ -382,7 +382,6 @@ void main(int argc, char** argv)
 
 	//
 	glutIdleFunc(RenderScene);
-	//glutDisplayFunc(RenderScene);
 
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
@@ -392,5 +391,5 @@ void main(int argc, char** argv)
 	
 	
 	// delete vao & vbo
-	glDeleteBuffers(1, &vao);
+	//glDeleteBuffers(1, &vao);
 }

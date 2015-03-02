@@ -2,15 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+
 // OpenGL
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+
 // OpenGL Mathemathics
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/ext.hpp>
+
 // Standard Vector Library
 #include <vector>
+
 // Header File
 #include "ParticleEmitter.h"
 
@@ -32,7 +36,8 @@ typedef struct Particle{
 	#pragma endregion
 
 	// Set the meaning of the < comparison for two particles
-	bool operator<(const Particle& that) const {
+	bool operator<(const Particle& that) const 
+	{
 		// Sort in reverse order, 
 		return this->cameradistance > that.cameradistance;
 	}
@@ -78,7 +83,7 @@ typedef struct Particle{
 		return position;
 	};
 	#pragma endregion
-}Particle;
+}Particle; // end of Particle struct
 
 // Global 
 #pragma region Variables
@@ -309,10 +314,7 @@ void ParticleEmitter::PEmitterDraw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// Use our shader
-	glUseProgram(programID);
-
+	
 	// Vertex shader
 	GLuint VP_Matrix_ID = glGetUniformLocation(programID, "VP");
 	GLuint CamRight_ID = glGetUniformLocation(programID, "CamRight_W");
@@ -371,6 +373,8 @@ void ParticleEmitter::PEmitterDraw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 	}
 #pragma endregion
 
+	// Unload particle shader program
+	glUseProgram(0);
 }
 
 void ParticleEmitter::PEMitterCleanup(){
