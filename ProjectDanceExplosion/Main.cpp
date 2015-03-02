@@ -26,6 +26,9 @@ GLuint basicProgram, particleProgram;
 
 
 ParticleEmitter pEmitter = ParticleEmitter();
+ParticleEmitter pEmitter2 = ParticleEmitter();
+ParticleEmitter pEmitter3 = ParticleEmitter();
+ParticleEmitter pEmitter4 = ParticleEmitter();
 
 // Camera
 glm::mat4 projection;
@@ -216,8 +219,19 @@ void RenderScene()
 
 	// Particle updates
 	pEmitter.PEmitterUpdate();
+	pEmitter2.PEmitterUpdate();
+	pEmitter3.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();
+
 	pEmitter.PEmitterDraw(view, projection * view);
+	pEmitter2.PEmitterDraw(view, projection * view);
+	pEmitter3.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();
+
 	pEmitter.PEMitterCleanup();
+	pEmitter2.PEMitterCleanup();
+	pEmitter3.PEmitterUpdate();
+	pEmitter4.PEmitterUpdate();
 
 	glutSwapBuffers();
 		
@@ -316,6 +330,25 @@ void CameraControls(int key, int x , int y)
 	}
 }
 
+// Mouse Controll for Zooming [a lot handier than dealing with Sticky based keys for windows
+void MouseWheel(int button, int dir, int x, int y)
+{
+	// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
+	if (button == 3)
+	{
+		zoom += 0.75f;
+		MoveCamera();
+	}
+	// Checks if the button pressed is button 4; this is the code for negative wheel scrolling
+	else if (button == 4)
+	{
+		zoom -= 0.75f;
+		MoveCamera();
+	}
+		
+}
+
+
 // setting up initial camera values
 void initCamera()
 {
@@ -374,18 +407,44 @@ void main(int argc, char** argv)
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(0, 0, 1.4f),						// Start Position
+		glm::vec3(0, 0, 1.9f),						// Start Position
 		glm::vec3(0, 0.01, 0.01),					// Velocity
 		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
 		900.0f,										// Lifetime
 		glm::vec4(1, 0, 0, 0.5));					// Colour
 
-	//
+
+	//Create a second particle emitter
+	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 1.9f),						// Start Position
+		glm::vec3(0, 0.01, 0.01),					// Velocity
+		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
+		900.0f,										// Lifetime
+		glm::vec4(1, 0, 0, 0.5));					// Colour
+
+	//Create a second particle emitter
+	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 2.9f),						// Start Position
+		glm::vec3(0, 0.01, 0.01),					// Velocity
+		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
+		900.0f,										// Lifetime
+		glm::vec4(1, 0, 0, 0.5));					// Colour
+
+	//Create a second particle emitter
+	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 2.9f),						// Start Position
+		glm::vec3(0, 0.01, 0.01),					// Velocity
+		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
+		900.0f,										// Lifetime
+		glm::vec4(1, 0, 0, 0.5));					// Colour
+
+	
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
+	glutMouseFunc(MouseWheel);
 
 	glutMainLoop();
 	
