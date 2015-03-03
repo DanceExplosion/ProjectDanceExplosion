@@ -68,15 +68,15 @@ void Mesh::StoreVertexData()
 
 			// if normals exist, store them
 			if (hasNormals == true)
-				StoreNormalData(j);
+				StoreNormalData(currentFace, j);
 		}
 	}
 }
 
-void Mesh::StoreNormalData(int index)
+void Mesh::StoreNormalData(aiFace currentFace, int index)
 {
 	// pull data into vec3
-	aiVector3D normal = modelData->mNormals[index];
+	aiVector3D normal = modelData->mNormals[currentFace.mIndices[index]];
 
 	// check normalized?
 	normal.Normalize();

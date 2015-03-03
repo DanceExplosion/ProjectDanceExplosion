@@ -70,6 +70,7 @@
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ModelFragmentShader.frag" />
     <None Include="Models\Bear_Brown\Bear_Brown.dae" />
     <None Include="Models\Bear_Brown\Bear_D.tga" />
     <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
@@ -96,6 +97,7 @@
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
     <None Include="Models\Stick Figure\Stick_Figure_little.max" />
+    <None Include="ModelVertexShader.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

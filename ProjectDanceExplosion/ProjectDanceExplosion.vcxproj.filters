@@ -52,6 +52,12 @@
     <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
     <None Include="Models\Robin188\Robin188.dae" />
     <None Include="Models\Robin188\Robin_DIFFUSE.tga" />
+    <None Include="ModelFragmentShader.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="ModelVertexShader.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

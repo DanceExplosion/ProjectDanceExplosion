@@ -52,7 +52,7 @@ private:
 
 	// pulls data from aiMesh's stucture and stores it in a loovely vector for us
 	void StoreVertexData();
-	void StoreNormalData(int index);
+	void StoreNormalData(aiFace currentFace, int index);
 	void StoreTextureCoordData(aiFace currentFace, int index);
 	void StoreTextureData(aiMaterial* mat);
 };
