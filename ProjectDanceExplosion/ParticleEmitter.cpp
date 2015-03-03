@@ -385,4 +385,6 @@ void ParticleEmitter::PEMitterCleanup(){
 	glDeleteBuffers(1, &particles_colour_buffer);
 	glDeleteBuffers(1, &particles_position_buffer);
 	glDeleteBuffers(1, &billboard_vertex_buffer);
+
+	glDisable(GL_BLEND);
 }
