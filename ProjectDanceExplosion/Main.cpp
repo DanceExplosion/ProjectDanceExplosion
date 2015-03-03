@@ -115,7 +115,6 @@ void RenderScene()
 	// set shader program
 	glUseProgram(basicProgram);	
 
-	glDisable(GL_BLEND);
 	// Bind various matrices to the shader
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
 	GLuint modelMId = glGetUniformLocation(basicProgram, "M");
