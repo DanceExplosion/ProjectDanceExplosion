@@ -65,6 +65,4 @@ private:
 	void StoreTextureCoordData(aiFace currentFace, int index);
 	void StoreTextureData(aiMaterial* mat);
 	void StoreNormalMapData(aiMaterial* mat);
-
-	void StoreVertexNormals();
 };

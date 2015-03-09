@@ -32,7 +32,7 @@ glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
 float camX = 0, camY = 0, zoom = -4;//-800;
-
+float lightX = 0,lightY = 0,lightZ = 0;
 // Models
 std::vector<Mesh> modelList;
 int numModels;
@@ -46,12 +46,12 @@ void LoadModelData()
 	Assimp::Importer importer;
 
 	std::string fileRoot = "Models/";
-	std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
+	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
-	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
 
@@ -110,15 +110,31 @@ void RenderScene()
 	// calculating MVP
 	glm::mat4 MVP = projection * view * modelMatrix;
 
+	glm::mat4 MV = view * modelMatrix;
 	// set shader program
 	glUseProgram(basicProgram);	
 
-	//bind BasicVertexShader.MVP to this.matrixId
+	// Bind various matrices to the shader
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
-	
+	GLuint modelMId = glGetUniformLocation(basicProgram, "M");
+	GLuint viewMId = glGetUniformLocation(basicProgram, "V");
+	GLuint modelViewMId = glGetUniformLocation(basicProgram, "MV");
+
+	// Get the light position
+	GLuint lightPosId = glGetUniformLocation(basicProgram, "LightPosition_worldspace");
+
+	// Pass in the coordinated for the light
+	glUniform3f(lightPosId, lightX,lightY,lightZ);
+
 	// USING SHADERS
 	glUniformMatrix4fv(matrixId, 1, GL_FALSE, &MVP[0][0]);
 	
+	glUniformMatrix4fv(modelMId, 1, GL_FALSE, &modelMatrix[0][0]);
+	
+	glUniformMatrix4fv(viewMId, 1, GL_FALSE, &view[0][0]);
+	
+	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
+
 	// buffers
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -152,10 +168,6 @@ void RenderScene()
 		// diffuse texture for model
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
-		// bind fragmentShader.textureSampler to this.textureSampler
-		GLuint textureSampler = glGetUniformLocation(basicProgram, "textureSampler");
-		// pass in texture data
-		glUniform1i(textureSampler, 0);
 
 		// normal texture for model
 		glActiveTexture(GL_TEXTURE1);
@@ -197,7 +209,7 @@ void RenderScene()
 			2,				// VertexArrayAttrib
 			3,				// size
 			GL_FLOAT,		// type
-			GL_TRUE,		// normalised?
+			GL_FALSE,		// normalised?
 			0,				// stride
 			(void*)0		// array buffer offset
 			);
@@ -259,6 +271,24 @@ void KeyPress(unsigned char key, int x, int y )
 	case 27: // close application by pressing "Esc"
 		glutDestroyWindow(window);
 		exit(0);
+		break;
+	case 'w':
+		lightY++;
+		break;
+	case 's':
+		lightY--;
+		break;
+	case 'd':
+		lightX++;
+		break;
+	case 'a':
+		lightX--;
+		break;
+	case 'r':
+		lightZ++;
+		break;
+	case 'f':
+		lightZ--;
 		break;
 	default:
 		break;
@@ -339,7 +369,8 @@ void initCamera()
 void initShaders()
 {
 	ShaderLoader loader;
-	basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
+	//basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
+	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 }
 
@@ -374,7 +405,6 @@ void main(int argc, char** argv)
 		900.0f,										// Lifetime
 		glm::vec4(1, 0, 0, 0.5));					// Colour
 
-	//glutDisplayFunc(RenderScene);
 	glutIdleFunc(RenderScene);
 
 	// keyboard control

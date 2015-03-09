@@ -16,33 +16,6 @@
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{98b4318a-f8f5-4499-a891-b196d55b6732}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Models">
-      <UniqueIdentifier>{95967050-f7cc-46b3-a6ee-347ee392f8c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Bear_Brown">
-      <UniqueIdentifier>{b7961df0-2b2f-47c0-b6c3-9ae2edaa3b66}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\C3P0">
-      <UniqueIdentifier>{01abb44f-b622-4b3f-9cd3-9dafbb7ecc99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\GreenArrow">
-      <UniqueIdentifier>{1ba5094b-0dd3-4df2-8509-fbc16ddacb3b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\IronMan">
-      <UniqueIdentifier>{cab4b248-51a2-45b5-b6d6-2494dc58d055}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Nightwing187">
-      <UniqueIdentifier>{77c744fb-594b-48db-ad52-352d59194725}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Optimus">
-      <UniqueIdentifier>{c67d458e-d7c4-42be-ab35-13967f2c0572}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Robin188">
-      <UniqueIdentifier>{12d25ccf-49b9-4383-b600-c1db4b7c09e8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models\Dog">
-      <UniqueIdentifier>{b3dcf8c6-3c3e-4ba9-ba2a-9b3cd9f9ff3f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
@@ -52,114 +25,38 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Models\Optimus\Optimus_Diffuse.png">
-      <Filter>Models\Optimus</Filter>
-    </Image>
-    <Image Include="Models\Optimus\Optimus_NORMAL.png">
-      <Filter>Models\Optimus</Filter>
-    </Image>
-    <Image Include="Models\BumpMapTryout.jpg">
-      <Filter>Models</Filter>
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
     <None Include="Models\Stick Figure\Stick_Figure_little.max" />
-    <None Include="Models\Bear_Brown\Bear_Brown.dae">
-      <Filter>Models\Bear_Brown</Filter>
+    <None Include="Models\Nightwing187\Nightwing187.dae" />
+    <None Include="Models\IronMan\Iron_Man.dae" />
+    <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
+    <None Include="Models\IronMan\Iron_Man_D.tga" />
+    <None Include="Models\Optimus\Optimus.DAE" />
+    <None Include="Models\GreenArrow\GreenArrow.dae" />
+    <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
+    <None Include="Models\C3P0\C3P0_head_D.tga" />
+    <None Include="Models\C3P0\C3P0.dae" />
+    <None Include="Models\C3P0\C3P0_body_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Fur_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Brown.dae" />
+    <None Include="Models\Bear_Brown\Bear_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
+    <None Include="Models\Robin188\Robin188.dae" />
+    <None Include="Models\Robin188\Robin_DIFFUSE.tga" />
+    <None Include="ModelFragmentShader.frag">
+      <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="Models\Bear_Brown\Bear_D.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\Bear_Brown\Bear_Eye_D.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\Bear_Brown\Bear_Fur_D.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\C3P0\C3P0.dae">
-      <Filter>Models\C3P0</Filter>
-    </None>
-    <None Include="Models\C3P0\C3P0_body_D.tga">
-      <Filter>Models\C3P0</Filter>
-    </None>
-    <None Include="Models\C3P0\C3P0_head_D.tga">
-      <Filter>Models\C3P0</Filter>
-    </None>
-    <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga">
-      <Filter>Models\GreenArrow</Filter>
-    </None>
-    <None Include="Models\GreenArrow\GreenArrow.dae">
-      <Filter>Models\GreenArrow</Filter>
-    </None>
-    <None Include="Models\IronMan\Iron_Man.dae">
-      <Filter>Models\IronMan</Filter>
-    </None>
-    <None Include="Models\IronMan\Iron_Man_D.tga">
-      <Filter>Models\IronMan</Filter>
-    </None>
-    <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga">
-      <Filter>Models\Nightwing187</Filter>
-    </None>
-    <None Include="Models\Nightwing187\Nightwing187.dae">
-      <Filter>Models\Nightwing187</Filter>
-    </None>
-    <None Include="Models\Optimus\Optimus.DAE">
-      <Filter>Models\Optimus</Filter>
-    </None>
-    <None Include="Models\Robin188\Robin188.dae">
-      <Filter>Models\Robin188</Filter>
-    </None>
-    <None Include="Models\Robin188\Robin_DIFFUSE.tga">
-      <Filter>Models\Robin188</Filter>
-    </None>
-    <None Include="packages.config">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Models\IronMan\Iron_Man_N.tga">
-      <Filter>Models\IronMan</Filter>
-    </None>
-    <None Include="Models\Bear_Brown\Bear_Eye_N.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\Bear_Brown\Bear_Fur_N.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\Bear_Brown\Bear_N.tga">
-      <Filter>Models\Bear_Brown</Filter>
-    </None>
-    <None Include="Models\C3P0\C3P0_body_N.tga">
-      <Filter>Models\C3P0</Filter>
-    </None>
-    <None Include="Models\C3P0\C3P0_head_N.tga">
-      <Filter>Models\C3P0</Filter>
-    </None>
-    <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga">
-      <Filter>Models\GreenArrow</Filter>
-    </None>
-    <None Include="Models\Nightwing187\Nightwing_NORMAL.tga">
-      <Filter>Models\Nightwing187</Filter>
-    </None>
-    <None Include="Models\Robin188\Robin_N.tga">
-      <Filter>Models\Robin188</Filter>
-    </None>
-    <None Include="Models\Dog\Dog.dae">
-      <Filter>Models\Dog</Filter>
-    </None>
-    <None Include="Models\Dog\Dog_D.tga">
-      <Filter>Models\Dog</Filter>
-    </None>
-    <None Include="Models\Dog\Dog_Eye_D.tga">
-      <Filter>Models\Dog</Filter>
-    </None>
-    <None Include="Models\Dog\Dog_Eye_N.tga">
-      <Filter>Models\Dog</Filter>
-    </None>
-    <None Include="Models\Dog\Dog_N.tga">
-      <Filter>Models\Dog</Filter>
+    <None Include="ModelVertexShader.vert">
+      <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
