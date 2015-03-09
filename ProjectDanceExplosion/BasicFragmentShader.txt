@@ -1,15 +1,35 @@
 #version 330 core
 
-in vec4 colour;
-in vec4 lighting;
+
 in vec2 textureCoords;
+in vec4 lighting;
+in vec4 colour;
+in vec3 norm;
 
 uniform sampler2D textureSampler;
+uniform sampler2D normalSampler;
 
 out vec4 finalColour;
 
 void main()
 {
-	finalColour = texture(textureSampler, textureCoords);// * lighting;
-	//finalColour = colour;// * lighting;
+    /** Lighting **/
+	vec3 lightPos = vec3(3.0, 2.0, 4.0);
+	vec4 normalFromTexture = normalize(texture2D(normalSampler, textureCoords) * 2.0 - 1.0);
+
+	// Ambient Light
+	vec4 ambientLight = vec4(0.7, 0.7, 0.7, 1.0) * vec4(0.7, 0.7, 0.7, 1.0);//vec4(1.0, 1.0, 1.0, 1.0);
+	//ambientLight = ambientLight * normalFromTexture;
+
+	// Diffuse Light
+	vec3 normalTotal = norm * vec3(normalFromTexture.x, normalFromTexture.y, normalFromTexture.z);
+	vec3 diffuseIntensity = vec3(max(0.0, dot(lightPos, normalTotal)));
+	vec4 diffuseLight =  vec4(0.2, 0.2, 0.2, 1.0) * vec4(diffuseIntensity, 1.0);
+
+	vec4 lighting = ambientLight + diffuseLight;
+
+	/** Lighting **/
+	finalColour = texture2D(textureSampler, textureCoords) * lighting;
+	//finalColour = texture2D(normalSampler, textureCoords);
+	//finalColour = colour * lighting;
 }

@@ -26,9 +26,6 @@ GLuint basicProgram, particleProgram;
 
 
 ParticleEmitter pEmitter = ParticleEmitter();
-/*ParticleEmitter pEmitter2 = ParticleEmitter();
-ParticleEmitter pEmitter3 = ParticleEmitter();
-ParticleEmitter pEmitter4 = ParticleEmitter();*/
 
 // Camera
 glm::mat4 projection;
@@ -39,7 +36,6 @@ float camX = 0, camY = 0, zoom = -4;//-800;
 // Models
 std::vector<Mesh> modelList;
 int numModels;
-//GLuint vao, vertexBuffer;
 
 void LoadModelData()
 {
@@ -52,6 +48,7 @@ void LoadModelData()
 	std::string fileRoot = "Models/";
 	std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
+	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
@@ -65,7 +62,8 @@ void LoadModelData()
 								aiProcess_Triangulate |
 								aiProcess_JoinIdenticalVertices |
 								aiProcess_SortByPType |
-								aiProcess_GenNormals |
+								aiProcess_FixInfacingNormals |
+								aiProcess_GenSmoothNormals |
 								aiProcess_GenUVCoords |
 								aiProcess_SortByPType
 								);
@@ -105,6 +103,7 @@ void RenderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
 
 	// model's model matrix
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -142,7 +141,6 @@ void RenderScene()
 		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetTextureCoords(), GL_STATIC_DRAW);
 		
-
 		// normal buffer
 		bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each normal has 3 parts(x, y & z), each part is 4 bytes long
 		GLuint normalbuffer;
@@ -151,14 +149,22 @@ void RenderScene()
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetNormalData(), GL_STATIC_DRAW);
 
 		// Texturing
-		// find correct texture for model
-		glEnable(GL_TEXTURE_2D);
+		// diffuse texture for model
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
 		// bind fragmentShader.textureSampler to this.textureSampler
 		GLuint textureSampler = glGetUniformLocation(basicProgram, "textureSampler");
 		// pass in texture data
 		glUniform1i(textureSampler, 0);
+
+		// normal texture for model
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetNormalMapData());
+		// bind fragmentShader.textureSampler to this.textureSampler
+		GLuint normalSampler = glGetUniformLocation(basicProgram, "normalSampler");
+		// pass in texture data
+		glUniform1i(normalSampler, 1);
+
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -219,19 +225,8 @@ void RenderScene()
 
 	// Particle updates
 	pEmitter.PEmitterUpdate();
-	/*pEmitter2.PEmitterUpdate();
-	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();*/
-
 	pEmitter.PEmitterDraw(view, projection * view);
-	/*pEmitter2.PEmitterDraw(view, projection * view);
-	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();*/
-
 	pEmitter.PEMitterCleanup();
-	/*pEmitter2.PEMitterCleanup();
-	pEmitter3.PEmitterUpdate();
-	pEmitter4.PEmitterUpdate();*/
 
 	glutSwapBuffers();
 		
@@ -244,34 +239,8 @@ void RenderScene()
 // Calculate view matrix
 void MoveCamera(/*int x, int y*/)
 {
-	/*
-	float camX, camZ;
-
-	// change cameraRadius if model cannot be seen
-	float cameraRadius = 120.0f;
-
-	xCircle += x + y;
-	yCircle += y;
-	if( y == 0 )// move in X and Z axis
-	{
-		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
-		camZ = (cameraRadius * sin(xCircle * 3.14f / 180.0f))+zoom;
-	}
-	else // move in X, Y and Z axis
-	{
-		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
-		camY = cameraRadius * sin(yCircle * 3.14f / 180.0f);
-		camZ = (120.0f * sin(xCircle * 3.14f / 180.0f))+zoom;
-	}
-
-	if ((xCircle > 360.0f) || (xCircle < -360.0f))
-		xCircle %= 360;
-
-	// camera position in world space
-	glm::vec3 pos = glm::vec3(camX , camY, zoom);
-	*/
 	view = glm::lookAt(
-		glm::vec3(6, 0, zoom),// camera position in world space
+		glm::vec3(0, 0, zoom),// camera position in world space
 		glm::vec3(0, 0, 0), // where camera is viewing in world space
 		glm::vec3(0, 1, 0)  // Y is up (in world space)
 		);
@@ -389,14 +358,6 @@ void main(int argc, char** argv)
 		std::cout << "glew error: " << glewGetErrorString(glewOK) << std::endl;
 	else
 		std::cout << "glew running" << std::endl;
-	
-	
-
-	/*// Buffering & linking variables for Shaders
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vertexBuffer);*/
 
 	// loading shaders
 	initShaders();
@@ -407,38 +368,13 @@ void main(int argc, char** argv)
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(0, 0, 1.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
-
-
-	//Create a second particle emitter
-/*	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 1.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
-
-	//Create a second particle emitter
-	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
 		glm::vec3(0, 0, 2.9f),						// Start Position
 		glm::vec3(0, 0.01, 0.01),					// Velocity
 		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
 		900.0f,										// Lifetime
 		glm::vec4(1, 0, 0, 0.5));					// Colour
 
-	//Create a second particle emitter
-	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 2.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
-		*/
-	
+	//glutDisplayFunc(RenderScene);
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
@@ -447,8 +383,4 @@ void main(int argc, char** argv)
 	glutMouseFunc(MouseWheel);
 
 	glutMainLoop();
-	
-	
-	// delete vao & vbo
-	//glDeleteBuffers(1, &vao);
 }

@@ -66,23 +66,48 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg" />
+    <Image Include="Models\BumpMapTryout.jpg" />
     <Image Include="Models\Optimus\Optimus_Diffuse.png" />
+    <Image Include="Models\Optimus\Optimus_NORMAL.png" />
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Models\Bear_Brown\Bear_Brown.dae" />
+    <None Include="Models\Bear_Brown\Bear_Brown.dae">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Models\Bear_Brown\Bear_D.tga" />
     <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Eye_N.tga" />
     <None Include="Models\Bear_Brown\Bear_Fur_D.tga" />
-    <None Include="Models\C3P0\C3P0.dae" />
+    <None Include="Models\Bear_Brown\Bear_Fur_N.tga" />
+    <None Include="Models\Bear_Brown\Bear_N.tga" />
+    <None Include="Models\C3P0\C3P0.dae">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Models\C3P0\C3P0_body_D.tga" />
+    <None Include="Models\C3P0\C3P0_body_N.tga" />
     <None Include="Models\C3P0\C3P0_head_D.tga" />
-    <None Include="Models\GreenArrow\GreenArrow.dae" />
+    <None Include="Models\C3P0\C3P0_head_N.tga" />
+    <None Include="Models\Dog\Dog.dae">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Models\Dog\Dog_D.tga" />
+    <None Include="Models\Dog\Dog_Eye_D.tga" />
+    <None Include="Models\Dog\Dog_Eye_N.tga" />
+    <None Include="Models\Dog\Dog_N.tga" />
+    <None Include="Models\GreenArrow\GreenArrow.dae">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
-    <None Include="Models\IronMan\Iron_Man.dae" />
+    <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga" />
+    <None Include="Models\IronMan\Iron_Man.dae">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Models\IronMan\Iron_Man_D.tga" />
+    <None Include="Models\IronMan\Iron_Man_N.tga" />
     <None Include="Models\Nightwing187\Nightwing187.dae" />
     <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
+    <None Include="Models\Nightwing187\Nightwing_NORMAL.tga" />
     <None Include="Models\Optimus\Optimus.DAE">
       <SubType>Designer</SubType>
     </None>
@@ -90,6 +115,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Models\Robin188\Robin_DIFFUSE.tga" />
+    <None Include="Models\Robin188\Robin_N.tga" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />

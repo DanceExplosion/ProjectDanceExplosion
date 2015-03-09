@@ -10,6 +10,15 @@ Mesh::Mesh(aiMesh* m, aiMaterial* mat)
 	numFaces = m->mNumFaces;
 	modelData = m;
 
+	// checking model is triangle based
+	if(modelData->mPrimitiveTypes == aiPrimitiveType_TRIANGLE)
+		std::cout << "Triangle Model" << std::endl;
+	else
+		std::cout << "Not triangle model" << std::endl;
+
+	//calculate normals per vertex
+	StoreVertexNormals();
+
 	// check for textures before storing vertex data
 	if (mat != NULL)
 	{
@@ -37,12 +46,6 @@ void Mesh::StoreVertexData()
 		std::cout << "normals detected" << std::endl;
 		hasNormals = true;
 	}
-
-	// checking model is triangle based
-	if(modelData->mPrimitiveTypes == aiPrimitiveType_TRIANGLE)
-		std::cout << "Triangle Model" << std::endl;
-	else
-		std::cout << "Not triangle model" << std::endl;
 	
 	// for each face in mesh
 	for (int i = 0; i < numFaces; i++)
@@ -62,28 +65,97 @@ void Mesh::StoreVertexData()
 
 			// if textures exist, store coordinates
 			if(textureRef != NULL)
-			{
 				StoreTextureCoordData(currentFace, j);
-			}
-
 			// if normals exist, store them
-			if (hasNormals == true)
-				StoreNormalData(j);
+			if (hasNormals == TRUE)
+				StoreNormalData(currentFace, j);
 		}
 	}
 }
 
-void Mesh::StoreNormalData(int index)
+void Mesh::StoreVertexNormals()
+{
+	/*for(int v = 0; v < aiNumVertices; v++)
+	{
+		aiVector3D currentVertex = modelData->mVertices[v];
+		glm::vec3 vertexNormal = glm::vec3(0.0, 0.0, 0.0);
+
+		for(int j = 0; j < numFaces; j++)
+		{
+			aiFace currentFace = modelData->mFaces[j];
+			bool stored = false;
+			int index = 0;
+			while((stored == false) && (index < 3))
+			{
+				if(modelData->mVertices[currentFace.mIndices[index]] == currentVertex)
+				{
+					aiVector3D normal = modelData->mNormals[currentFace.mIndices[index]];
+					vertexNormal += glm::vec3(normal.x, normal.y, normal.z);
+					stored = true;
+				}
+				index++;
+			}
+		}
+		vertexNormal = glm::normalize(vertexNormal);
+		vertexNormalData.push_back(vertexNormal);
+	}*/
+	/*for(int v = 0; v < aiNumVertices; v++)
+	{
+		glm::vec3 vertexNormal = glm::vec3(0.0, 0.0, 0.0);
+		for(int f = 0; f < numFaces; f++)
+		{
+			aiFace currentFace = modelData->mFaces[f];
+			if((currentFace.mIndices[0] == v) || (currentFace.mIndices[1] == v) || (currentFace.mIndices[2] == v))
+			{
+				// Doesn't matter which index is used as all face's verticies use same normal
+				aiVector3D normal = modelData->mNormals[currentFace.mIndices[0]];
+				vertexNormal += glm::vec3(normal.x, normal.y, normal.z);
+			}
+		}
+		vertexNormal = glm::normalize(vertexNormal);
+		//std::cout << "one vertex done" << std::endl;
+	}
+	std::cout << "all vertices done" << std::endl;*/
+	/*for(int v = 0; v < aiNumVertices; v++)
+	{
+		int vertCount = 0;
+		for(int i = 0; i <numFaces; i++)
+		{
+			aiFace currentFace = modelData->mFaces[i];
+			bool stored = FALSE;
+			if(((currentFace.mIndices[0] == v) || (currentFace.mIndices[1] == v) || (currentFace.mIndices[2] == v)) && (stored != true))
+			{
+				vertCount++;
+				stored = true;
+			}
+		}
+		if (vertCount > 1)
+			std::cout <<"vertex " << v << ": num of faces: "<< vertCount << std::endl;
+	}
+	std::cout << "" << std::endl;*/
+}
+
+void Mesh::StoreNormalData(aiFace currentFace, int index)
 {
 	// pull data into vec3
-	aiVector3D normal = modelData->mNormals[index];
-
+	aiVector3D n = modelData->mNormals[currentFace.mIndices[index]];//vertexNormalData.at(currentFace.mIndices[index]);
 	// check normalized?
-	normal.Normalize();
+	aiVector3D t = modelData->mTangents[currentFace.mIndices[index]];
+	aiVector3D b = modelData->mBitangents[currentFace.mIndices[index]];
+	glm::vec3 normal = glm::vec3(n.x, n.y, n.z);
+	glm::vec3 tangent = glm::vec3(t.x, t.y, t.z);
+	glm::vec3 bitangent = glm::vec3(b.x, b.y, b.z);
+	
+	//normal = normal + (glm::cross(tangent, bitangent));
+	
+
+	//normal = normal + bitangent + tangent;
+	//normal.Normalize();
+	normal = glm::normalize(normal);
 	// store in vector
-	normalData.push_back(normal.x);
-	normalData.push_back(normal.y);
-	normalData.push_back(normal.z);
+	normalData.push_back(normal.x);// * tangent.x * bitangent.x);
+	normalData.push_back(normal.y);// * tangent.y * bitangent.y);
+	normalData.push_back(normal.z);// * tangent.z * bitangent.z);
 }
 
 // assigning 
@@ -96,8 +168,6 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	std::cout <<"	Number of ambient textures detected: " << numTextures << std::endl;
 	numTextures = mat->GetTextureCount(aiTextureType_DISPLACEMENT);
 	std::cout <<"	Number of displacement textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_EMISSIVE);
-	std::cout <<"	Number of emmisive textures detected: " << numTextures << std::endl;
 	numTextures = mat->GetTextureCount(aiTextureType_EMISSIVE);
 	std::cout <<"	Number of emmisive textures detected: " << numTextures << std::endl;
 	numTextures = mat->GetTextureCount(aiTextureType_HEIGHT);
@@ -117,9 +187,9 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	numTextures = mat->GetTextureCount(aiTextureType_UNKNOWN);
 	std::cout <<"	Number of unknown textures detected: " << numTextures << std::endl;
 	numTextures = mat->GetTextureCount(aiTextureType_NONE);
-	std::cout <<"	Number of NONE? textures detected: " << numTextures << std::endl;*/
+	std::cout <<"	Number of NONE? textures detected: " << numTextures << std::endl;
 
-	std::cout << "Texture Index: " << modelData->mMaterialIndex << std::endl;
+	std::cout << "Texture Index: " << modelData->mMaterialIndex << std::endl;*/
 
 	std::string fileRoot = "Models/";
 
@@ -183,6 +253,78 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	glActiveTexture(NULL);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glDisable(GL_TEXTURE_2D);
+
+	StoreNormalMapData(mat);
+}
+
+void Mesh::StoreNormalMapData(aiMaterial* mat)
+{
+	std::string fileRoot = "Models/";
+
+	//std::string path = "BumpMapTryout.jpg";
+	//std::string path = "Bear_Brown/Bear_N.tga";
+	std::string path = "Bear_Brown/Bear_Fur_N.tga";
+	//std::string path = "Bear_Brown/Bear_Eye_N.tga";
+	//std::string path = "C3P0/C3P0_body_N.tga";
+	//std::string path = "C3P0/C3P0_head_N.tga";
+	//std::string path = "Dog/Dog_N.tga";
+	//std::string path = "GreenArrow/GreenArrow_NORMAL.tga";
+	//std::string path = "IronMan/Iron_Man_N.tga";
+	//std::string path = "Nightwing187/Nightwing_NORMAL.tga";
+	//std::string path = "Optimus/Optimus_NORMAL.png";
+	//std::string path = "Robin188/Robin_N.tga";
+
+	std::string filePath = fileRoot + path;
+
+	std::cout << "normal filePath: " << filePath << std::endl;
+	// initialising DevIL libraries
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+
+	// Load in texture
+	if(ilLoadImage(filePath.c_str()))
+	{
+		// checking relevant data has been loaded
+		ILubyte* data = ilGetData();
+		if(!data)
+			std::cout << "No normal image data found" << std::endl;
+		else
+		{
+			std::cout << "normal image loaded" << std::endl;
+			// create new texture enum for model
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE1);
+			glGenTextures(1, &normalMapRef);	
+			glBindTexture(GL_TEXTURE_2D, normalMapRef);
+
+			// texture wrapping method
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			// texture mipmap generation? usage?
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			
+			// bind data to textureRef
+			normalMapRef = ilutGLBindTexImage();
+		}
+	}
+	else
+	{
+		// erro message
+		std::cout << "failed to load normal image" << std::endl;
+		ILenum error = ilGetError();
+		std::cout << "error: " << iluErrorString(error) << std::endl;
+	}
+
+	// check that ptexture is created
+	if(glIsTexture(normalMapRef))
+		std::cout << "normal texture success" << std::endl;
+
+	// unbinding & disabling texturing
+	glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);
 }
 
 void Mesh::StoreTextureCoordData(aiFace currentFace, int index)
@@ -223,6 +365,11 @@ float* Mesh::GetTextureCoords()
 GLuint Mesh::GetTextureData()
 {
 	return textureRef;
+}
+
+GLuint Mesh::GetNormalMapData()
+{
+	return normalMapRef;
 }
 
 float* Mesh::GetNormalData()
