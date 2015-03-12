@@ -7,6 +7,7 @@
 #include <assimp/scene.h>		// output data structure
 #include <assimp/postprocess.h>	// post processing flag
 
+
 // OpenGL Mathemathics
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -19,14 +20,15 @@
 #include "ShaderLoader.h"
 #include "Mesh.h"
 #include "ParticleEMitter.h"
+#include "Node.h"
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram;
+GLuint basicProgram, particleProgram, nodeProgram;
 
 
 ParticleEmitter pEmitter = ParticleEmitter();
-
+Node node = Node();
 // Camera
 glm::mat4 projection;
 glm::mat4 view;
@@ -37,6 +39,23 @@ float lightX = 0,lightY = 0,lightZ = 0;
 std::vector<Mesh> modelList;
 int numModels;
 
+std::vector<glm::vec4> nodeTList1;
+std::vector<glm::vec4> nodeTList2;
+std::vector<glm::vec4> nodeTList3;
+std::vector<glm::vec4> nodeTList4;
+
+const aiScene* scene;
+
+void splitMatrixList(std::vector<aiMatrix4x4> list){
+	for(int i = 0; i<list.size();i++){
+		aiMatrix4x4 mat = list.at(i);
+		nodeTList1.push_back(glm::vec4(mat.a1,mat.a2,mat.a3,mat.a4));
+		nodeTList2.push_back(glm::vec4(mat.b1,mat.b2,mat.b3,mat.b4));
+		nodeTList3.push_back(glm::vec4(mat.c1,mat.c2,mat.c3,mat.c4));
+		nodeTList4.push_back(glm::vec4(mat.d1,mat.d2,mat.d3,mat.d4));
+	}
+}
+
 void LoadModelData()
 {
 	// set background colour //black
@@ -44,20 +63,19 @@ void LoadModelData()
 
 	// Assimp file importer
 	Assimp::Importer importer;
-
 	std::string fileRoot = "Models/";
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
-	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
-	std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
 
 	const char* filePath = file.c_str();
 
-	const aiScene* scene = importer.ReadFile(filePath,
+	scene = importer.ReadFile(filePath,
 								aiProcess_CalcTangentSpace |
 								aiProcess_Triangulate |
 								aiProcess_JoinIdenticalVertices |
@@ -77,7 +95,7 @@ void LoadModelData()
 	int anim = scene->mNumAnimations;
 	numModels = (scene->mNumMeshes);
 	int numTextures = scene->mNumMaterials;
-	
+	node = Node(scene);
 	std::cout << "Number of models in file: " << numModels << std::endl;
 	std::cout << "Number of external textures in file: " << numTextures << std::endl;
 	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
@@ -235,6 +253,81 @@ void RenderScene()
 	// Unload model shader program, pEmitter uses its own 
 	glUseProgram(0);
 
+	
+	#pragma region Skeleton Drawing
+	// Use skeleton drawing program
+	glUseProgram(nodeProgram);
+
+	glDisable(GL_DEPTH_TEST);
+	// Draw model skeleton
+	GLuint bonebuffer;
+	int bufferSize = node.GetNumBones() * 16 * 4; // Every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
+	glGenBuffers(1, &bonebuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, node.GetBoneMatrix(), GL_STATIC_DRAW);
+
+	// Bind BasicVertexShader.MVP to this.matrixId
+	GLuint MatrixId = glGetUniformLocation(nodeProgram, "MVP");	
+	// USING SHADERS
+	glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);
+
+	// Pass texture coordinate data
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		0,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)0		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		1,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 4)		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		2,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 8)		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		3,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 12)		// array buffer offset
+		);
+
+	// Increase the line width and point size, so that the drawn Skeleton is easier to see
+	glLineWidth(4.0f);
+	glPointSize(5.0f);
+
+	// Draw the Skeleton
+	glDrawArrays(GL_POINTS, 0, node.GetNumBones());
+	
+	// Unload shader program
+	glUseProgram(0);
+	glEnable(GL_DEPTH_TEST);
+	#pragma endregion
+
 	// Particle updates
 	pEmitter.PEmitterUpdate();
 	pEmitter.PEmitterDraw(view, projection * view);
@@ -372,6 +465,7 @@ void initShaders()
 	//basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
+	nodeProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 }
 
 void main(int argc, char** argv)

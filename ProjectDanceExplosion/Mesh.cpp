@@ -195,8 +195,8 @@ void Mesh::StoreNormalMapData(aiMaterial* mat)
 	//std::string path = "C3P0/C3P0_head_N.tga";
 	//std::string path = "Dog/Dog_N.tga";
 	//std::string path = "GreenArrow/GreenArrow_NORMAL.tga";
-	//std::string path = "IronMan/Iron_Man_N.tga";
-	std::string path = "Nightwing187/Nightwing_NORMAL.tga";
+	std::string path = "IronMan/Iron_Man_N.tga";
+	//std::string path = "Nightwing187/Nightwing_NORMAL.tga";
 	//std::string path = "Optimus/Optimus_NORMAL.png";
 	//std::string path = "Robin188/Robin_N.tga";
 
