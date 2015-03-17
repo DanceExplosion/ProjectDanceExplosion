@@ -94,9 +94,6 @@ GLuint programID;
 // Annoying
 const static int MAXPARTICLES = 10000;
 
-// Gotta get that time yo
-int oldTime = 0;
-
 // Variables for Buffers
 GLuint billboard_vertex_buffer, particles_position_buffer, particles_colour_buffer;
 static const GLfloat g_vertex_buffer_data[] = {
@@ -188,17 +185,11 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 
 }
 
 // Main Update Loop
-void ParticleEmitter::PEmitterUpdate(){
+void ParticleEmitter::PEmitterUpdate(int delta){
 	
 	// Update Function for the Particle Emitter
 
 	// Use ShaderProgram
-	glUseProgram(programID);
-
-	// Wibbly wobbly timey wimey stuff
-	int timeAtStart = glutGet(GLUT_ELAPSED_TIME);
-	int delta = timeAtStart - oldTime;
-	oldTime = timeAtStart;
 
 #pragma region Particle Updating
 

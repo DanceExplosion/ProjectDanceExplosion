@@ -21,11 +21,13 @@
 #include "Mesh.h"
 #include "ParticleEMitter.h"
 #include "Node.h"
+#include "ModelAnimation.h"
 
 // OpenGL Essentials
 GLuint window;
 GLuint basicProgram, particleProgram, nodeProgram;
 
+AnimationController animCont = AnimationController();
 
 ParticleEmitter pEmitter = ParticleEmitter();
 Node node = Node();
@@ -39,22 +41,13 @@ float lightX = 0,lightY = 0,lightZ = 0;
 std::vector<Mesh> modelList;
 int numModels;
 
-std::vector<glm::vec4> nodeTList1;
-std::vector<glm::vec4> nodeTList2;
-std::vector<glm::vec4> nodeTList3;
-std::vector<glm::vec4> nodeTList4;
+const aiScene* scene, *animScene;
+	Assimp::Importer importer;
+	Assimp::Importer importer2;
+GLuint vao;
 
-const aiScene* scene;
-
-void splitMatrixList(std::vector<aiMatrix4x4> list){
-	for(int i = 0; i<list.size();i++){
-		aiMatrix4x4 mat = list.at(i);
-		nodeTList1.push_back(glm::vec4(mat.a1,mat.a2,mat.a3,mat.a4));
-		nodeTList2.push_back(glm::vec4(mat.b1,mat.b2,mat.b3,mat.b4));
-		nodeTList3.push_back(glm::vec4(mat.c1,mat.c2,mat.c3,mat.c4));
-		nodeTList4.push_back(glm::vec4(mat.d1,mat.d2,mat.d3,mat.d4));
-	}
-}
+// Gotta get that time yo
+int oldTime = 0;
 
 void LoadModelData()
 {
@@ -62,19 +55,23 @@ void LoadModelData()
 	glClearColor(0.3f, 0.3f, 0.6f, 0.0f);
 
 	// Assimp file importer
-	Assimp::Importer importer;
 	std::string fileRoot = "Models/";
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
-	std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
+	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
+	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
-
+	std::string animation = fileRoot+"NightWingAS/anim.BVH";
+	//std::string animation = fileRoot+"Army Pilot/ArmyPilot.BVH";
 	const char* filePath = file.c_str();
-
+	const char* animPath = animation.c_str();
 	scene = importer.ReadFile(filePath,
 								aiProcess_CalcTangentSpace |
 								aiProcess_Triangulate |
@@ -85,21 +82,28 @@ void LoadModelData()
 								aiProcess_GenUVCoords |
 								aiProcess_SortByPType
 								);
-
+	animScene = importer2.ReadFile(animPath, aiProcess_SortByPType);
 	// error checking
 	if(!scene)
 		std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
 	else
 		std::cout << "File loaded successfully" <<std::endl;
 	
-	int anim = scene->mNumAnimations;
+	int anim = animScene->mNumAnimations;
+
+	
+
 	numModels = (scene->mNumMeshes);
 	int numTextures = scene->mNumMaterials;
 	node = Node(scene);
 	std::cout << "Number of models in file: " << numModels << std::endl;
 	std::cout << "Number of external textures in file: " << numTextures << std::endl;
 	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
+	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
 	std::cout << ""<< std::endl;
+
+	animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
+	//animCont = AnimationController(scene->mAnimations,scene->mRootNode);
 
 	// Pulling required data from scene
 	for (int i = 0; i < numModels; i++)
@@ -130,7 +134,12 @@ void RenderScene()
 
 	glm::mat4 MV = view * modelMatrix;
 	// set shader program
+
 	glUseProgram(basicProgram);	
+	
+	// buffers
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	// Bind various matrices to the shader
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
@@ -153,10 +162,6 @@ void RenderScene()
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
-	// buffers
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	GLuint vertexBuffer;
 
@@ -236,8 +241,9 @@ void RenderScene()
 		int numVertices = modelList.at(i).GetNumVertices();
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-		// TEXTURING
+		// Texturing
 		glBindTexture(GL_TEXTURE_2D, NULL);
+
 		glActiveTexture(NULL);
 
 		// disable & delete vbo, texturebuffer & normalbuffer
@@ -249,7 +255,6 @@ void RenderScene()
 		glDeleteBuffers(1, &texturebuffer);
 		glDeleteBuffers(1, &normalbuffer);
 	}
-	
 	// Unload model shader program, pEmitter uses its own 
 	glUseProgram(0);
 
@@ -258,13 +263,15 @@ void RenderScene()
 	// Use skeleton drawing program
 	glUseProgram(nodeProgram);
 
+	
+
 	glDisable(GL_DEPTH_TEST);
 	// Draw model skeleton
 	GLuint bonebuffer;
 	int bufferSize = node.GetNumBones() * 16 * 4; // Every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
 	glGenBuffers(1, &bonebuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize, node.GetBoneMatrix(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, &node.StoreBones().at(0), GL_STATIC_DRAW);
 
 	// Bind BasicVertexShader.MVP to this.matrixId
 	GLuint MatrixId = glGetUniformLocation(nodeProgram, "MVP");	
@@ -325,18 +332,29 @@ void RenderScene()
 	
 	// Unload shader program
 	glUseProgram(0);
+	glDeleteBuffers(1, &bonebuffer);
 	glEnable(GL_DEPTH_TEST);
+
 	#pragma endregion
 
+
+	int timeAtStart = glutGet(GLUT_ELAPSED_TIME);
+
+	// Wibbly wobbly timey-wimey stuff
+	int delta = timeAtStart - oldTime;
+	oldTime = timeAtStart;
+	animCont.Update(delta);
+
 	// Particle updates
-	pEmitter.PEmitterUpdate();
+	
+	pEmitter.PEmitterUpdate(delta);
 	pEmitter.PEmitterDraw(view, projection * view);
 	pEmitter.PEMitterCleanup();
-
+	
 	glutSwapBuffers();
 		
 	// delete vao
-	glDeleteBuffers(1, &vao);
+	glDeleteVertexArrays(1, &vao);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 }
@@ -483,6 +501,7 @@ void main(int argc, char** argv)
 		std::cout << "glew error: " << glewGetErrorString(glewOK) << std::endl;
 	else
 		std::cout << "glew running" << std::endl;
+
 
 	// loading shaders
 	initShaders();

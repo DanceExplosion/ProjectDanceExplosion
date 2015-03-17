@@ -23,8 +23,10 @@ Node::Node(const aiScene* mS)
 }
 
 // Gather the data needed for the skeleton
-void Node::StoreBones()
+std::vector<float> Node::StoreBones()
 {
+	std::vector<float> boneMs = std::vector<float>();
+	numBones = 0;
 	// Loop through each mesh in the scene
 	for(unsigned int m = 0; m < mainScene->mNumMeshes; m++)
 	{
@@ -47,8 +49,8 @@ void Node::StoreBones()
 			unsigned int numWeights = bone1->mNumWeights;
 
 			// Inverse and Transpose teh bone's data
-			aiMatrix4x4 bonePlace = bone1->mOffsetMatrix.Inverse().Transpose();// * SearchTree(root, name);
-
+			aiMatrix4x4 bonePlace = SearchTree(root, name);
+			bonePlace.Transpose();
 			// *old* Convert to glm's mat4 format
 			/*glm::mat4 boneFinal = glm::mat4(bonePlace.a1, bonePlace.a2, bonePlace.a3, bonePlace.a4,
 												bonePlace.b1, bonePlace.b2, bonePlace.b3, bonePlace.b4,
@@ -71,28 +73,28 @@ void Node::StoreBones()
 			// Push the matrix values into the float list for passing into the shader
 
 			// Row 1
-			boneMatricies.push_back(bonePlace.a1);
-			boneMatricies.push_back(bonePlace.a2);
-			boneMatricies.push_back(bonePlace.a3);
-			boneMatricies.push_back(bonePlace.a4);
+			boneMs.push_back(bonePlace.a1);
+			boneMs.push_back(bonePlace.a2);
+			boneMs.push_back(bonePlace.a3);
+			boneMs.push_back(bonePlace.a4);
 			
 			// Row 2
-			boneMatricies.push_back(bonePlace.b1);
-			boneMatricies.push_back(bonePlace.b2);
-			boneMatricies.push_back(bonePlace.b3);
-			boneMatricies.push_back(bonePlace.b4);
+			boneMs.push_back(bonePlace.b1);
+			boneMs.push_back(bonePlace.b2);
+			boneMs.push_back(bonePlace.b3);
+			boneMs.push_back(bonePlace.b4);
 
 			// Row 3
-			boneMatricies.push_back(bonePlace.c1);
-			boneMatricies.push_back(bonePlace.c2);
-			boneMatricies.push_back(bonePlace.c3);
-			boneMatricies.push_back(bonePlace.c4);
+			boneMs.push_back(bonePlace.c1);
+			boneMs.push_back(bonePlace.c2);
+			boneMs.push_back(bonePlace.c3);
+			boneMs.push_back(bonePlace.c4);
 
 			// Row 4
-			boneMatricies.push_back(bonePlace.d1);
-			boneMatricies.push_back(bonePlace.d2);
-			boneMatricies.push_back(bonePlace.d3);
-			boneMatricies.push_back(bonePlace.d4);
+			boneMs.push_back(bonePlace.d1);
+			boneMs.push_back(bonePlace.d2);
+			boneMs.push_back(bonePlace.d3);
+			boneMs.push_back(bonePlace.d4);
 
 		}
 	}
@@ -107,8 +109,7 @@ void Node::StoreBones()
 	std::cout << "\t \t \t" << bonePlace.b1 << " " << bonePlace.b2 << " " << bonePlace.b3 << " " << bonePlace.b4 << std::endl;
 	std::cout << "\t \t \t" << bonePlace.c1 << " " << bonePlace.c2 << " " << bonePlace.c3 << " " << bonePlace.c4 << std::endl;
 	std::cout << "\t \t \t" << bonePlace.d1 << " " << bonePlace.d2 << " " << bonePlace.d3 << " " << bonePlace.d4 << std::endl;*/
-
-	int num = 9;
+	return boneMs;
 }
 
 //Initial method for printing the Hierarchy
@@ -193,12 +194,12 @@ aiMatrix4x4 Node::SearchTree(aiNode* node, aiString name)
 		// Get the total transformation of the node
 		while(node->mParent != NULL)
 		{
+			aiMatrix4x4 temp = node->mParent->mTransformation;
+			finalTransform = temp*finalTransform;
 			node = node->mParent;
-			finalTransform = finalTransform * node->mTransformation;
 		}
-
 		//Return the total matrix
-		return finalTransform.Transpose();
+		return finalTransform;
 	}
 	// If the name doesn't match
 	else

@@ -33,11 +33,11 @@ public:
 
 	// Function to print the node hierarchy
 	void PreOrderTraversal();
-
-private:
 	
 	// Function to build the matrix list
-	void StoreBones();
+	std::vector<float> StoreBones();
+private:
+	
 	
 	// Recursive print functions
 	void PreOrder(aiNode* node);

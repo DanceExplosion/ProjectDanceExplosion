@@ -43,6 +43,18 @@
     <Filter Include="Models\Dog">
       <UniqueIdentifier>{1e2557b9-af79-4ad2-bb4b-ae882841f6fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Models\Ant">
+      <UniqueIdentifier>{e1c1f39e-b1ea-4a5c-8b19-602c43b89e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Army Pilot">
+      <UniqueIdentifier>{4fa08478-679f-4cee-b75c-cd8bcb45567b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Ninja">
+      <UniqueIdentifier>{7bf2dd7d-9059-4af0-bc76-f8afb29faa9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\NightwingAS">
+      <UniqueIdentifier>{08081a5a-8e12-4e56-8d46-23fa67a5c172}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
@@ -59,6 +71,54 @@
     </Image>
     <Image Include="Models\BumpMapTryout.jpg">
       <Filter>Models</Filter>
+    </Image>
+    <Image Include="Models\ant1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\nskinbl.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ant\ant1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ant\ant2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\body01.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\head01.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\m4tex.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinbl.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinbr.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskingr.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinrd.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinwh.jpg">
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +225,84 @@
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
     <None Include="Models\Stick Figure\Stick_Figure_little.max" />
+    <None Include="Models\Ant\ant01.b3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant01.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant01Edit.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant02.b3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant02.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\antviewer.bb">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.bvh">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.dae">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.dxf">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.fbx">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.material">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.mesh">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.ms3d">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.mtl">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.x">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.b3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.cfx">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.ms3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninjaEdit.ms3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\NightWingAS\anim - Copy.bvh">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\anim.bvh">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\nightwing anim.dae">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\nightwing anim.fbx">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -185,6 +323,9 @@
     <ClCompile Include="Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AnimationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt">
@@ -198,6 +339,12 @@
     </Text>
     <Text Include="ParticleVertexShader.txt">
       <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="Models\Ninja\ninja animation ranges.txt">
+      <Filter>Models\Ninja</Filter>
+    </Text>
+    <Text Include="Models\Ant\animation info.txt">
+      <Filter>Models\NightwingAS</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
@@ -216,5 +363,16 @@
     <ClInclude Include="Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ModelAnimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Models\Army Pilot\ArmyPilot.mesh.xml">
+      <Filter>Models\Army Pilot</Filter>
+    </Xml>
+    <Xml Include="Models\Army Pilot\ArmyPilot.skeleton.xml">
+      <Filter>Models\Army Pilot</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

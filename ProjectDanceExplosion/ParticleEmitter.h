@@ -33,7 +33,7 @@ public:
 	ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col);
 	
 	//ParticleEmitterUpdate function
-	void PEmitterUpdate();
+	void PEmitterUpdate(int delta);
 
 	//Draw Function
 	void PEmitterDraw(glm::mat4 viewMatrix, glm::mat4 vpmatrix);
