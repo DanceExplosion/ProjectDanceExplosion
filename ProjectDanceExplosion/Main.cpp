@@ -30,7 +30,12 @@ GLuint basicProgram, particleProgram, nodeProgram;
 AnimationController animCont = AnimationController();
 
 ParticleEmitter pEmitter = ParticleEmitter();
+ParticleEmitter pEmitter2 = ParticleEmitter();
+ParticleEmitter pEmitter3 = ParticleEmitter();
+ParticleEmitter pEmitter4 = ParticleEmitter();
+
 Node node = Node();
+
 // Camera
 glm::mat4 projection;
 glm::mat4 view;
@@ -44,6 +49,7 @@ int numModels;
 const aiScene* scene, *animScene;
 	Assimp::Importer importer;
 	Assimp::Importer importer2;
+
 GLuint vao;
 
 // Gotta get that time yo
@@ -345,11 +351,20 @@ void RenderScene()
 	oldTime = timeAtStart;
 	animCont.Update(delta);
 
-	// Particle updates
-	
-	pEmitter.PEmitterUpdate(delta);
-	pEmitter.PEmitterDraw(view, projection * view);
-	pEmitter.PEMitterCleanup();
+	// Particle Emitter Updates
+	pEmitter.Update(delta);
+	pEmitter2.Update(delta);
+	pEmitter3.Update(delta);
+	pEmitter4.Update(delta);
+
+	// Emitter Draw
+	pEmitter.Draw(view, projection * view);
+
+	// Emitter Cleanups
+	pEmitter.Cleanup();
+	pEmitter2.Cleanup();
+	pEmitter3.Cleanup();
+	pEmitter4.Cleanup();
 	
 	glutSwapBuffers();
 		
@@ -400,6 +415,15 @@ void KeyPress(unsigned char key, int x, int y )
 		break;
 	case 'f':
 		lightZ--;
+		break;
+	case 'g':
+		pEmitter.particleCount();
+		break;
+	case 'h':
+		pEmitter.disable();
+		break;
+	case 'j':
+		pEmitter.whatIsFPS();
 		break;
 	default:
 		break;
@@ -480,7 +504,6 @@ void initCamera()
 void initShaders()
 {
 	ShaderLoader loader;
-	//basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 	nodeProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
@@ -510,13 +533,66 @@ void main(int argc, char** argv)
 	// loading models from file
 	LoadModelData();
 
+	float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+#pragma region Iron Man examples
+	/*
+	
+	//Feet Thruster Particles
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(0, 0, 2.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
+		glm::vec3(0.2f, 0, 0),						// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 255, 255, 255));				// Colour
+
+	//Create a second particle emitter
+	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(-0.2f, 0, 0),						// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(0, 255, 255, 255));				// Colour
+
+	// Hand Thruster Particles
+	//Create a second particle emitter
+	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(1.8f, 0, 2.9f),					// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 255, 0, 255));					// Colour
+
+	//Create a second particle emitter
+	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(-1.8f, 0, 2.9f),					// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 0, 255, 255));				// Colour
+		*/
+#pragma endregion
+
+#pragma region NightWing examples
+
+	//Create a particle emitter
+	pEmitter = ParticleEmitter(particleProgram,		// Shader
+		glm::vec3(3, 2.5f, 0),						// Start Position
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		330.0f,										// Lifetime
+		glm::vec4(255, 255, 255, 255));				// Colour - White
+
+	//Create a particle emitter
+	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(-3, 2.5f, 0),						// Start Position
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		330.0f,										// Lifetime
+		glm::vec4(255, 0, 255, 255));				// Colour - Magenta
+
+#pragma endregion
 
 	glutIdleFunc(RenderScene);
 
