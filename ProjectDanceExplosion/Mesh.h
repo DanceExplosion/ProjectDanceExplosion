@@ -21,6 +21,7 @@
 
 // Other libraries
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 /* Used to store elements of a mesh */
@@ -65,4 +66,6 @@ private:
 	void StoreTextureCoordData(aiFace currentFace, int index);
 	void StoreTextureData(aiMaterial* mat);
 	void StoreNormalMapData(aiMaterial* mat);
+
+	void ReadFile(std::string filePath);
 };

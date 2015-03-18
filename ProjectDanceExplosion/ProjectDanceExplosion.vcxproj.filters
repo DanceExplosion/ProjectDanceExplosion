@@ -43,6 +43,9 @@
     <Filter Include="Models\Dog">
       <UniqueIdentifier>{1e2557b9-af79-4ad2-bb4b-ae882841f6fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Animations">
+      <UniqueIdentifier>{debabab0-eaf6-46de-8457-d268fbba9c0e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
@@ -165,6 +168,15 @@
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
     <None Include="Models\Stick Figure\Stick_Figure_little.max" />
+    <None Include="Models\GreenArrow\GreenArrow_MAT.mat">
+      <Filter>Models\GreenArrow</Filter>
+    </None>
+    <None Include="Models\GreenArrow\GreenArrow_HAIR_MAT.mat">
+      <Filter>Models\GreenArrow</Filter>
+    </None>
+    <None Include="Animations\nightwing anim.fbx">
+      <Filter>Animations</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -177,6 +189,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,6 +208,18 @@
     <Text Include="ParticleVertexShader.txt">
       <Filter>Source Files\Shaders</Filter>
     </Text>
+    <Text Include="NodeVertexShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="NodeFragmentShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="RedrawVertexShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="RedrawFragmentShader.txt">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderLoader.h">
@@ -204,5 +231,16 @@
     <ClInclude Include="ParticleEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ProjectDanceExplosion.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

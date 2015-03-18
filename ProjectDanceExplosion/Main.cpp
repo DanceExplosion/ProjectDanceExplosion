@@ -19,12 +19,14 @@
 #include "ShaderLoader.h"
 #include "Mesh.h"
 #include "ParticleEMitter.h"
+#include "Node.h"
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram;
+GLuint basicProgram, particleProgram, skeletonProgram;
+GLuint redrawProgram;
 
-
+// Particle Emitter
 ParticleEmitter pEmitter = ParticleEmitter();
 
 // Camera
@@ -33,9 +35,12 @@ glm::mat4 view;
 int xCircle = 1, yCircle = 1;
 float camX = 0, camY = 0, zoom = -4;//-800;
 float lightX = 0,lightY = 0,lightZ = 0;
+
 // Models
 std::vector<Mesh> modelList;
+Node sceneNodes;
 int numModels;
+
 
 void LoadModelData()
 {
@@ -49,9 +54,9 @@ void LoadModelData()
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "Dog/Dog.dae";
-	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
+	std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
-	std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
 
@@ -83,19 +88,140 @@ void LoadModelData()
 	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
 	std::cout << ""<< std::endl;
 
+	// storing bone data
+	sceneNodes = Node(scene);
+	//for(unsigned int i = 0; i < scene->mNumMeshes; i++)
+	//{
+		for(unsigned int j = 0; j < scene->mMeshes[0]->mNumBones; j++)
+			sceneNodes.SkinBone(0, j);
+	//}
+		
+
 	// Pulling required data from scene
 	for (int i = 0; i < numModels; i++)
 	{
 		aiMesh* mesh1 = scene->mMeshes[i];
-		aiBone* bone1 = mesh1->mBones[0];
 		std::cout << "Number of bones in model "<< i << " : "<< mesh1->mNumBones << std::endl;
 		std::cout << "Number of faces in model "<< i << " : "<< mesh1->mNumFaces << std::endl;
-		
+
 		if (mesh1->HasTextureCoords(0))
 			modelList.push_back(Mesh(mesh1, scene->mMaterials[mesh1->mMaterialIndex]));
 		else
 			modelList.push_back(Mesh(mesh1, NULL));
 	}
+}
+
+
+void RenderBones(glm::mat4 MVP)
+{
+	// Use skeleton drawing program
+	glUseProgram(skeletonProgram);
+
+	//glDisable(GL_DEPTH_TEST);
+	// Draw model skeleton
+	GLuint bonebuffer;
+	int bufferSize = sceneNodes.GetNumBones() * 16 * 4; // every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
+	glGenBuffers(1, &bonebuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, sceneNodes.GetBoneMatrix(), GL_STATIC_DRAW);
+
+	//bind BasicVertexShader.MVP to this.matrixId
+	GLuint MatrixId = glGetUniformLocation(skeletonProgram, "MVP");	
+	// USING SHADERS
+	glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);
+
+	// pass texture coordinate data
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		0,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)0		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		1,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,		// stride
+		(void*)(sizeof(float) * 4)	// array buffer offset
+		);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		2,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,		// stride
+		(void*)(sizeof(float) * 8)	// array buffer offset
+		);
+
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		3,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 12)		// array buffer offset
+		);
+
+	glLineWidth(4.0f);
+	glPointSize(5.0f);
+	//glDrawArrays(GL_LINES, 0, sceneNodes.GetNumBones());
+	//glDrawArrays(GL_LINE_STRIP, 0, sceneNodes.GetNumBones());
+	//glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, sceneNodes.GetNumBones());
+	//glDrawArrays(GL_LINE_LOOP, 0, sceneNodes.GetNumBones());
+	//glDrawArrays(GL_LINES_ADJACENCY, 0, sceneNodes.GetNumBones());
+	glDrawArrays(GL_POINTS, 0, sceneNodes.GetNumBones());
+	
+	// Unload shader program
+	glUseProgram(0);
+	//glEnable(GL_DEPTH_TEST);
+}
+
+void RenderLeg(glm::mat4 MVP)
+{
+	// Use skeleton drawing program
+	glUseProgram(redrawProgram);
+
+	GLuint vertexBuffer;
+	int bufferSize = sceneNodes.GetKneeSize() * 4; // each part is 4 bytes long
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, sceneNodes.GetKnee(), GL_STATIC_DRAW);
+
+	//bind BasicVertexShader.MVP to this.matrixId
+	GLuint MatrixId = glGetUniformLocation(skeletonProgram, "MVP");	
+	// USING SHADERS
+	glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);	
+
+	// pass vertex data
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(
+		0,				// VertexArrayAttrib
+		3,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		0,				// stride
+		(void*)0		// array buffer offset
+		);
+
+	int numVertices = sceneNodes.GetKneeSize() / 3;
+	glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+	// Unload shader program
+	glUseProgram(0);
 }
 
 void RenderScene()
@@ -141,7 +267,7 @@ void RenderScene()
 	glBindVertexArray(vao);
 
 	GLuint vertexBuffer;
-
+	// Draw models
 	for(int i = 0; i < numModels; i++)
 	{
 		// vertex buffer		
@@ -168,15 +294,18 @@ void RenderScene()
 		// diffuse texture for model
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
+		// bind fragmentShader.textureSampler to this.textureSampler
+		GLuint textureSampler = glGetUniformLocation(basicProgram, "textureSampler");
+		// pass in texture data
+		glUniform1i(textureSampler, 0);
 
 		// normal texture for model
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetNormalMapData());
-		// bind fragmentShader.textureSampler to this.textureSampler
+		// bind fragmentShader.normalSampler to this.normalSampler
 		GLuint normalSampler = glGetUniformLocation(basicProgram, "normalSampler");
 		// pass in texture data
 		glUniform1i(normalSampler, 1);
-
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -230,10 +359,12 @@ void RenderScene()
 		glDeleteBuffers(1, &vertexBuffer);
 		glDeleteBuffers(1, &texturebuffer);
 		glDeleteBuffers(1, &normalbuffer);
-	}
-	
-	// Unload model shader program, pEmitter uses its own 
+	}	
+	// Unload model shader program
 	glUseProgram(0);
+
+	RenderLeg(MVP);
+	RenderBones(MVP);
 
 	// Particle updates
 	pEmitter.PEmitterUpdate();
@@ -249,7 +380,7 @@ void RenderScene()
 }
 
 // Calculate view matrix
-void MoveCamera(/*int x, int y*/)
+void MoveCamera()
 {
 	view = glm::lookAt(
 		glm::vec3(0, 0, zoom),// camera position in world space
@@ -347,7 +478,6 @@ void MouseWheel(int button, int dir, int x, int y)
 		
 }
 
-
 // setting up initial camera values
 void initCamera()
 {
@@ -372,6 +502,8 @@ void initShaders()
 	//basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
+	skeletonProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
+	redrawProgram = loader.CreateProgram("RedrawVertexShader.txt","RedrawFragmentShader.txt");
 }
 
 void main(int argc, char** argv)

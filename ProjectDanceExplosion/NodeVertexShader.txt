@@ -1,0 +1,16 @@
+#version 330 core
+
+layout(location = 0) in vec4 pos1;
+layout(location = 1) in vec4 pos2;
+layout(location = 2) in vec4 pos3;
+layout(location = 3) in vec4 pos4;
+
+uniform mat4 MVP;
+
+void main()
+{
+	mat4 pos = mat4(pos1, pos2, pos3, pos4);
+	gl_Position = MVP * pos * vec4(0,0,0,1);
+
+	//gl_Position = MVP * pos1 * vec4(0, 0, 0, 1);
+}

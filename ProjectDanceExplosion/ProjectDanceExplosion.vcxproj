@@ -72,6 +72,9 @@
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Animations\nightwing anim.fbx">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="ModelFragmentShader.frag" />
     <None Include="Models\Bear_Brown\Bear_Brown.dae" />
     <None Include="Models\Bear_Brown\Bear_D.tga" />
@@ -92,6 +95,8 @@
     <None Include="Models\Dog\Dog_N.tga" />
     <None Include="Models\GreenArrow\GreenArrow.dae" />
     <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
+    <None Include="Models\GreenArrow\GreenArrow_HAIR_MAT.mat" />
+    <None Include="Models\GreenArrow\GreenArrow_MAT.mat" />
     <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga" />
     <None Include="Models\IronMan\Iron_Man.dae" />
     <None Include="Models\IronMan\Iron_Man_D.tga" />
@@ -119,19 +124,29 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt" />
     <Text Include="BasicVertexShader.txt" />
+    <Text Include="NodeFragmentShader.txt" />
+    <Text Include="NodeVertexShader.txt" />
     <Text Include="ParticleFragmentShader.txt" />
     <Text Include="ParticleVertexShader.txt" />
+    <Text Include="RedrawFragmentShader.txt" />
+    <Text Include="RedrawVertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="ParticleEmitter.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderLoader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ProjectDanceExplosion.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

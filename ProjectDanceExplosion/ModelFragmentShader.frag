@@ -17,7 +17,7 @@ uniform vec3 LightPosition_worldspace;
 
 void main(){
 
-	vec4 LightColor = vec4(0.2,0.2,0.2,1);
+	vec4 LightColor = vec4(0.2, 0.2, 0.2, 1.0);
 	float LightPower = 50;
 
 	// Normal/Bump Mapping

@@ -79,9 +79,9 @@ void Mesh::StoreNormalData(aiFace currentFace, int index)
 	normal.Normalize();
 
 	// store in vector
-	normalData.push_back(normal.x);// * tangent.x * bitangent.x);
-	normalData.push_back(normal.y);// * tangent.y * bitangent.y);
-	normalData.push_back(normal.z);// * tangent.z * bitangent.z);
+	normalData.push_back(normal.x);
+	normalData.push_back(normal.y);
+	normalData.push_back(normal.z);
 }
 
 // assigning 
@@ -131,6 +131,10 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	std::string filePath = fileRoot + path.data;
 
 	std::cout << "filePath: " << filePath << std::endl;
+
+	// To be extended later in project for automatic texture detection
+	//ReadFile(filePath);
+
 	// initialising DevIL libraries
 	ilInit();
 	iluInit();
@@ -183,6 +187,23 @@ void Mesh::StoreTextureData(aiMaterial* mat)
 	StoreNormalMapData(mat);
 }
 
+void Mesh::ReadFile(std::string filePath)
+{
+	std::string line;
+	std::ifstream matFile (filePath, std::ios::binary);
+	if (matFile.is_open())
+	{
+		while ( getline (matFile,line) )
+		{
+			std::cout << line << '\n';
+		}
+		matFile.close();
+	}
+
+	else 
+		std::cout << "Unable to open file" ; 
+}
+
 void Mesh::StoreNormalMapData(aiMaterial* mat)
 {
 	std::string fileRoot = "Models/";
@@ -194,9 +215,9 @@ void Mesh::StoreNormalMapData(aiMaterial* mat)
 	//std::string path = "C3P0/C3P0_body_N.tga";
 	//std::string path = "C3P0/C3P0_head_N.tga";
 	//std::string path = "Dog/Dog_N.tga";
-	//std::string path = "GreenArrow/GreenArrow_NORMAL.tga";
+	std::string path = "GreenArrow/GreenArrow_NORMAL.tga";
 	//std::string path = "IronMan/Iron_Man_N.tga";
-	std::string path = "Nightwing187/Nightwing_NORMAL.tga";
+	//std::string path = "Nightwing187/Nightwing_NORMAL.tga";
 	//std::string path = "Optimus/Optimus_NORMAL.png";
 	//std::string path = "Robin188/Robin_N.tga";
 
