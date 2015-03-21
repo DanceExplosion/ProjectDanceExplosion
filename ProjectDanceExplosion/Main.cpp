@@ -22,6 +22,7 @@
 #include "ParticleEMitter.h"
 #include "Node.h"
 #include "ModelAnimation.h"
+#include "SkyBox.h"
 
 // OpenGL Essentials
 GLuint window;
@@ -35,6 +36,8 @@ ParticleEmitter pEmitter3 = ParticleEmitter();
 ParticleEmitter pEmitter4 = ParticleEmitter();
 
 Node node = Node();
+
+SkyBox skybox = SkyBox();
 
 // Camera
 glm::mat4 projection;
@@ -168,6 +171,8 @@ void RenderScene()
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
+	//Rendering skybox
+	skybox.renderSkybox();
 
 	GLuint vertexBuffer;
 
@@ -530,6 +535,16 @@ void main(int argc, char** argv)
 	initShaders();
 	// setting up MVP
 	initCamera();
+
+	// Loading SkyBox Textures	
+	skybox.loadSkybox("Textures/",
+						"jajlands1_ft.jpg",
+						"jajlands1_bk.jpg",
+						"jajlands1_lf.jpg",
+						"jajlands1_rt.jpg",
+						"jajlands1_up.jpg",
+						"jajlands1_dn.jpg");
+
 	// loading models from file
 	LoadModelData();
 
