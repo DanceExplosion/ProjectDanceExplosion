@@ -7,6 +7,7 @@
 #include <assimp/scene.h>		// output data structure
 #include <assimp/postprocess.h>	// post processing flag
 
+
 // OpenGL Mathemathics
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -19,16 +20,21 @@
 #include "ShaderLoader.h"
 #include "Mesh.h"
 #include "ParticleEMitter.h"
+#include "Node.h"
+#include "ModelAnimation.h"
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram;
+GLuint basicProgram, particleProgram, nodeProgram;
 
+AnimationController animCont = AnimationController();
 
 ParticleEmitter pEmitter = ParticleEmitter();
 ParticleEmitter pEmitter2 = ParticleEmitter();
 ParticleEmitter pEmitter3 = ParticleEmitter();
 ParticleEmitter pEmitter4 = ParticleEmitter();
+
+Node node = Node();
 
 // Camera
 glm::mat4 projection;
@@ -39,7 +45,15 @@ float lightX = 0,lightY = 0,lightZ = 0;
 // Models
 std::vector<Mesh> modelList;
 int numModels;
-//GLuint vao, vertexBuffer;
+
+const aiScene* scene, *animScene;
+	Assimp::Importer importer;
+	Assimp::Importer importer2;
+
+GLuint vao;
+
+// Gotta get that time yo
+int oldTime = 0;
 
 void LoadModelData()
 {
@@ -47,43 +61,55 @@ void LoadModelData()
 	glClearColor(0.3f, 0.3f, 0.6f, 0.0f);
 
 	// Assimp file importer
-	Assimp::Importer importer;
-
 	std::string fileRoot = "Models/";
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
+	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
-	std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
+	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
+	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
+	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
-
+	std::string animation = fileRoot+"NightWingAS/anim.BVH";
+	//std::string animation = fileRoot+"Army Pilot/ArmyPilot.BVH";
 	const char* filePath = file.c_str();
-
-	const aiScene* scene = importer.ReadFile(filePath,
+	const char* animPath = animation.c_str();
+	scene = importer.ReadFile(filePath,
 								aiProcess_CalcTangentSpace |
 								aiProcess_Triangulate |
 								aiProcess_JoinIdenticalVertices |
 								aiProcess_SortByPType |
-								aiProcess_GenNormals |
+								aiProcess_FixInfacingNormals |
+								aiProcess_GenSmoothNormals |
 								aiProcess_GenUVCoords |
 								aiProcess_SortByPType
 								);
-
+	animScene = importer2.ReadFile(animPath, aiProcess_SortByPType);
 	// error checking
 	if(!scene)
 		std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
 	else
 		std::cout << "File loaded successfully" <<std::endl;
 	
-	int anim = scene->mNumAnimations;
+	int anim = animScene->mNumAnimations;
+
+	
+
 	numModels = (scene->mNumMeshes);
 	int numTextures = scene->mNumMaterials;
-	
+	node = Node(scene);
 	std::cout << "Number of models in file: " << numModels << std::endl;
 	std::cout << "Number of external textures in file: " << numTextures << std::endl;
 	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
+	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
 	std::cout << ""<< std::endl;
+
+	animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
+	//animCont = AnimationController(scene->mAnimations,scene->mRootNode);
 
 	// Pulling required data from scene
 	for (int i = 0; i < numModels; i++)
@@ -105,6 +131,7 @@ void RenderScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
 
 	// model's model matrix
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -113,7 +140,12 @@ void RenderScene()
 
 	glm::mat4 MV = view * modelMatrix;
 	// set shader program
+
 	glUseProgram(basicProgram);	
+	
+	// buffers
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	// Bind various matrices to the shader
 	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
@@ -136,10 +168,6 @@ void RenderScene()
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
-	// buffers
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	GLuint vertexBuffer;
 
@@ -158,7 +186,6 @@ void RenderScene()
 		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetTextureCoords(), GL_STATIC_DRAW);
 		
-
 		// normal buffer
 		bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each normal has 3 parts(x, y & z), each part is 4 bytes long
 		GLuint normalbuffer;
@@ -167,10 +194,18 @@ void RenderScene()
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetNormalData(), GL_STATIC_DRAW);
 
 		// Texturing
-		// find correct texture for model
-		glEnable(GL_TEXTURE_2D);
+		// diffuse texture for model
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
+
+		// normal texture for model
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetNormalMapData());
+		// bind fragmentShader.textureSampler to this.textureSampler
+		GLuint normalSampler = glGetUniformLocation(basicProgram, "normalSampler");
+		// pass in texture data
+		glUniform1i(normalSampler, 1);
+
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -212,8 +247,9 @@ void RenderScene()
 		int numVertices = modelList.at(i).GetNumVertices();
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
-		// TEXTURING
+		// Texturing
 		glBindTexture(GL_TEXTURE_2D, NULL);
+
 		glActiveTexture(NULL);
 
 		// disable & delete vbo, texturebuffer & normalbuffer
@@ -225,24 +261,115 @@ void RenderScene()
 		glDeleteBuffers(1, &texturebuffer);
 		glDeleteBuffers(1, &normalbuffer);
 	}
-	
 	// Unload model shader program, pEmitter uses its own 
 	glUseProgram(0);
 
-	// Particle updates
-	pEmitter.PEmitterUpdate();
-	pEmitter2.PEmitterUpdate();
+	
+	#pragma region Skeleton Drawing
+	// Use skeleton drawing program
+	glUseProgram(nodeProgram);
 
-	pEmitter.PEmitterDraw(view, projection * view);
-	pEmitter2.PEmitterDraw(view, projection * view);
+	
 
-	pEmitter.PEMitterCleanup();
-	pEmitter2.PEMitterCleanup();
+	glDisable(GL_DEPTH_TEST);
+	// Draw model skeleton
+	GLuint bonebuffer;
+	int bufferSize = node.GetNumBones() * 16 * 4; // Every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
+	glGenBuffers(1, &bonebuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, &node.StoreBones().at(0), GL_STATIC_DRAW);
 
+	// Bind BasicVertexShader.MVP to this.matrixId
+	GLuint MatrixId = glGetUniformLocation(nodeProgram, "MVP");	
+	// USING SHADERS
+	glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);
+
+	// Pass texture coordinate data
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		0,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)0		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		1,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 4)		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		2,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 8)		// array buffer offset
+		);
+
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
+	glVertexAttribPointer(
+		3,				// VertexArrayAttrib
+		4,				// size
+		GL_FLOAT,		// type
+		GL_FALSE,		// normalised?
+		sizeof(float) * 4 * 4,				// stride
+		(void*)(sizeof(float) * 12)		// array buffer offset
+		);
+
+	// Increase the line width and point size, so that the drawn Skeleton is easier to see
+	glLineWidth(4.0f);
+	glPointSize(5.0f);
+
+	// Draw the Skeleton
+	glDrawArrays(GL_POINTS, 0, node.GetNumBones());
+	
+	// Unload shader program
+	glUseProgram(0);
+	glDeleteBuffers(1, &bonebuffer);
+	glEnable(GL_DEPTH_TEST);
+
+	#pragma endregion
+
+
+	int timeAtStart = glutGet(GLUT_ELAPSED_TIME);
+
+	// Wibbly wobbly timey-wimey stuff
+	int delta = timeAtStart - oldTime;
+	oldTime = timeAtStart;
+	animCont.Update(delta);
+
+	// Particle Emitter Updates
+	pEmitter.Update(delta);
+	pEmitter2.Update(delta);
+	pEmitter3.Update(delta);
+	pEmitter4.Update(delta);
+
+	// Emitter Draw
+	pEmitter.Draw(view, projection * view);
+
+	// Emitter Cleanups
+	pEmitter.Cleanup();
+	pEmitter2.Cleanup();
+	pEmitter3.Cleanup();
+	pEmitter4.Cleanup();
+	
 	glutSwapBuffers();
 		
 	// delete vao
-	glDeleteBuffers(1, &vao);
+	glDeleteVertexArrays(1, &vao);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 }
@@ -250,32 +377,6 @@ void RenderScene()
 // Calculate view matrix
 void MoveCamera(/*int x, int y*/)
 {
-	/*
-	float camX, camZ;
-
-	// change cameraRadius if model cannot be seen
-	float cameraRadius = 120.0f;
-
-	xCircle += x + y;
-	yCircle += y;
-	if( y == 0 )// move in X and Z axis
-	{
-		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
-		camZ = (cameraRadius * sin(xCircle * 3.14f / 180.0f))+zoom;
-	}
-	else // move in X, Y and Z axis
-	{
-		camX = cameraRadius * cos(xCircle * 3.14f / 180.0f);
-		camY = cameraRadius * sin(yCircle * 3.14f / 180.0f);
-		camZ = (120.0f * sin(xCircle * 3.14f / 180.0f))+zoom;
-	}
-
-	if ((xCircle > 360.0f) || (xCircle < -360.0f))
-		xCircle %= 360;
-
-	// camera position in world space
-	glm::vec3 pos = glm::vec3(camX , camY, zoom);
-	*/
 	view = glm::lookAt(
 		glm::vec3(0, 0, zoom),// camera position in world space
 		glm::vec3(0, 0, 0), // where camera is viewing in world space
@@ -314,6 +415,15 @@ void KeyPress(unsigned char key, int x, int y )
 		break;
 	case 'f':
 		lightZ--;
+		break;
+	case 'g':
+		pEmitter.particleCount();
+		break;
+	case 'h':
+		pEmitter.disable();
+		break;
+	case 'j':
+		pEmitter.whatIsFPS();
 		break;
 	default:
 		break;
@@ -394,9 +504,9 @@ void initCamera()
 void initShaders()
 {
 	ShaderLoader loader;
-	//basicProgram = loader.CreateProgram("BasicVertexShader.txt", "BasicFragmentShader.txt");
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
+	nodeProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 }
 
 void main(int argc, char** argv)
@@ -414,14 +524,7 @@ void main(int argc, char** argv)
 		std::cout << "glew error: " << glewGetErrorString(glewOK) << std::endl;
 	else
 		std::cout << "glew running" << std::endl;
-	
-	
 
-	/*// Buffering & linking variables for Shaders
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vertexBuffer);*/
 
 	// loading shaders
 	initShaders();
@@ -430,24 +533,67 @@ void main(int argc, char** argv)
 	// loading models from file
 	LoadModelData();
 
+	float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+#pragma region Iron Man examples
+	/*
+	
+	//Feet Thruster Particles
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(0, 0, 1.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, -0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
-
+		glm::vec3(0.2f, 0, 0),						// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 255, 255, 255));				// Colour
 
 	//Create a second particle emitter
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 1.9f),						// Start Position
-		glm::vec3(0, 0.01, 0.01),					// Velocity
-		glm::vec3(0.0f, 0.00098f, 0.0f),			// Accelleration
-		900.0f,										// Lifetime
-		glm::vec4(1, 0, 0, 0.5));					// Colour
+		glm::vec3(-0.2f, 0, 0),						// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(0, 255, 255, 255));				// Colour
 
-	
+	// Hand Thruster Particles
+	//Create a second particle emitter
+	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(1.8f, 0, 2.9f),					// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 255, 0, 255));					// Colour
+
+	//Create a second particle emitter
+	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(-1.8f, 0, 2.9f),					// Start Position
+		glm::vec3(0, 0, 0.01),						// Velocity
+		glm::vec3(0, 0, -0.0004f),					// Accelleration
+		170.0f,										// Lifetime
+		glm::vec4(255, 0, 255, 255));				// Colour
+		*/
+#pragma endregion
+
+#pragma region NightWing examples
+
+	//Create a particle emitter
+	pEmitter = ParticleEmitter(particleProgram,		// Shader
+		glm::vec3(3, 2.5f, 0),						// Start Position
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		330.0f,										// Lifetime
+		glm::vec4(255, 255, 255, 255));				// Colour - White
+
+	//Create a particle emitter
+	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(-3, 2.5f, 0),						// Start Position
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, -0.004f),					// Accelleration
+		330.0f,										// Lifetime
+		glm::vec4(255, 0, 255, 255));				// Colour - Magenta
+
+#pragma endregion
+
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
@@ -456,8 +602,4 @@ void main(int argc, char** argv)
 	glutMouseFunc(MouseWheel);
 
 	glutMainLoop();
-	
-	
-	// delete vao & vbo
-	//glDeleteBuffers(1, &vao);
 }

@@ -10,14 +10,19 @@ in vec3 nColour;
 out vec4 color;
 
 uniform sampler2D textureSampler;
+uniform sampler2D normalSampler;
 uniform mat4 MV;
 uniform vec3 LightPosition_worldspace;
 
 
 void main(){
 
-	vec4 LightColor = vec4(0.5,0.5,0.5,1);
+	vec4 LightColor = vec4(0.2,0.2,0.2,1);
 	float LightPower = 50;
+
+	// Normal/Bump Mapping
+	vec4 normalFromTexture = normalize(texture2D(normalSampler, textureCoords) * 2.0 - 1.0);
+	vec3 normalTotal = Normal_cameraspace * vec3(normalFromTexture.x, normalFromTexture.y, normalFromTexture.z);
 	
 	// Basic colour of the fragment
 	vec4 MaterialDiffuseColor = texture2D( textureSampler, textureCoords );
@@ -32,7 +37,7 @@ void main(){
 	float distance = length( LightPosition_worldspace - Position_worldspace );
 	
 	// Normalized cameraspace normal
-	vec3 n = normalize( Normal_cameraspace );
+	vec3 n = normalize( normalTotal );
 	
 	// Normalized light direction in cameraspace
 	vec3 l = normalize( LightDirection_cameraspace );

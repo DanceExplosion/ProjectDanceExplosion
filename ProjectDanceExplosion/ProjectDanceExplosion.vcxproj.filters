@@ -16,6 +16,45 @@
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{98b4318a-f8f5-4499-a891-b196d55b6732}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{aaa3af76-10bb-4ec2-961f-82054b8b3a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Bear">
+      <UniqueIdentifier>{81644b62-452d-494c-9cf1-dc0429f649a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\C3P0">
+      <UniqueIdentifier>{e0f13bfd-6683-40a4-bf1b-875501d2dc84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\GreenArrow">
+      <UniqueIdentifier>{276d8622-92cc-4eea-a148-759d4ad46b64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\IronMan">
+      <UniqueIdentifier>{47fbdbf1-c9fb-4942-8407-da1fed556f34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Nightwing187">
+      <UniqueIdentifier>{3a99d752-93dd-46cc-b328-eb5228a86225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Optimus">
+      <UniqueIdentifier>{601f6363-d818-4061-9070-e914dcd9e0ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Robin188">
+      <UniqueIdentifier>{b39861d6-c8ad-448a-96bf-5e37a251802b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Dog">
+      <UniqueIdentifier>{1e2557b9-af79-4ad2-bb4b-ae882841f6fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Ant">
+      <UniqueIdentifier>{e1c1f39e-b1ea-4a5c-8b19-602c43b89e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Army Pilot">
+      <UniqueIdentifier>{4fa08478-679f-4cee-b75c-cd8bcb45567b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\Ninja">
+      <UniqueIdentifier>{7bf2dd7d-9059-4af0-bc76-f8afb29faa9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models\NightwingAS">
+      <UniqueIdentifier>{08081a5a-8e12-4e56-8d46-23fa67a5c172}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg">
@@ -25,38 +64,244 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Models\Optimus\Optimus_Diffuse.png">
+      <Filter>Models\Optimus</Filter>
+    </Image>
+    <Image Include="Models\Optimus\Optimus_NORMAL.png">
+      <Filter>Models\Optimus</Filter>
+    </Image>
+    <Image Include="Models\BumpMapTryout.jpg">
+      <Filter>Models</Filter>
+    </Image>
+    <Image Include="Models\ant1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\nskinbl.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ant\ant1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ant\ant2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\body01.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\head01.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Tex\m4tex.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Army Pilot\Thumbnail3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinbl.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinbr.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskingr.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinrd.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Models\Ninja\nskinwh.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ModelFragmentShader.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="ModelVertexShader.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_Brown.dae">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_D.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_Eye_D.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_Fur_D.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\C3P0\C3P0_head_D.tga">
+      <Filter>Models\C3P0</Filter>
+    </None>
+    <None Include="Models\C3P0\C3P0.dae">
+      <Filter>Models\C3P0</Filter>
+    </None>
+    <None Include="Models\C3P0\C3P0_body_D.tga">
+      <Filter>Models\C3P0</Filter>
+    </None>
+    <None Include="Models\GreenArrow\GreenArrow.dae">
+      <Filter>Models\GreenArrow</Filter>
+    </None>
+    <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga">
+      <Filter>Models\GreenArrow</Filter>
+    </None>
+    <None Include="Models\IronMan\Iron_Man.dae">
+      <Filter>Models\IronMan</Filter>
+    </None>
+    <None Include="Models\IronMan\Iron_Man_D.tga">
+      <Filter>Models\IronMan</Filter>
+    </None>
+    <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga">
+      <Filter>Models\Nightwing187</Filter>
+    </None>
+    <None Include="Models\Nightwing187\Nightwing187.dae">
+      <Filter>Models\Nightwing187</Filter>
+    </None>
+    <None Include="Models\Optimus\Optimus.DAE">
+      <Filter>Models\Optimus</Filter>
+    </None>
+    <None Include="Models\Robin188\Robin188.dae">
+      <Filter>Models\Robin188</Filter>
+    </None>
+    <None Include="Models\Robin188\Robin_DIFFUSE.tga">
+      <Filter>Models\Robin188</Filter>
+    </None>
     <None Include="packages.config" />
+    <None Include="Models\Bear_Brown\Bear_Eye_N.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_Fur_N.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\Bear_Brown\Bear_N.tga">
+      <Filter>Models\Bear</Filter>
+    </None>
+    <None Include="Models\C3P0\C3P0_body_N.tga">
+      <Filter>Models\C3P0</Filter>
+    </None>
+    <None Include="Models\C3P0\C3P0_head_N.tga">
+      <Filter>Models\C3P0</Filter>
+    </None>
+    <None Include="Models\Dog\Dog.dae">
+      <Filter>Models\Dog</Filter>
+    </None>
+    <None Include="Models\Dog\Dog_D.tga">
+      <Filter>Models\Dog</Filter>
+    </None>
+    <None Include="Models\Dog\Dog_Eye_D.tga">
+      <Filter>Models\Dog</Filter>
+    </None>
+    <None Include="Models\Dog\Dog_Eye_N.tga">
+      <Filter>Models\Dog</Filter>
+    </None>
+    <None Include="Models\Dog\Dog_N.tga">
+      <Filter>Models\Dog</Filter>
+    </None>
+    <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga">
+      <Filter>Models\GreenArrow</Filter>
+    </None>
+    <None Include="Models\IronMan\Iron_Man_N.tga">
+      <Filter>Models\IronMan</Filter>
+    </None>
+    <None Include="Models\Nightwing187\Nightwing_NORMAL.tga">
+      <Filter>Models\Nightwing187</Filter>
+    </None>
+    <None Include="Models\Robin188\Robin_N.tga">
+      <Filter>Models\Robin188</Filter>
+    </None>
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.max" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.mtl" />
     <None Include="Models\Stick Figure\Stick_Figure_little.max" />
-    <None Include="Models\Nightwing187\Nightwing187.dae" />
-    <None Include="Models\IronMan\Iron_Man.dae" />
-    <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
-    <None Include="Models\IronMan\Iron_Man_D.tga" />
-    <None Include="Models\Optimus\Optimus.DAE" />
-    <None Include="Models\GreenArrow\GreenArrow.dae" />
-    <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
-    <None Include="Models\C3P0\C3P0_head_D.tga" />
-    <None Include="Models\C3P0\C3P0.dae" />
-    <None Include="Models\C3P0\C3P0_body_D.tga" />
-    <None Include="Models\Bear_Brown\Bear_Fur_D.tga" />
-    <None Include="Models\Bear_Brown\Bear_Brown.dae" />
-    <None Include="Models\Bear_Brown\Bear_D.tga" />
-    <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
-    <None Include="Models\Robin188\Robin188.dae" />
-    <None Include="Models\Robin188\Robin_DIFFUSE.tga" />
-    <None Include="ModelFragmentShader.frag">
-      <Filter>Source Files\Shaders</Filter>
+    <None Include="Models\Ant\ant01.b3d">
+      <Filter>Models\Ant</Filter>
     </None>
-    <None Include="ModelVertexShader.vert">
-      <Filter>Source Files\Shaders</Filter>
+    <None Include="Models\Ant\ant01.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant01Edit.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant02.b3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\ant02.ms3d">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Ant\antviewer.bb">
+      <Filter>Models\Ant</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.bvh">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.dae">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.dxf">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.fbx">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.material">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.mesh">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.ms3d">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.mtl">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Army Pilot\ArmyPilot.x">
+      <Filter>Models\Army Pilot</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.b3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.cfx">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninja.ms3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\Ninja\ninjaEdit.ms3d">
+      <Filter>Models\Ninja</Filter>
+    </None>
+    <None Include="Models\NightWingAS\anim - Copy.bvh">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\anim.bvh">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\nightwing anim.dae">
+      <Filter>Models\NightwingAS</Filter>
+    </None>
+    <None Include="Models\NightWingAS\nightwing anim.fbx">
+      <Filter>Models\NightwingAS</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +315,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skeleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,6 +340,12 @@
     <Text Include="ParticleVertexShader.txt">
       <Filter>Source Files\Shaders</Filter>
     </Text>
+    <Text Include="Models\Ninja\ninja animation ranges.txt">
+      <Filter>Models\Ninja</Filter>
+    </Text>
+    <Text Include="Models\Ant\animation info.txt">
+      <Filter>Models\NightwingAS</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderLoader.h">
@@ -97,5 +357,22 @@
     <ClInclude Include="ParticleEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Skeleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelAnimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Models\Army Pilot\ArmyPilot.mesh.xml">
+      <Filter>Models\Army Pilot</Filter>
+    </Xml>
+    <Xml Include="Models\Army Pilot\ArmyPilot.skeleton.xml">
+      <Filter>Models\Army Pilot</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

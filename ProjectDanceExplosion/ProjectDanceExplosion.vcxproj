@@ -66,24 +66,81 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg" />
+    <Image Include="Models\ant1.jpg" />
+    <Image Include="Models\Ant\ant1.jpg" />
+    <Image Include="Models\Ant\ant2.jpg" />
+    <Image Include="Models\Army Pilot\Tex\body01.png" />
+    <Image Include="Models\Army Pilot\Tex\head01.png" />
+    <Image Include="Models\Army Pilot\Tex\m4tex.png" />
+    <Image Include="Models\Army Pilot\Thumbnail1.png" />
+    <Image Include="Models\Army Pilot\Thumbnail2.png" />
+    <Image Include="Models\Army Pilot\Thumbnail3.png" />
+    <Image Include="Models\Army Pilot\Thumbnail4.png" />
+    <Image Include="Models\BumpMapTryout.jpg" />
+    <Image Include="Models\Ninja\nskinbl.jpg" />
+    <Image Include="Models\Ninja\nskinbr.jpg" />
+    <Image Include="Models\Ninja\nskingr.jpg" />
+    <Image Include="Models\Ninja\nskinrd.jpg" />
+    <Image Include="Models\Ninja\nskinwh.jpg" />
+    <Image Include="Models\nskinbl.jpg" />
     <Image Include="Models\Optimus\Optimus_Diffuse.png" />
+    <Image Include="Models\Optimus\Optimus_NORMAL.png" />
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ModelFragmentShader.frag" />
+    <None Include="Models\Ant\ant01.b3d" />
+    <None Include="Models\Ant\ant01.ms3d" />
+    <None Include="Models\Ant\ant01Edit.ms3d" />
+    <None Include="Models\Ant\ant02.b3d" />
+    <None Include="Models\Ant\ant02.ms3d" />
+    <None Include="Models\Ant\antviewer.bb" />
+    <None Include="Models\Army Pilot\ArmyPilot.bvh" />
+    <None Include="Models\Army Pilot\ArmyPilot.dae" />
+    <None Include="Models\Army Pilot\ArmyPilot.dxf" />
+    <None Include="Models\Army Pilot\ArmyPilot.fbx" />
+    <None Include="Models\Army Pilot\ArmyPilot.material" />
+    <None Include="Models\Army Pilot\ArmyPilot.mesh" />
+    <None Include="Models\Army Pilot\ArmyPilot.ms3d" />
+    <None Include="Models\Army Pilot\ArmyPilot.mtl" />
+    <None Include="Models\Army Pilot\ArmyPilot.x" />
     <None Include="Models\Bear_Brown\Bear_Brown.dae" />
     <None Include="Models\Bear_Brown\Bear_D.tga" />
     <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Eye_N.tga" />
     <None Include="Models\Bear_Brown\Bear_Fur_D.tga" />
+    <None Include="Models\Bear_Brown\Bear_Fur_N.tga" />
+    <None Include="Models\Bear_Brown\Bear_N.tga" />
     <None Include="Models\C3P0\C3P0.dae" />
     <None Include="Models\C3P0\C3P0_body_D.tga" />
+    <None Include="Models\C3P0\C3P0_body_N.tga" />
     <None Include="Models\C3P0\C3P0_head_D.tga" />
+    <None Include="Models\C3P0\C3P0_head_N.tga" />
+    <None Include="Models\Dog\Dog.dae" />
+    <None Include="Models\Dog\Dog_D.tga" />
+    <None Include="Models\Dog\Dog_Eye_D.tga" />
+    <None Include="Models\Dog\Dog_Eye_N.tga" />
+    <None Include="Models\Dog\Dog_N.tga" />
     <None Include="Models\GreenArrow\GreenArrow.dae" />
     <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
+    <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga" />
     <None Include="Models\IronMan\Iron_Man.dae" />
     <None Include="Models\IronMan\Iron_Man_D.tga" />
+    <None Include="Models\IronMan\Iron_Man_N.tga" />
     <None Include="Models\Nightwing187\Nightwing187.dae" />
     <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
+    <None Include="Models\Nightwing187\Nightwing_NORMAL.tga" />
+    <None Include="Models\NightWingAS\anim - Copy.bvh" />
+    <None Include="Models\NightWingAS\anim.bvh" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga" />
+    <None Include="Models\NightWingAS\nightwing anim.dae" />
+    <None Include="Models\NightWingAS\nightwing anim.fbx" />
+    <None Include="Models\Ninja\ninja.b3d" />
+    <None Include="Models\Ninja\ninja.cfx" />
+    <None Include="Models\Ninja\ninja.ms3d" />
+    <None Include="Models\Ninja\ninjaEdit.ms3d" />
     <None Include="Models\Optimus\Optimus.DAE">
       <SubType>Designer</SubType>
     </None>
@@ -91,6 +148,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Models\Robin188\Robin_DIFFUSE.tga" />
+    <None Include="Models\Robin188\Robin_N.tga" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.3DS" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.DAE" />
     <None Include="Models\Stick Figure\Stick_Figure_by_Swp.FBX" />
@@ -101,21 +159,33 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationController.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
+    <ClCompile Include="Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt" />
     <Text Include="BasicVertexShader.txt" />
+    <Text Include="Models\Ant\animation info.txt" />
+    <Text Include="Models\Ninja\ninja animation ranges.txt" />
     <Text Include="ParticleFragmentShader.txt" />
     <Text Include="ParticleVertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ModelAnimation.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ShaderLoader.h" />
+    <ClInclude Include="Skeleton.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Models\Army Pilot\ArmyPilot.mesh.xml" />
+    <Xml Include="Models\Army Pilot\ArmyPilot.skeleton.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
