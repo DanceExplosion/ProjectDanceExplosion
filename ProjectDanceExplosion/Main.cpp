@@ -37,7 +37,7 @@ ParticleEmitter pEmitter4 = ParticleEmitter();
 
 Node node = Node();
 
-SkyBox skybox = SkyBox();
+//SkyBox skybox = SkyBox();
 
 // Camera
 glm::mat4 projection;
@@ -53,10 +53,89 @@ const aiScene* scene, *animScene;
 	Assimp::Importer importer;
 	Assimp::Importer importer2;
 
+std::string currentModel;
+std::vector<glm::vec2> animationTimes;
+
 GLuint vao;
 
 // Gotta get that time yo
 int oldTime = 0;
+int currentAnimation = 0;
+void animationSplit(std::string model){
+	animationTimes.clear();
+
+	#pragma region Ninja Animations
+	if(model == "ninja"){
+		// Standing
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(104),
+								animCont.currentAnimation->mDuration));
+
+		// Walking
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
+										animCont.getFrameTime(7)));
+		
+		// Sneaking
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(8),
+										animCont.getFrameTime(14)));
+
+		// Attacking
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(16),
+										animCont.getFrameTime(24)));
+
+		// Attack 2
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
+										animCont.getFrameTime(27)));
+
+		// Kick
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(28),
+										animCont.getFrameTime(37)));
+		
+		// Pickup
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(38),
+										animCont.getFrameTime(46)));
+
+		// Jump with motion
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(47),
+										animCont.getFrameTime(53)));
+
+		// Jump with no motion
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(54),
+										animCont.getFrameTime(60)));
+
+		// Jump strike
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(60),
+										animCont.getFrameTime(69)));
+		
+		// Kick 2
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(69),
+										animCont.getFrameTime(74)));
+		
+		// Spin attack
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(74),
+										animCont.getFrameTime(80)));
+		
+		// Backflip
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(80),
+										animCont.getFrameTime(85)));
+		
+		// Climb/Freak out
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(87),
+										animCont.getFrameTime(89)));
+		
+		// Die
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(90),
+										animCont.getFrameTime(92)));
+		
+		// Faceplant
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(93),
+										animCont.getFrameTime(96)));
+		// Weird standing
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(97),
+										animCont.getFrameTime(104)));
+		
+	}
+	#pragma endregion
+}
 
 void LoadModelData()
 {
@@ -71,8 +150,8 @@ void LoadModelData()
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
-	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
-	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
+	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
@@ -111,8 +190,11 @@ void LoadModelData()
 	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
 	std::cout << ""<< std::endl;
 
-	animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
-	//animCont = AnimationController(scene->mAnimations,scene->mRootNode);
+	//animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
+	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
+	animationSplit("ninja");
+	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+	
 
 	// Pulling required data from scene
 	for (int i = 0; i < numModels; i++)
@@ -172,7 +254,7 @@ void RenderScene()
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
 	//Rendering skybox
-	skybox.renderSkybox();
+	//skybox.renderSkybox();
 
 	GLuint vertexBuffer;
 
@@ -430,6 +512,20 @@ void KeyPress(unsigned char key, int x, int y )
 	case 'j':
 		pEmitter.whatIsFPS();
 		break;
+	case ',':
+		if(currentAnimation > 0)
+			currentAnimation--;
+		else
+			currentAnimation = animationTimes.size()-1;
+		animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
+		break;
+	case '.':
+		if(currentAnimation < animationTimes.size()-1)
+			currentAnimation++;
+		else
+			currentAnimation = 0;
+		animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
+		break;
 	default:
 		break;
 	}
@@ -537,13 +633,13 @@ void main(int argc, char** argv)
 	initCamera();
 
 	// Loading SkyBox Textures	
-	skybox.loadSkybox("Textures/",
+	/*skybox.loadSkybox("Textures/",
 						"jajlands1_ft.jpg",
 						"jajlands1_bk.jpg",
 						"jajlands1_lf.jpg",
 						"jajlands1_rt.jpg",
 						"jajlands1_up.jpg",
-						"jajlands1_dn.jpg");
+						"jajlands1_dn.jpg");*/
 
 	// loading models from file
 	LoadModelData();

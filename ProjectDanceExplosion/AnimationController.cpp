@@ -8,8 +8,8 @@ void AnimationController::Update(float delta){
 	timePassed = timePassed+(delta*0.016);
 
 	// Loop the animation
-	if(timePassed >= currentAnimation->mDuration){
-		timePassed = 0;
+	if(timePassed >= endTime){
+		timePassed = startTime;
 	}
 
 	// Rotation Matrix

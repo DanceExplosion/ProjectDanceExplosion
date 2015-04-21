@@ -42,6 +42,10 @@ class AnimationController{
 	// The elapsed time of the animation
 	double timePassed;
 
+	// The starting and ending point of the looped animation
+	double startTime;
+	double endTime;
+
 	// Root node of hierarchy
 	aiNode* rootNode;
 
@@ -53,6 +57,15 @@ class AnimationController{
 		animationList = aList;
 		SetCurrentAnimation(0);
 		rootNode = root;
+		startTime = 0;
+		endTime = currentAnimation->mDuration;
+	}
+
+	// Set the bounds for the animation's loop
+	void SetLoopTime(float start, float end){
+		startTime = start;
+		endTime = end;
+		timePassed = start;
 	}
 
 	// Change the animation for files with split animations
@@ -61,6 +74,11 @@ class AnimationController{
 		timePassed = 0;
 		currentKeyScale = 1;
 	}
+
+	double getFrameTime(int frameNumber){
+		return currentAnimation->mChannels[0]->mRotationKeys[frameNumber].mTime;
+	}
+
 
 	// Update the animation
 	void Update(float delta);
