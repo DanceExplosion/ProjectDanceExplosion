@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>AntTweakBar.redist</id>
+    <version>1.16</version>
+    <title>AntTweakBar Redist</title>
+    <authors>Philippe Decaudin</authors>
+    <owners>Philippe Decaudin</owners>
+    <licenseUrl>http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:license</licenseUrl>
+    <projectUrl>http://www.sgrottel.de/nuget/anttweakbar</projectUrl>
+    <iconUrl>http://anttweakbar.sourceforge.net/doc/lib/tpl/antisphere/images/aswikilogo.gif</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Redistributable components for package 'AntTweakBar'. This package should only be installed as a dependency. 
+(This is not the package you are looking for).</description>
+    <summary>Redistributable components for for package 'AntTweakBar'</summary>
+    <releaseNotes>AntTweakBar 1.16 packaged by S. Grottel (http://www.sgrottel.de)</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>AntTweakBar native CoApp nativepackage</tags>
+    <references />
+  </metadata>
+</package>
