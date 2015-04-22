@@ -14,6 +14,9 @@
 // Standard Vector Library
 #include <vector>
 #include <iostream>
+#include <AntTweakBar.h>
+
+#include "Node.h"
 
 //Particle Emitter Class
 class ParticleEmitter
@@ -25,6 +28,7 @@ public:
 	glm::vec3 p_velocity;
 	glm::vec3 p_acc;
 	glm::vec3 position;
+	aiNode* sPos_Node;
 	
 
 	//Value for max number of Particles in the system
@@ -35,7 +39,9 @@ public:
 	ParticleEmitter();
 
 	// ParticleEmitter function, passes in the variables from above
-	ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col);
+	ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col, aiNode* node);
+
+	//ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col);
 	
 	// ParticleEmitterUpdate function
 	void Update(float delta);
@@ -56,8 +62,16 @@ public:
 	void disable();
 
 	// Gets the FPS of the particle emitter
-	void whatIsFPS();
+	float whatIsFPS();
+
+	// Multiplies the buffer values by 1.1 to make the particle bigger
+	void scaleBufferUp();
+
+	// Multiplies the buffer values by 0.9 to make the particle smaller
+	void scaleBufferDown();
 
 	GLuint textureRef;
+
+	bool additive;
 
 };

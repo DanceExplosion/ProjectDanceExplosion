@@ -15,6 +15,7 @@
 
 // Extra Libraries
 #include <iostream>
+#include <AntTweakBar.h>
 
 // Inner Project Classes
 #include "ShaderLoader.h"
@@ -45,6 +46,7 @@ glm::mat4 view;
 int xCircle = 1, yCircle = 1;
 float camX = 0, camY = 0, zoom = -4;//-800;
 float lightX = 0,lightY = 0,lightZ = 0;
+
 // Models
 std::vector<Mesh> modelList;
 int numModels;
@@ -57,6 +59,8 @@ std::string currentModel;
 std::vector<glm::vec2> animationTimes;
 
 GLuint vao;
+
+float final_fps = 0.0f;
 
 // Gotta get that time yo
 int oldTime = 0;
@@ -150,8 +154,8 @@ void LoadModelData()
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
-	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
-	std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
+	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
@@ -190,10 +194,10 @@ void LoadModelData()
 	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
 	std::cout << ""<< std::endl;
 
-	//animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
-	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	animationSplit("ninja");
-	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+	animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
+	//animCont = AnimationController(scene->mAnimations,scene->mRootNode);
+	//animationSplit("ninja");
+	//animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
 	
 
 	// Pulling required data from scene
@@ -356,8 +360,6 @@ void RenderScene()
 	// Use skeleton drawing program
 	glUseProgram(nodeProgram);
 
-	
-
 	glDisable(GL_DEPTH_TEST);
 	// Draw model skeleton
 	GLuint bonebuffer;
@@ -430,7 +432,6 @@ void RenderScene()
 
 	#pragma endregion
 
-
 	int timeAtStart = glutGet(GLUT_ELAPSED_TIME);
 
 	// Wibbly wobbly timey-wimey stuff
@@ -444,6 +445,8 @@ void RenderScene()
 	pEmitter3.Update(delta);
 	pEmitter4.Update(delta);
 
+	final_fps = pEmitter.whatIsFPS();
+
 	// Emitter Draw
 	pEmitter.Draw(view, projection * view);
 
@@ -453,12 +456,19 @@ void RenderScene()
 	pEmitter3.Cleanup();
 	pEmitter4.Cleanup();
 	
-	glutSwapBuffers();
-		
 	// delete vao
 	glDeleteVertexArrays(1, &vao);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
+
+	// TweakBar
+	
+	TwDraw();
+	GLenum error = glGetError();
+	std::cout << error << std::endl;
+
+
+	glutSwapBuffers();
 }
 
 // Calculate view matrix
@@ -568,21 +578,57 @@ void CameraControls(int key, int x , int y)
 // Mouse Controll for Zooming [a lot handier than dealing with Sticky based keys for windows
 void MouseWheel(int button, int dir, int x, int y)
 {
-	// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
-	if (button == 3)
+	if (!TwEventMouseButtonGLUT(button, dir, x, y))   // Send event to AntTweakBar
 	{
-		zoom += 0.75f;
-		MoveCamera();
-	}
-	// Checks if the button pressed is button 4; this is the code for negative wheel scrolling
-	else if (button == 4)
-	{
-		zoom -= 0.75f;
-		MoveCamera();
+		// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
+		if (button == 3)
+		{
+			zoom += 0.75f;
+			MoveCamera();
+		}
+		// Checks if the button pressed is button 4; this is the code for negative wheel scrolling
+		else if (button == 4)
+		{
+			zoom -= 0.75f;
+			MoveCamera();
+		}
 	}
 		
 }
 
+// Recursive method for finding the node with a requested name
+aiNode* SearchTree(aiNode* node, aiString name)
+{
+	// Store the name for easy access
+	aiString currentName = node->mName;
+
+	// Matrix to be returned
+	aiMatrix4x4 mat;
+
+	// Corresponding node found
+	if (name == currentName)
+	{
+		//Return the total matrix
+		return node;
+	}
+	// If the name doesn't match
+	else
+	{
+		// Loop through all of the current node's children
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			// Get the return value of the recursive search
+			aiNode* mat = SearchTree(node->mChildren[i], name);
+
+			// If it has returned a value that isn't NULL, return it
+			if (mat != NULL)
+				return mat;
+		}
+	}
+
+	// If nothing has been found, then this branch of the skeleton is a dead end, return NULL for the first value to represent this
+	return NULL;
+}
 
 // setting up initial camera values
 void initCamera()
@@ -610,11 +656,30 @@ void initShaders()
 	nodeProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 }
 
+void TW_CALL scaleUpCallback(void *clientData)
+{
+	pEmitter.scaleBufferUp();
+}
+
+void TW_CALL scaleDownCallback(void *clientData)
+{
+	pEmitter.scaleBufferDown();
+}
+
 void main(int argc, char** argv)
 {
 	// initialising freeglut
 	glutInit(&argc, argv);
 
+	// Create TweakBar
+	TwBar *tBar;
+	TwInit(TW_OPENGL, NULL);
+
+	tBar = TwNewBar("Options");
+	TwWindowSize(800, 800);
+	TwDefine(" Options size='200 800' color='96 216 224' ");
+	TwDefine(" Options position='0 0' ");
+	
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(700, 100);// window position
 	glutInitWindowSize(800, 800); // window size
@@ -644,7 +709,45 @@ void main(int argc, char** argv)
 	// loading models from file
 	LoadModelData();
 
+	glutIdleFunc(RenderScene);
+
+	// keyboard control
+	// Linked to TweakBar
+	glutKeyboardFunc((GLUTkeyboardfun)TwEventKeyboardGLUT);
+	//glutKeyboardFunc(KeyPress);
+	glutSpecialFunc(CameraControls);
+	glutMouseFunc(MouseWheel);
+
+
 	float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+#pragma region Model Node Finding
+
+#pragma region Nightwing
+	// Strings to be searched in the Node tree
+	aiString leftToeBase = aiString("mixamorig_LeftToeBase");
+	aiString rightToeBase = aiString("mixamorig_RightToeBase");
+	aiString leftHandBase = aiString("mixamorig_LeftHand");
+	aiString rightHandBase = aiString("mixamorig_RightHand");
+#pragma endregion
+
+	aiString joint = aiString("Joint6");
+	aiString joint2 = aiString("Joint5");
+
+
+#pragma endregion
+
+	// Assigning a node pointer the value of a node from the node tree
+	aiNode* leftFoot = SearchTree(node.root, leftToeBase);
+	aiNode* rightFoot = SearchTree(node.root, rightToeBase);
+	aiNode* leftHand = SearchTree(node.root, leftHandBase);
+	aiNode* rightHand = SearchTree(node.root, rightHandBase);
+
+	//aiNode* yes = SearchTree(node.root, joint);
+	//aiNode* no = SearchTree(node.root, joint2);
+
+	// Use this to find names of bones in current loaded model
+	//node.PreOrderTraversal();
 
 #pragma region Iron Man examples
 	/*
@@ -685,32 +788,156 @@ void main(int argc, char** argv)
 		*/
 #pragma endregion
 
+	
 #pragma region NightWing examples
 
 	//Create a particle emitter
-	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(3, 2.5f, 0),						// Start Position
+	pEmitter = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 0),							// Start Position offset
 		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, -0.004f),					// Accelleration
-		330.0f,										// Lifetime
-		glm::vec4(255, 255, 255, 255));				// Colour - White
+		glm::vec3(0, 0, 0),							// Accelleration
+		10.0f,										// Lifetime
+		glm::vec4(255, 255, 255, 225),				// Colour - White
+		leftFoot);									// Node to pair with
 
 	//Create a particle emitter
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(-3, 2.5f, 0),						// Start Position
+		glm::vec3(0, 0, 0),							// Start Position offset
 		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, -0.004f),					// Accelleration
-		330.0f,										// Lifetime
-		glm::vec4(255, 0, 255, 255));				// Colour - Magenta
+		glm::vec3(0, 0, 0),							// Accelleration
+		10.0f,										// Lifetime
+		glm::vec4(0, 255, 0, 255),					// Colour - Magenta
+		rightFoot);									// Node to pair with
+
+
+	//Create a particle emitter
+	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 0),							// Start Position offset
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, 0),							// Accelleration
+		10.0f,										// Lifetime
+		glm::vec4(0, 0, 255, 255),
+		leftHand);
+
+	//Create a particle emitter
+	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
+		glm::vec3(0, 0, 0),							// Start Position offset
+		glm::vec3(0, 0, 0.0001f),					// Velocity
+		glm::vec3(0, 0, 0),							// Accelleration
+		10.0f,										// Lifetime
+		glm::vec4(255, 0, 0, 255),
+		rightHand);					// Color
+
+#pragma endregion
+		
+
+#pragma region TweakBar
+
+	// FPS in UI
+	TwAddVarRO(tBar, "FPS", TW_TYPE_FLOAT, &final_fps, " ");
+	TwAddSeparator(tBar, NULL, " ");
+
+	// Button to call function to Scale the Particles bigger
+	TwAddButton(tBar, "ScaleBuffer Up", scaleUpCallback, NULL, " group='Scaling' ");
+
+	// Button to call function to Scale the particles smaller
+	TwAddButton(tBar, "ScaleBuffer Down", scaleDownCallback, NULL, " group='Scaling' ");
+	TwAddSeparator(tBar, NULL, " ");
+
+	// Button to call function to Scale the particles smaller
+	TwAddVarRW(tBar, "Toggle Additive Blending", TW_TYPE_BOOLCPP, &pEmitter.additive, " group='Blending' ");
+	TwAddSeparator(tBar, NULL, " ");
+
+
+
+#pragma region PEmitter1
+
+#pragma region - Velocity
+	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
+	TwAddVarRW(tBar, "Emitter 1 : X Velocity", TW_TYPE_FLOAT, &pEmitter.p_velocity.x, " label='X Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=q keyDecr=Q group='Emitter 1'");
+	TwAddVarRW(tBar, "Emitter 1 : Y Velocity", TW_TYPE_FLOAT, &pEmitter.p_velocity.y, " label='Y Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=w keyDecr=W group='Emitter 1'");
+	TwAddVarRW(tBar, "Emitter 1 : Z Velocity", TW_TYPE_FLOAT, &pEmitter.p_velocity.z, " label='Z Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=e keyDecr=E group='Emitter 1'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
+	TwAddVarRW(tBar, "Emitter 1 : Lifetime", TW_TYPE_FLOAT, &pEmitter.p_lifetime, " label='Particle Lifetime for Emitter 1' min=0 step=10 keyIncr=r keyDecr=R group='Emitter 1' ");
+#pragma endregion
+
+#pragma region - Colour
+
+	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
+	TwAddVarRW(tBar, "E1 Color", TW_TYPE_COLOR4F, &pEmitter.p_colour, " group='Emitter 1'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
+
+
 
 #pragma endregion
 
-	glutIdleFunc(RenderScene);
+#pragma endregion
 
-	// keyboard control
-	glutKeyboardFunc(KeyPress);
-	glutSpecialFunc(CameraControls);
-	glutMouseFunc(MouseWheel);
+#pragma region PEmitter2
+
+#pragma region - Velocity
+	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
+	TwAddVarRW(tBar, "Emitter 2 : X Velocity", TW_TYPE_FLOAT, &pEmitter2.p_velocity.x, " label='X Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=a keyDecr=A group='Emitter 2'");
+	TwAddVarRW(tBar, "Emitter 2 : Y Velocity", TW_TYPE_FLOAT, &pEmitter2.p_velocity.y, " label='Y Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=s keyDecr=S group='Emitter 2'");
+	TwAddVarRW(tBar, "Emitter 2 : Z Velocity", TW_TYPE_FLOAT, &pEmitter2.p_velocity.z, " label='Z Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=d keyDecr=D group='Emitter 2'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
+	TwAddVarRW(tBar, "Emitter 2 : Lifetime", TW_TYPE_FLOAT, &pEmitter2.p_lifetime, " label='Particle Lifetime' min=0 step=10 keyIncr=f keyDecr=F group='Emitter 2' ");
+#pragma endregion
+
+#pragma region - Colour
+
+	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
+	TwAddVarRW(tBar, "E2 Color", TW_TYPE_COLOR4F, &pEmitter2.p_colour, " group='Emitter 2'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
+
+#pragma endregion
+
+#pragma endregion
+
+#pragma region PEmitter3
+
+#pragma region - Velocity
+	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
+	TwAddVarRW(tBar, "Emitter 3 : X Velocity", TW_TYPE_FLOAT, &pEmitter3.p_velocity.x, " label='X Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=z keyDecr=Z group='Emitter 3'");
+	TwAddVarRW(tBar, "Emitter 3 : Y Velocity", TW_TYPE_FLOAT, &pEmitter3.p_velocity.y, " label='Y Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=x keyDecr=X group='Emitter 3'");
+	TwAddVarRW(tBar, "Emitter 3 : Z Velocity", TW_TYPE_FLOAT, &pEmitter3.p_velocity.z, " label='Z Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=c keyDecr=C group='Emitter 3'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
+	TwAddVarRW(tBar, "Emitter 3 : Lifetime", TW_TYPE_FLOAT, &pEmitter3.p_lifetime, " label='Particle Lifetime' min=0 step=10 keyIncr=v keyDecr=V group='Emitter 3' ");
+#pragma endregion
+
+#pragma region - Colour
+
+	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
+	TwAddVarRW(tBar, "E3 Color", TW_TYPE_COLOR4F, &pEmitter3.p_colour, " group='Emitter 3'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
+
+#pragma endregion
+
+#pragma endregion
+
+#pragma region PEmitter4
+
+#pragma region - Velocity
+	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
+	TwAddVarRW(tBar, "Emitter 4 : X Velocity", TW_TYPE_FLOAT, &pEmitter4.p_velocity.x, " label='X Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=t keyDecr=T group='Emitter 4'");
+	TwAddVarRW(tBar, "Emitter 4 : Y Velocity", TW_TYPE_FLOAT, &pEmitter4.p_velocity.y, " label='Y Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=y keyDecr=Y group='Emitter 4'");
+	TwAddVarRW(tBar, "Emitter 4 : Z Velocity", TW_TYPE_FLOAT, &pEmitter4.p_velocity.z, " label='Z Velocity' min=-0.01 max=0.01 step=0.0001 keyIncr=u keyDecr=U group='Emitter 4'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
+	TwAddVarRW(tBar, "Emitter 4 : Lifetime", TW_TYPE_FLOAT, &pEmitter4.p_lifetime, " label='Particle Lifetime' min=0 step=10 keyIncr=i keyDecr=I group='Emitter 4' ");
+#pragma endregion
+
+#pragma region - Colour
+
+	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
+	TwAddVarRW(tBar, "E4 Color", TW_TYPE_COLOR4F, &pEmitter4.p_colour, " group='Emitter 4'");
+	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
+
+#pragma endregion
+
+#pragma endregion
+
+
+#pragma endregion
 
 	glutMainLoop();
 }

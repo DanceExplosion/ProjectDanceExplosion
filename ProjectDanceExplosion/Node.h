@@ -36,24 +36,24 @@ public:
 	
 	// Function to build the matrix list
 	std::vector<float> StoreBones();
+
+	// The root node
+	aiNode* root;
+
+	// Find a node by name
+	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
+
 private:
-	
 	
 	// Recursive print functions
 	void PreOrder(aiNode* node);
 	void PreOrder(aiNode* node, int count);
-
-	// Find a node by name
-	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
 
 	// The model scene
 	const aiScene* mainScene;
 
 	// The total number of bones
 	int numBones;
-
-	// The root node
-	aiNode* root;
 
 	// The array that holds the matrix data
 	std::vector<float> boneMatricies;

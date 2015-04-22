@@ -95,12 +95,14 @@ float fps = 0.0f;
 // Shader ID
 GLuint programID;
 
+bool additive;
+
 // Annoying
 const static int MAXPARTICLES = 10000;
 
 // Variables for Buffers
 GLuint billboard_vertex_buffer, particles_position_buffer, particles_colour_buffer, particle_texture_buffer;
-static const GLfloat g_vertex_buffer_data[] = {
+GLfloat g_vertex_buffer_data[] = {
 	-0.7, -0.7, 0,
 	0.7, -0.7, 0,
 	-0.7, 0.7, 0,
@@ -152,6 +154,70 @@ void SortParticles(){
 // Blank constructor
 ParticleEmitter::ParticleEmitter(){}
 
+// Main constructor for a Particle Emitter
+// Passes through position, velocity, acceleration, lifeTime and colour
+ParticleEmitter::ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col, aiNode* node){
+
+	// Assignment of parameters
+	programID = shaderProgram;
+	position = pos;
+	p_velocity = vel;
+	p_acc = accel;
+	p_lifetime = life;
+	p_colour = col;
+	sPos_Node = node;
+
+	additive = false;
+
+	// Loop to initialize all particles
+	for (int i = 0; i < MAXPARTICLES; i++)
+	{
+		ParticleContainer[i] = Particle();
+	}
+
+	// Use the Shader Program
+	glUseProgram(programID);
+
+	// Bind the buffers to their respective arrays
+#pragma region Binding of Buffers
+
+	//Buffers for Drawing Particles
+	glGenBuffers(1, &billboard_vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	//Buffers for Drawing Particles
+	glGenBuffers(1, &particle_texture_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, particle_texture_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_texture_buffer_data), g_texture_buffer_data, GL_STATIC_DRAW);
+
+	// The VBO containing the positions of the particles
+	glGenBuffers(1, &particles_position_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
+	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 3 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+
+	// The VBO containing the colours of the particles
+	glGenBuffers(1, &particles_colour_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, particles_colour_buffer);
+	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
+
+	// End the shader
+	glUseProgram(0);
+
+#pragma endregion
+
+#pragma region Particle Texture
+
+	// Function call for getting the Texture for the particle
+	StoreParticleTextureData();
+
+#pragma endregion
+
+}
+
+/*
 // Main constructor for a Particle Emitter
 // Passes through position, velocity, acceleration, lifeTime and colour
 ParticleEmitter::ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col){
@@ -211,6 +277,8 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 
 #pragma endregion
 
 }
+*/
+
 
 // Main Update Loop
 void ParticleEmitter::Update(float delta){
@@ -235,6 +303,33 @@ void ParticleEmitter::Update(float delta){
 
 	//newparticles = 1;
 
+#pragma region Node Positions for Emitters
+
+	aiNode* tempNode = sPos_Node;
+	aiMatrix4x4 sPos = sPos_Node->mTransformation;
+
+	// Get the total transformation of the node
+	while (tempNode->mParent != NULL)
+	{
+		aiMatrix4x4 temp = tempNode->mParent->mTransformation;
+		sPos = temp*sPos;
+		tempNode = tempNode->mParent;
+	}
+
+	sPos = sPos.Transpose();
+
+	glm::mat4 sPos_Converted = glm::mat4(
+		sPos.a1, sPos.a2, sPos.a3, sPos.a4,
+		sPos.b1, sPos.b2, sPos.b3, sPos.b4,
+		sPos.c1, sPos.c2, sPos.c3, sPos.c4,
+		sPos.d1, sPos.d2, sPos.d3, sPos.d4);
+
+	glm::vec4 temp = sPos_Converted * glm::vec4(position, 1);
+
+	glm::vec3 startPos = glm::vec3(temp.x, temp.y, temp.z);
+
+#pragma endregion
+
 	// Loops through every new particle
 	for (int i = 0; i < newparticles; i++){
 
@@ -247,15 +342,15 @@ void ParticleEmitter::Update(float delta){
 			// Checks the Index of the current particle isnt out of bounds
 			// Sets the values of each particle to the parameter values from the Emitter initialisation
 			ParticleContainer[particleIndex].lifetime = p_lifetime;
-			ParticleContainer[particleIndex].position = position;
+			ParticleContainer[particleIndex].position = startPos;
 			ParticleContainer[particleIndex].velocity = p_velocity;
 			ParticleContainer[particleIndex].acc = p_acc;
 
 			// Set the RGBA values of Particles in the container to the passed in values 
-			ParticleContainer[particleIndex].r = p_colour.r;
-			ParticleContainer[particleIndex].g = p_colour.g;
-			ParticleContainer[particleIndex].b = p_colour.b;
-			ParticleContainer[particleIndex].a = p_colour.a;
+			ParticleContainer[particleIndex].r = p_colour.r * 255;
+			ParticleContainer[particleIndex].g = p_colour.g * 255;
+			ParticleContainer[particleIndex].b = p_colour.b * 255;
+			ParticleContainer[particleIndex].a = p_colour.a * 255;
 		}
 
 	}
@@ -352,8 +447,14 @@ void ParticleEmitter::Draw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 #pragma endregion
 
 		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_CULL_FACE);
+
+		if (!additive)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		else
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		
 
 		// Vertex shader
 		GLuint VP_Matrix_ID = glGetUniformLocation(programID, "VP");
@@ -429,6 +530,8 @@ void ParticleEmitter::Draw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 		// Draw the actual buffers
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
 
+		glDepthMask(GL_TRUE);
+
 		// Partial Cleanup, Disabling of VertexAttribArrays
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -466,8 +569,8 @@ void ParticleEmitter::StoreParticleTextureData()
 {
 	//Particle Texture Name
 
-	//std::string fileRoot = "Models/SmokeShape.png";
-	std::string fileRoot = "Models/Troll-face.png";
+	std::string fileRoot = "Models/SmokeShape.png";
+	//std::string fileRoot = "Models/Troll-face.png";
 	//std::string fileRoot = "Models/p.hanna.jpg";
 
 #pragma region  Default Loading for Images
@@ -550,21 +653,33 @@ void ParticleEmitter::disable() {
 }
 
 // Function to get the FPS 
-void ParticleEmitter::whatIsFPS() {
+float ParticleEmitter::whatIsFPS() {
 
 	// FPS
 	// Get the stored delta value [d_Store] - should be around 16 - 18ms
 	// So 1/0.016 = ~60 frames per second
-	fps = 1 / ((d_Store/1000.0f));
+	return fps = 1 / ((d_Store/1000.0f));
 
 	std::cout << "\nFPS: " << fps << std::endl;
 
-	int count = 0;
-	for (int i = 0; i < MAXPARTICLES; i++) {
+}
 
-		if (ParticleContainer[i].lifetime > 0) {
-			count++;
-		}
+// Function for Scaling the Particle size up
+void ParticleEmitter::scaleBufferUp() {
+
+	for (int i = 0; i < 12; i++)
+	{
+		g_vertex_buffer_data[i] = g_vertex_buffer_data[i] * 1.1f;
 	}
-	std::cout << "ParticleCount: " << count << std::endl;
+
+}
+
+// Function for Scaling the Particle size down
+void ParticleEmitter::scaleBufferDown() {
+
+	for (int i = 0; i < 12; i++)
+	{
+		g_vertex_buffer_data[i] = g_vertex_buffer_data[i] * 0.9f;
+	}
+
 }
