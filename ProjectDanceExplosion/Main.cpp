@@ -38,7 +38,7 @@ ParticleEmitter pEmitter4 = ParticleEmitter();
 
 Node node = Node();
 
-//SkyBox skybox = SkyBox();
+SkyBox skybox = SkyBox();
 
 // Camera
 glm::mat4 projection;
@@ -231,7 +231,10 @@ void RenderScene()
 	// set shader program
 
 	glUseProgram(basicProgram);	
-	
+
+	//Render Skybox
+	skybox.renderSkybox();
+
 	// buffers
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -256,9 +259,7 @@ void RenderScene()
 	glUniformMatrix4fv(viewMId, 1, GL_FALSE, &view[0][0]);
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
-
-	//Rendering skybox
-	//skybox.renderSkybox();
+	
 
 	GLuint vertexBuffer;
 
@@ -691,20 +692,20 @@ void main(int argc, char** argv)
 	else
 		std::cout << "glew running" << std::endl;
 
-
-	// loading shaders
-	initShaders();
-	// setting up MVP
-	initCamera();
-
 	// Loading SkyBox Textures	
-	/*skybox.loadSkybox("Textures/",
+	skybox.loadSkybox("Textures/",
 						"jajlands1_ft.jpg",
 						"jajlands1_bk.jpg",
 						"jajlands1_lf.jpg",
 						"jajlands1_rt.jpg",
 						"jajlands1_up.jpg",
-						"jajlands1_dn.jpg");*/
+						"jajlands1_dn.jpg");
+
+	// loading shaders
+	initShaders();
+	
+	// setting up MVP
+	initCamera();
 
 	// loading models from file
 	LoadModelData();

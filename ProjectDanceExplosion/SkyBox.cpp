@@ -29,13 +29,6 @@ void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::str
 		tTextures[i].setSamplerParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	glGenVertexArrays(1, &uiVAO);
-	glBindVertexArray(uiVAO);
-
-	glGenBuffers(1, &uiBuffer);
-	data.reserve(0);
-	glBindBuffer(GL_ARRAY_BUFFER, uiBuffer);
-
 	#pragma region Creating the Skybox
 	glm::vec3 vSkyBoxVertices[24] =
 	{
@@ -54,7 +47,10 @@ void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::str
 	};
 	glm::vec2 vSkyBoxTexCoords[4] =
 	{
-		glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 0.0f)
+		glm::vec2(0.0f, 1.0f), 
+		glm::vec2(0.0f, 0.0f), 
+		glm::vec2(1.0f, 1.0f), 
+		glm::vec2(1.0f, 0.0f)
 	};
 
 	glm::vec3 vSkyBoxNormals[6] =
@@ -75,9 +71,19 @@ void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::str
 
 	}
 #pragma endregion
+	
+}
+
+void SkyBox::renderSkybox(){
+	glGenVertexArrays(1, &uiVAO);
+	glBindVertexArray(uiVAO);
+
+	glGenBuffers(1, &uiBuffer);
+	data.reserve(0);
+	glBindBuffer(GL_ARRAY_BUFFER, uiBuffer);
 
 	glBufferData(GL_ARRAY_BUFFER, data.size(), &data[0], GL_STATIC_DRAW);
-	data.clear();
+	//data.clear();
 
 	// Vertex positions
 	glEnableVertexAttribArray(0);
@@ -88,10 +94,7 @@ void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::str
 	// Normal vectors
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3) + sizeof(glm::vec2), (void*)(sizeof(glm::vec3) + sizeof(glm::vec2)));
-}
 
-void SkyBox::renderSkybox()
-{
 	glDepthMask(0);
 	glBindVertexArray(uiVAO);
 	for (int i = 0; i < 6;i++)
@@ -99,7 +102,10 @@ void SkyBox::renderSkybox()
 		tTextures[i].bindTexture();
 		glDrawArrays(GL_TRIANGLE_STRIP, i * 4, 4);
 	}
-	glDepthMask(1);
 
-	//glDeleteVertexArrays(1, uiVAO);
+	glDepthMask(1);
+	glDeleteVertexArrays(1, &uiVAO);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 }
