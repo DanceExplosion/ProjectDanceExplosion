@@ -166,6 +166,8 @@
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
     <ClCompile Include="Skeleton.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt" />
@@ -182,6 +184,8 @@
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="Skeleton.h" />
+    <ClInclude Include="SkyBox.h" />
+    <ClInclude Include="TextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="Models\Army Pilot\ArmyPilot.mesh.xml" />
@@ -199,7 +203,7 @@
     <Import Project="..\packages\glm.0.9.6.1\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.6.1\build\native\glm.targets')" />
     <Import Project="..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets" Condition="Exists('..\packages\DevIL.redist.1.7.8\build\native\DevIL.redist.targets')" />
     <Import Project="..\packages\DevIL.1.7.8\build\native\DevIL.targets" Condition="Exists('..\packages\DevIL.1.7.8\build\native\DevIL.targets')" />
- <Import Project="..\packages\AntTweakBar.redist.1.16\build\native\AntTweakBar.redist.targets" Condition="Exists('..\packages\AntTweakBar.redist.1.16\build\native\AntTweakBar.redist.targets')" />
+    <Import Project="..\packages\AntTweakBar.redist.1.16\build\native\AntTweakBar.redist.targets" Condition="Exists('..\packages\AntTweakBar.redist.1.16\build\native\AntTweakBar.redist.targets')" />
     <Import Project="..\packages\AntTweakBar.1.16\build\native\AntTweakBar.targets" Condition="Exists('..\packages\AntTweakBar.1.16\build\native\AntTweakBar.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

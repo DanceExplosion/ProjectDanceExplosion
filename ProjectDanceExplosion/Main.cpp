@@ -44,7 +44,7 @@ GLuint smokeTex,philTex,trollTex;
 
 Node node = Node();
 
-//SkyBox skybox = SkyBox();
+SkyBox skybox = SkyBox();
 
 #pragma region Camera
 glm::mat4 projection;
@@ -239,6 +239,9 @@ void RenderScene()
 
 	glUseProgram(basicProgram);	
 	
+	//Render Skybox
+	skybox.renderSkybox();
+
 	// buffers
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -263,9 +266,6 @@ void RenderScene()
 	glUniformMatrix4fv(viewMId, 1, GL_FALSE, &view[0][0]);
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
-
-	//Rendering skybox
-	//skybox.renderSkybox();
 
 	GLuint vertexBuffer;
 
@@ -906,13 +906,13 @@ void main(int argc, char** argv)
 #pragma endregion
 
 	// Loading SkyBox Textures	
-	/*skybox.loadSkybox("Textures/",
+	skybox.loadSkybox("Textures/",
 						"jajlands1_ft.jpg",
 						"jajlands1_bk.jpg",
 						"jajlands1_lf.jpg",
 						"jajlands1_rt.jpg",
 						"jajlands1_up.jpg",
-						"jajlands1_dn.jpg");*/
+						"jajlands1_dn.jpg");
 
 	// loading models from file
 	LoadModelData();
