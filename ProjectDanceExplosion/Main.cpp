@@ -1,3 +1,4 @@
+#pragma region Includes
 //OpenGL
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -24,6 +25,7 @@
 #include "Node.h"
 #include "ModelAnimation.h"
 #include "SkyBox.h"
+#pragma endregion
 
 // OpenGL Essentials
 GLuint window;
@@ -31,21 +33,26 @@ GLuint basicProgram, particleProgram, nodeProgram;
 
 AnimationController animCont = AnimationController();
 
+#pragma region Particle Variables
 ParticleEmitter pEmitter = ParticleEmitter();
 ParticleEmitter pEmitter2 = ParticleEmitter();
 ParticleEmitter pEmitter3 = ParticleEmitter();
 ParticleEmitter pEmitter4 = ParticleEmitter();
 
+GLuint smokeTex,philTex,trollTex;
+#pragma endregion
+
 Node node = Node();
 
 //SkyBox skybox = SkyBox();
 
-// Camera
+#pragma region Camera
 glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
-float camX = 0, camY = 0, zoom = -4;//-800;
+float camX = 0, camY = 190, zoom = -10;//-800;
 float lightX = 0,lightY = 0,lightZ = 0;
+#pragma endregion
 
 // Models
 std::vector<Mesh> modelList;
@@ -154,8 +161,8 @@ void LoadModelData()
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
 	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
-	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
-	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
+	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
@@ -194,10 +201,10 @@ void LoadModelData()
 	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
 	std::cout << ""<< std::endl;
 
-	animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
-	//animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	//animationSplit("ninja");
-	//animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+	//animCont = AnimationController(animScene->mAnimations,scene->mRootNode);
+	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
+	animationSplit("ninja");
+	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
 	
 
 	// Pulling required data from scene
@@ -440,37 +447,223 @@ void RenderScene()
 	animCont.Update(delta);
 
 	// Particle Emitter Updates
-	pEmitter.Update(delta);
-	pEmitter2.Update(delta);
-	pEmitter3.Update(delta);
-	pEmitter4.Update(delta);
+	pEmitter.Update(delta, view);
+	pEmitter2.Update(delta, view);
+	pEmitter3.Update(delta, view);
+	pEmitter4.Update(delta, view);
 
 	final_fps = pEmitter.whatIsFPS();
 
 	// Emitter Draw
 	pEmitter.Draw(view, projection * view);
+	//pEmitter2.Draw(view, projection * view);
 
 	// Emitter Cleanups
 	pEmitter.Cleanup();
-	pEmitter2.Cleanup();
-	pEmitter3.Cleanup();
-	pEmitter4.Cleanup();
 	
+	// TweakBar
+	
+	TwDraw();
+	glutSwapBuffers();
+
 	// delete vao
 	glDeleteVertexArrays(1, &vao);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
-
-	// TweakBar
-	
-	TwDraw();
-	GLenum error = glGetError();
-	std::cout << error << std::endl;
-
-
-	glutSwapBuffers();
 }
 
+void StoreParticleTextureData()
+{
+	//Particle Texture Name
+	
+	// initialising DevIL libraries
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+
+	std::string fileRoot = "Models/SmokeShape.png";
+
+	#pragma region  Loading Smoke Image
+
+
+	// Load in texture
+	if (ilLoadImage(fileRoot.c_str()))
+	{
+		// checking relevant data has been loaded
+		ILubyte* data = ilGetData();
+		if (!data)
+			std::cout << "No image data found" << std::endl;
+		else
+		{
+			std::cout << "particle image loaded" << std::endl;
+			// create new texture enum for model
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
+			glGenTextures(1, &smokeTex);
+			glBindTexture(GL_TEXTURE_2D, smokeTex);
+
+			// texture wrapping method
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			// texture mipmap generation? usage?
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			// bind data to textureRef
+			smokeTex = ilutGLBindTexImage();
+		}
+	}
+	else
+	{
+		// erro message
+		std::cout << "failed to load image" << std::endl;
+		ILenum error = ilGetError();
+		std::cout << "error: " << iluErrorString(error) << std::endl;
+	}
+
+	// check that ptexture is created
+	if (glIsTexture(smokeTex))
+		std::cout << "particle texture success" << std::endl;
+	
+	// unbinding & disabling texturing
+	glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);
+#pragma endregion
+	
+	fileRoot = "Models/p.hanna.jpg";
+	
+	#pragma region  Loading Phil Image
+	// Load in texture
+	if (ilLoadImage(fileRoot.c_str()))
+	{
+		// checking relevant data has been loaded
+		ILubyte* data = ilGetData();
+		if (!data)
+			std::cout << "No image data found" << std::endl;
+		else
+		{
+			std::cout << "particle image loaded" << std::endl;
+			// create new texture enum for model
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
+			glGenTextures(1, &philTex);
+			glBindTexture(GL_TEXTURE_2D, philTex);
+
+			// texture wrapping method
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			// texture mipmap generation? usage?
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			// bind data to textureRef
+			philTex = ilutGLBindTexImage();
+		}
+	}
+	else
+	{
+		// erro message
+		std::cout << "failed to load image" << std::endl;
+		ILenum error = ilGetError();
+		std::cout << "error: " << iluErrorString(error) << std::endl;
+	}
+
+	// check that ptexture is created
+	if (glIsTexture(philTex))
+		std::cout << "particle texture success" << std::endl;
+
+	
+	// unbinding & disabling texturing
+	glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);
+#pragma endregion
+	
+	fileRoot = "Models/Troll-face.png";
+	
+	#pragma region  Loading Troll Image
+	// Load in texture
+	if (ilLoadImage(fileRoot.c_str()))
+	{
+		// checking relevant data has been loaded
+		ILubyte* data = ilGetData();
+		if (!data)
+			std::cout << "No image data found" << std::endl;
+		else
+		{
+			std::cout << "particle image loaded" << std::endl;
+			// create new texture enum for model
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
+			glGenTextures(1, &trollTex);
+			glBindTexture(GL_TEXTURE_2D, trollTex);
+
+			// texture wrapping method
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			// texture mipmap generation? usage?
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			// bind data to textureRef
+			trollTex = ilutGLBindTexImage();
+		}
+	}
+	else
+	{
+		// erro message
+		std::cout << "failed to load image" << std::endl;
+		ILenum error = ilGetError();
+		std::cout << "error: " << iluErrorString(error) << std::endl;
+	}
+
+	// check that ptexture is created
+	if (glIsTexture(trollTex))
+		std::cout << "particle texture success" << std::endl;
+	// unbinding & disabling texturing
+	glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);
+#pragma endregion
+
+}
+
+// Recursive method for finding the node with a requested name
+aiNode* SearchTree(aiNode* node, aiString name)
+{
+	// Store the name for easy access
+	aiString currentName = node->mName;
+
+	// Matrix to be returned
+	aiMatrix4x4 mat;
+
+	// Corresponding node found
+	if (name == currentName)
+	{
+		//Return the total matrix
+		return node;
+	}
+	// If the name doesn't match
+	else
+	{
+		// Loop through all of the current node's children
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			// Get the return value of the recursive search
+			aiNode* mat = SearchTree(node->mChildren[i], name);
+
+			// If it has returned a value that isn't NULL, return it
+			if (mat != NULL)
+				return mat;
+		}
+	}
+
+	// If nothing has been found, then this branch of the skeleton is a dead end, return NULL for the first value to represent this
+	return NULL;
+}
+
+#pragma region camera functions
 // Calculate view matrix
 void MoveCamera(/*int x, int y*/)
 {
@@ -489,55 +682,59 @@ void MoveCamera(/*int x, int y*/)
 // Keyboard controls
 void KeyPress(unsigned char key, int x, int y )
 {
-	switch (key)
+	
+	if (!TwEventKeyboardGLUT(key, x, y))   // Send event to AntTweakBar
 	{
-	case 27: // close application by pressing "Esc"
-		glutDestroyWindow(window);
-		exit(0);
-		break;
-	case 'w':
-		lightY++;
-		break;
-	case 's':
-		lightY--;
-		break;
-	case 'd':
-		lightX++;
-		break;
-	case 'a':
-		lightX--;
-		break;
-	case 'r':
-		lightZ++;
-		break;
-	case 'f':
-		lightZ--;
-		break;
-	case 'g':
-		pEmitter.particleCount();
-		break;
-	case 'h':
-		pEmitter.disable();
-		break;
-	case 'j':
-		pEmitter.whatIsFPS();
-		break;
-	case ',':
-		if(currentAnimation > 0)
-			currentAnimation--;
-		else
-			currentAnimation = animationTimes.size()-1;
-		animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
-		break;
-	case '.':
-		if(currentAnimation < animationTimes.size()-1)
-			currentAnimation++;
-		else
-			currentAnimation = 0;
-		animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
-		break;
-	default:
-		break;
+		switch (key)
+		{
+		case 27: // close application by pressing "Esc"
+			glutDestroyWindow(window);
+			exit(0);
+			break;
+		case 'w':
+			lightY++;
+			break;
+		case 's':
+			lightY--;
+			break;
+		case 'd':
+			lightX++;
+			break;
+		case 'a':
+			lightX--;
+			break;
+		case 'r':
+			lightZ++;
+			break;
+		case 'f':
+			lightZ--;
+			break;
+		case 'g':
+			pEmitter.particleCount();
+			break;
+		case 'h':
+			pEmitter.disable();
+			break;
+		case 'j':
+			pEmitter.whatIsFPS();
+			break;
+		case ',':
+			if(currentAnimation > 0)
+				currentAnimation--;
+			else
+				currentAnimation = animationTimes.size()-1;
+			animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
+			break;
+		case '.':
+			if(currentAnimation < animationTimes.size()-1)
+				currentAnimation++;
+			else
+				currentAnimation = 0;
+			animCont.SetLoopTime(animationTimes.at(currentAnimation).x,animationTimes.at(currentAnimation).y);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -596,39 +793,6 @@ void MouseWheel(int button, int dir, int x, int y)
 		
 }
 
-// Recursive method for finding the node with a requested name
-aiNode* SearchTree(aiNode* node, aiString name)
-{
-	// Store the name for easy access
-	aiString currentName = node->mName;
-
-	// Matrix to be returned
-	aiMatrix4x4 mat;
-
-	// Corresponding node found
-	if (name == currentName)
-	{
-		//Return the total matrix
-		return node;
-	}
-	// If the name doesn't match
-	else
-	{
-		// Loop through all of the current node's children
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-			// Get the return value of the recursive search
-			aiNode* mat = SearchTree(node->mChildren[i], name);
-
-			// If it has returned a value that isn't NULL, return it
-			if (mat != NULL)
-				return mat;
-		}
-	}
-
-	// If nothing has been found, then this branch of the skeleton is a dead end, return NULL for the first value to represent this
-	return NULL;
-}
 
 // setting up initial camera values
 void initCamera()
@@ -641,11 +805,11 @@ void initCamera()
 		1500.0f			// max of view frustrum
 		);
 
-	// camY needs a default value
-	camY = 0.0f;
 	// view matrix
 	MoveCamera();
 }
+
+#pragma endregion
 
 // compiling shader code
 void initShaders()
@@ -666,19 +830,46 @@ void TW_CALL scaleDownCallback(void *clientData)
 	pEmitter.scaleBufferDown();
 }
 
+void MyReshape(int width, int height){
+	glViewport(0,0,width,height);
+	// Set up projection matrix
+	projection = glm::perspective(
+		45.0f,						// field of view
+		(float)(width / height),	// ratio
+		0.1f,						// min of view fustrum
+		1500.0f						// max of view frustrum
+		);
+	TwWindowSize(width, height);
+}
+
+static void display() {}
+	
+#pragma region Emitter Button Functions
+	// Change Emitter's graphic to Smoke
+	void TW_CALL emitSmoke(void *clientData)
+	{ 
+		pEmitter.textureRef = smokeTex;
+	}
+
+	// Change Emitter's graphic to Phil
+	void TW_CALL emitPhil(void *clientData)
+	{ 
+		pEmitter.textureRef = philTex;
+	}
+
+	// Change Emitter's graphic to a trollface
+	void TW_CALL emitTroll(void *clientData)
+	{ 
+		pEmitter.textureRef = trollTex;
+	}
+
+#pragma endregion
+
 void main(int argc, char** argv)
 {
+	#pragma region Initialization
 	// initialising freeglut
 	glutInit(&argc, argv);
-
-	// Create TweakBar
-	TwBar *tBar;
-	TwInit(TW_OPENGL, NULL);
-
-	tBar = TwNewBar("Options");
-	TwWindowSize(800, 800);
-	TwDefine(" Options size='200 800' color='96 216 224' ");
-	TwDefine(" Options position='0 0' ");
 	
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(700, 100);// window position
@@ -690,12 +881,29 @@ void main(int argc, char** argv)
 		std::cout << "glew error: " << glewGetErrorString(glewOK) << std::endl;
 	else
 		std::cout << "glew running" << std::endl;
+	
+
+	// directly redirect GLUT events (excluding mouse) to AntTweakBar
+	glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
+	glutPassiveMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
+	glutKeyboardFunc((GLUTkeyboardfun)TwEventKeyboardGLUT);
+	glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
+
+	TwInit(TW_OPENGL, NULL);
+	TwWindowSize(800, 800);
+	// Send window size events to AntTweakBar
+	glutReshapeFunc(MyReshape);
+	glutDisplayFunc(display);
+	
+	// send the 'glutGetModifers' function pointer to AntTweakBar
+	TwGLUTModifiersFunc(glutGetModifiers);
 
 
 	// loading shaders
 	initShaders();
 	// setting up MVP
 	initCamera();
+#pragma endregion
 
 	// Loading SkyBox Textures	
 	/*skybox.loadSkybox("Textures/",
@@ -708,13 +916,15 @@ void main(int argc, char** argv)
 
 	// loading models from file
 	LoadModelData();
+	
+	StoreParticleTextureData();
 
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
 	// Linked to TweakBar
 	glutKeyboardFunc((GLUTkeyboardfun)TwEventKeyboardGLUT);
-	//glutKeyboardFunc(KeyPress);
+	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
 	glutMouseFunc(MouseWheel);
 
@@ -731,8 +941,9 @@ void main(int argc, char** argv)
 	aiString rightHandBase = aiString("mixamorig_RightHand");
 #pragma endregion
 
-	aiString joint = aiString("Joint6");
-	aiString joint2 = aiString("Joint5");
+	aiString joint = aiString("Joint12");
+	aiString joint2 = aiString("Joint17");
+	aiString joint3 = aiString("Joint8");
 
 
 #pragma endregion
@@ -743,8 +954,9 @@ void main(int argc, char** argv)
 	aiNode* leftHand = SearchTree(node.root, leftHandBase);
 	aiNode* rightHand = SearchTree(node.root, rightHandBase);
 
-	//aiNode* yes = SearchTree(node.root, joint);
-	//aiNode* no = SearchTree(node.root, joint2);
+	aiNode* n_rightHand = SearchTree(node.root, joint);
+	aiNode* n_leftHand = SearchTree(node.root, joint2);
+	aiNode* n_head = SearchTree(node.root, joint3);
 
 	// Use this to find names of bones in current loaded model
 	//node.PreOrderTraversal();
@@ -793,13 +1005,73 @@ void main(int argc, char** argv)
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 0),							// Start Position offset
-		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, 0),							// Accelleration
-		10.0f,										// Lifetime
-		glm::vec4(255, 255, 255, 225),				// Colour - White
-		leftFoot);									// Node to pair with
+		n_leftHand,
+		smokeTex);									// Node to pair with
+	//Emitter 1 Initial Values
+	pEmitter.emitterDir[0] = 0;
+	pEmitter.emitterDir[1] = 1;
+	pEmitter.emitterDir[2] = 0;
+	pEmitter.velocity = 0.004;
+	pEmitter.p_lifetime = 50;
+	pEmitter.startScale = 1;
+	pEmitter.endScale = .5;
+	pEmitter.p_colourStart = glm::vec4(1,0,0,1);
+	pEmitter.p_colourEnd = glm::vec4(0,0,1,0);
+	pEmitter.angleRange = glm::vec3(0);
+	pEmitter.rate = 100;
 
+	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
+		n_head,
+		smokeTex);									// Node to pair with
+									// Node to pair with
+	//Emitter 2 Initial Values
+	pEmitter2.emitterDir[0] = 0;
+	pEmitter2.emitterDir[1] = 1;
+	pEmitter2.emitterDir[2] = 0;
+	pEmitter2.velocity = 0.001;
+	pEmitter2.p_lifetime = 15;
+	pEmitter2.startScale = 0.7;
+	pEmitter2.endScale = 0;
+	pEmitter2.p_colourStart = glm::vec4(1,0.5,0,1);
+	pEmitter2.p_colourEnd = glm::vec4(0,0,0,0);
+	pEmitter2.angleRange = glm::vec3(4);
+	pEmitter2.rate = 100;
+
+	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
+		n_rightHand,
+		smokeTex);									// Node to pair with
+	//Emitter 3 Initial Values
+	pEmitter3.emitterDir[0] = 0;
+	pEmitter3.emitterDir[1] = 1;
+	pEmitter3.emitterDir[2] = 0;
+	pEmitter3.velocity = 0.004;
+	pEmitter3.p_lifetime = 50;
+	pEmitter3.startScale = 1;
+	pEmitter3.endScale = .5;
+	pEmitter3.p_colourStart = glm::vec4(0,1,0,1);
+	pEmitter3.p_colourEnd = glm::vec4(1,0,0,0);
+	pEmitter3.angleRange = glm::vec3(0);
+	pEmitter3.rate = 100;
+
+	
+	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
+		NULL,
+		smokeTex);									// Node to pair with
+	//Emitter 4 Initial Values
+	pEmitter4.emitterDir[0] = 0;
+	pEmitter4.emitterDir[1] = 0;
+	pEmitter4.emitterDir[2] = -1;
+	pEmitter4.position = glm::vec3(5,0,0);
+	pEmitter4.velocity = 0.001;
+	pEmitter4.p_lifetime = 50;
+	pEmitter4.startScale = 2;
+	pEmitter4.endScale = 0;
+	pEmitter4.p_colourStart = glm::vec4(0,0.7,1,1);
+	pEmitter4.p_colourEnd = glm::vec4(0.5,0,0.5,0);
+	pEmitter4.angleRange = glm::vec3(0.5);
+	pEmitter4.rate = 100;
+
+	/*
 	//Create a particle emitter
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
 		glm::vec3(0, 0, 0),							// Start Position offset
@@ -827,11 +1099,18 @@ void main(int argc, char** argv)
 		10.0f,										// Lifetime
 		glm::vec4(255, 0, 0, 255),
 		rightHand);					// Color
-
+	*/
 #pragma endregion
 		
 
 #pragma region TweakBar
+	
+	// Create TweakBar
+	TwBar *tBar;
+
+	tBar = TwNewBar("GlobalOptions");
+	TwDefine("GlobalOptions size='200 300'" /*color='96 216 224' "*/);
+	TwDefine("GlobalOptions position='10 10' ");
 
 	// FPS in UI
 	TwAddVarRO(tBar, "FPS", TW_TYPE_FLOAT, &final_fps, " ");
@@ -848,7 +1127,239 @@ void main(int argc, char** argv)
 	TwAddVarRW(tBar, "Toggle Additive Blending", TW_TYPE_BOOLCPP, &pEmitter.additive, " group='Blending' ");
 	TwAddSeparator(tBar, NULL, " ");
 
+	TwAddButton(tBar, "Emit Smoke", emitSmoke, NULL, " label='Emit Smoke'");
+	TwAddButton(tBar, "Emit Phil", emitPhil, NULL, " label='Emit Phil'");
+	TwAddButton(tBar, "Emit Troll", emitTroll, NULL, " label='Emit Troll'");
 
+	// GUI Setup
+	
+	#pragma region Emitter1 GUI
+
+	// Window that will store the settings for the emitter and the particles
+	TwBar *emitterBar1;
+	emitterBar1 = TwNewBar("Emitter1Settings");
+	TwDefine("Emitter1Settings  size='250 500' iconified=false position='530 20' ");
+
+	// Variables stored in the Particle's section of the window
+	#pragma region Particle Variables
+	// Particle Velocity and Velocity range
+	TwAddVarRW(emitterBar1, "Velocity", TW_TYPE_FLOAT, &pEmitter.velocity, "step=0.0001 group='Particle Properties'");
+	TwAddVarRW(emitterBar1, "Velocity Range", TW_TYPE_FLOAT, &pEmitter.velocityRange, "step=0.0001 group='Particle Properties'");
+	// Particle Lifetime
+	TwAddVarRW(emitterBar1, "Life Span", TW_TYPE_FLOAT, &pEmitter.p_lifetime, "group='Particle Properties' step=1 min=2");
+	// Particle Start and end Size
+	TwAddVarRW(emitterBar1, "Initial Size", TW_TYPE_FLOAT, &pEmitter.startScale, "group='Particle Properties' step=0.1");
+	TwAddVarRW(emitterBar1, "Ending Size", TW_TYPE_FLOAT, &pEmitter.endScale, "group='Particle Properties' step=0.1");
+
+	// Particle Accelleration
+	TwAddVarRW(emitterBar1, "Acceleration X", TW_TYPE_FLOAT, &pEmitter.p_acc.x, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar1, "Acceleration Y", TW_TYPE_FLOAT, &pEmitter.p_acc.y, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar1, "Acceleration Z", TW_TYPE_FLOAT, &pEmitter.p_acc.z, "group='Acceleration' step=0.00001");
+
+	// Particle Angle Range
+	TwAddVarRW(emitterBar1, "Angle Range X", TW_TYPE_FLOAT, &pEmitter.angleRange.x, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar1, "Angle Range Y", TW_TYPE_FLOAT, &pEmitter.angleRange.y, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar1, "Angle Range Z", TW_TYPE_FLOAT, &pEmitter.angleRange.z, "group='AngleRange' step=0.1");
+
+	// Add grouped items to the particle section
+	TwDefine("Emitter1Settings/AngleRange  group='Particle Properties'  ");
+	TwDefine("Emitter1Settings/Acceleration  group='Particle Properties'  ");
+
+	// Particle start and end colour
+	TwAddVarRW(emitterBar1, "Start Colour", TW_TYPE_COLOR4F, &pEmitter.p_colourStart, "group='Particle Properties'");
+	TwAddVarRW(emitterBar1, "End Colour", TW_TYPE_COLOR4F, &pEmitter.p_colourEnd, "group='Particle Properties'");
+	#pragma endregion
+
+	// Variables stored in the Emitter's section of the window
+	#pragma region Emitter Variables
+	// Emitter emission rate
+	TwAddVarRW(emitterBar1, "Rate", TW_TYPE_FLOAT, &pEmitter.rate, "step=0.5 group='Emitter Properties' min=0");
+	// Main direction of the Emitter
+	TwAddVarRW(emitterBar1, "Emitter Angle", TW_TYPE_DIR3F, &pEmitter.emitterDir, "group='Emitter Properties'");
+
+	// Location in worldspace of the emitter
+	TwAddVarRW(emitterBar1, "PositionX", TW_TYPE_FLOAT, &pEmitter.position.x, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar1, "PositionY", TW_TYPE_FLOAT, &pEmitter.position.y, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar1, "PositionZ", TW_TYPE_FLOAT, &pEmitter.position.z, "group='Position' step=0.1");
+
+	// Add the position group to the emitter section
+	TwDefine("Emitter1Settings/Position  group='Emitter Properties'  ");
+
+	#pragma endregion
+
+	#pragma endregion
+
+	#pragma region Emitter2 GUI
+
+	// Window that will store the settings for the emitter and the particles
+	TwBar *emitterBar2;
+	emitterBar2 = TwNewBar("emitter2Settings");
+	TwDefine("emitter2Settings  size='250 500' iconified=true  ");
+
+	// Variables stored in the Particle's section of the window
+	#pragma region Particle Variables
+	// Particle Velocity and Velocity range
+	TwAddVarRW(emitterBar2, "Velocity", TW_TYPE_FLOAT, &pEmitter2.velocity, "step=0.0001 group='Particle Properties'");
+	TwAddVarRW(emitterBar2, "Velocity Range", TW_TYPE_FLOAT, &pEmitter2.velocityRange, "step=0.0001 group='Particle Properties'");
+	// Particle Lifetime
+	TwAddVarRW(emitterBar2, "Life Span", TW_TYPE_FLOAT, &pEmitter2.p_lifetime, "group='Particle Properties' step=1 min=2");
+	// Particle Start and end Size
+	TwAddVarRW(emitterBar2, "Initial Size", TW_TYPE_FLOAT, &pEmitter2.startScale, "group='Particle Properties' step=0.1");
+	TwAddVarRW(emitterBar2, "Ending Size", TW_TYPE_FLOAT, &pEmitter2.endScale, "group='Particle Properties' step=0.1");
+
+	// Particle Accelleration
+	TwAddVarRW(emitterBar2, "Acceleration X", TW_TYPE_FLOAT, &pEmitter2.p_acc.x, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar2, "Acceleration Y", TW_TYPE_FLOAT, &pEmitter2.p_acc.y, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar2, "Acceleration Z", TW_TYPE_FLOAT, &pEmitter2.p_acc.z, "group='Acceleration' step=0.00001");
+
+	// Particle Angle Range
+	TwAddVarRW(emitterBar2, "Angle Range X", TW_TYPE_FLOAT, &pEmitter2.angleRange.x, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar2, "Angle Range Y", TW_TYPE_FLOAT, &pEmitter2.angleRange.y, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar2, "Angle Range Z", TW_TYPE_FLOAT, &pEmitter2.angleRange.z, "group='AngleRange' step=0.1");
+
+	// Add grouped items to the particle section
+	TwDefine("emitter2Settings/AngleRange  group='Particle Properties'  ");
+	TwDefine("emitter2Settings/Acceleration  group='Particle Properties'  ");
+
+	// Particle start and end colour
+	TwAddVarRW(emitterBar2, "Start Colour", TW_TYPE_COLOR4F, &pEmitter2.p_colourStart, "group='Particle Properties'");
+	TwAddVarRW(emitterBar2, "End Colour", TW_TYPE_COLOR4F, &pEmitter2.p_colourEnd, "group='Particle Properties'");
+	#pragma endregion
+
+	// Variables stored in the Emitter's section of the window
+	#pragma region Emitter Variables
+	// Emitter emission rate
+	TwAddVarRW(emitterBar2, "Rate", TW_TYPE_FLOAT, &pEmitter2.rate, "step=0.5 group='Emitter Properties' min=0");
+	// Main direction of the Emitter
+	TwAddVarRW(emitterBar2, "Emitter Angle", TW_TYPE_DIR3F, &pEmitter2.emitterDir, "group='Emitter Properties'");
+
+	// Location in worldspace of the emitter
+	TwAddVarRW(emitterBar2, "PositionX", TW_TYPE_FLOAT, &pEmitter2.position.x, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar2, "PositionY", TW_TYPE_FLOAT, &pEmitter2.position.y, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar2, "PositionZ", TW_TYPE_FLOAT, &pEmitter2.position.z, "group='Position' step=0.1");
+
+	// Add the position group to the emitter section
+	TwDefine("emitter2Settings/Position  group='Emitter Properties'  ");
+
+	#pragma endregion
+
+	#pragma endregion
+
+	
+	#pragma region Emitter3 GUI
+
+	// Window that will store the settings for the emitter and the particles
+	TwBar *emitterBar3;
+	emitterBar3 = TwNewBar("Emitter3Settings");
+	TwDefine("Emitter3Settings  size='250 500' iconified=true  ");
+
+	// Variables stored in the Particle's section of the window
+	#pragma region Particle Variables
+	// Particle Velocity and Velocity range
+	TwAddVarRW(emitterBar3, "Velocity", TW_TYPE_FLOAT, &pEmitter3.velocity, "step=0.0001 group='Particle Properties'");
+	TwAddVarRW(emitterBar3, "Velocity Range", TW_TYPE_FLOAT, &pEmitter3.velocityRange, "step=0.0001 group='Particle Properties'");
+	// Particle Lifetime
+	TwAddVarRW(emitterBar3, "Life Span", TW_TYPE_FLOAT, &pEmitter3.p_lifetime, "group='Particle Properties' step=1 min=2");
+	// Particle Start and end Size
+	TwAddVarRW(emitterBar3, "Initial Size", TW_TYPE_FLOAT, &pEmitter3.startScale, "group='Particle Properties' step=0.1");
+	TwAddVarRW(emitterBar3, "Ending Size", TW_TYPE_FLOAT, &pEmitter3.endScale, "group='Particle Properties' step=0.1");
+
+	// Particle Accelleration
+	TwAddVarRW(emitterBar3, "Acceleration X", TW_TYPE_FLOAT, &pEmitter3.p_acc.x, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar3, "Acceleration Y", TW_TYPE_FLOAT, &pEmitter3.p_acc.y, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar3, "Acceleration Z", TW_TYPE_FLOAT, &pEmitter3.p_acc.z, "group='Acceleration' step=0.00001");
+
+	// Particle Angle Range
+	TwAddVarRW(emitterBar3, "Angle Range X", TW_TYPE_FLOAT, &pEmitter3.angleRange.x, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar3, "Angle Range Y", TW_TYPE_FLOAT, &pEmitter3.angleRange.y, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar3, "Angle Range Z", TW_TYPE_FLOAT, &pEmitter3.angleRange.z, "group='AngleRange' step=0.1");
+
+	// Add grouped items to the particle section
+	TwDefine("Emitter3Settings/AngleRange  group='Particle Properties'  ");
+	TwDefine("Emitter3Settings/Acceleration  group='Particle Properties'  ");
+
+	// Particle start and end colour
+	TwAddVarRW(emitterBar3, "Start Colour", TW_TYPE_COLOR4F, &pEmitter3.p_colourStart, "group='Particle Properties'");
+	TwAddVarRW(emitterBar3, "End Colour", TW_TYPE_COLOR4F, &pEmitter3.p_colourEnd, "group='Particle Properties'");
+	#pragma endregion
+
+	// Variables stored in the Emitter's section of the window
+	#pragma region Emitter Variables
+	// Emitter emission rate
+	TwAddVarRW(emitterBar3, "Rate", TW_TYPE_FLOAT, &pEmitter3.rate, "step=0.5 group='Emitter Properties' min=0");
+	// Main direction of the Emitter
+	TwAddVarRW(emitterBar3, "Emitter Angle", TW_TYPE_DIR3F, &pEmitter3.emitterDir, "group='Emitter Properties'");
+
+	// Location in worldspace of the emitter
+	TwAddVarRW(emitterBar3, "PositionX", TW_TYPE_FLOAT, &pEmitter3.position.x, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar3, "PositionY", TW_TYPE_FLOAT, &pEmitter3.position.y, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar3, "PositionZ", TW_TYPE_FLOAT, &pEmitter3.position.z, "group='Position' step=0.1");
+
+	// Add the position group to the emitter section
+	TwDefine("Emitter3Settings/Position  group='Emitter Properties'  ");
+
+	#pragma endregion
+
+	#pragma endregion
+
+	
+	#pragma region Emitter1 GUI
+
+	// Window that will store the settings for the emitter and the particles
+	TwBar *emitterBar4;
+	emitterBar4 = TwNewBar("Emitter4Settings");
+	TwDefine("Emitter4Settings  size='250 500' iconified=true  ");
+
+	// Variables stored in the Particle's section of the window
+	#pragma region Particle Variables
+	// Particle Velocity and Velocity range
+	TwAddVarRW(emitterBar4, "Velocity", TW_TYPE_FLOAT, &pEmitter4.velocity, "step=0.0001 group='Particle Properties'");
+	TwAddVarRW(emitterBar4, "Velocity Range", TW_TYPE_FLOAT, &pEmitter4.velocityRange, "step=0.0001 group='Particle Properties'");
+	// Particle Lifetime
+	TwAddVarRW(emitterBar4, "Life Span", TW_TYPE_FLOAT, &pEmitter4.p_lifetime, "group='Particle Properties' step=1 min=2");
+	// Particle Start and end Size
+	TwAddVarRW(emitterBar4, "Initial Size", TW_TYPE_FLOAT, &pEmitter4.startScale, "group='Particle Properties' step=0.1");
+	TwAddVarRW(emitterBar4, "Ending Size", TW_TYPE_FLOAT, &pEmitter4.endScale, "group='Particle Properties' step=0.1");
+
+	// Particle Accelleration
+	TwAddVarRW(emitterBar4, "Acceleration X", TW_TYPE_FLOAT, &pEmitter4.p_acc.x, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar4, "Acceleration Y", TW_TYPE_FLOAT, &pEmitter4.p_acc.y, "group='Acceleration' step=0.00001");
+	TwAddVarRW(emitterBar4, "Acceleration Z", TW_TYPE_FLOAT, &pEmitter4.p_acc.z, "group='Acceleration' step=0.00001");
+
+	// Particle Angle Range
+	TwAddVarRW(emitterBar4, "Angle Range X", TW_TYPE_FLOAT, &pEmitter4.angleRange.x, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar4, "Angle Range Y", TW_TYPE_FLOAT, &pEmitter4.angleRange.y, "group='AngleRange' step=0.1");
+	TwAddVarRW(emitterBar4, "Angle Range Z", TW_TYPE_FLOAT, &pEmitter4.angleRange.z, "group='AngleRange' step=0.1");
+
+	// Add grouped items to the particle section
+	TwDefine("Emitter4Settings/AngleRange  group='Particle Properties'  ");
+	TwDefine("Emitter4Settings/Acceleration  group='Particle Properties'  ");
+
+	// Particle start and end colour
+	TwAddVarRW(emitterBar4, "Start Colour", TW_TYPE_COLOR4F, &pEmitter4.p_colourStart, "group='Particle Properties'");
+	TwAddVarRW(emitterBar4, "End Colour", TW_TYPE_COLOR4F, &pEmitter4.p_colourEnd, "group='Particle Properties'");
+	#pragma endregion
+
+	// Variables stored in the Emitter's section of the window
+	#pragma region Emitter Variables
+	// Emitter emission rate
+	TwAddVarRW(emitterBar4, "Rate", TW_TYPE_FLOAT, &pEmitter4.rate, "step=0.5 group='Emitter Properties' min=0");
+	// Main direction of the Emitter
+	TwAddVarRW(emitterBar4, "Emitter Angle", TW_TYPE_DIR3F, &pEmitter4.emitterDir, "group='Emitter Properties'");
+
+	// Location in worldspace of the emitter
+	TwAddVarRW(emitterBar4, "PositionX", TW_TYPE_FLOAT, &pEmitter4.position.x, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar4, "PositionY", TW_TYPE_FLOAT, &pEmitter4.position.y, "group='Position' step=0.1");
+	TwAddVarRW(emitterBar4, "PositionZ", TW_TYPE_FLOAT, &pEmitter4.position.z, "group='Position' step=0.1");
+
+	// Add the position group to the emitter section
+	TwDefine("Emitter4Settings/Position  group='Emitter Properties'  ");
+
+	#pragma endregion
+
+	#pragma endregion
+
+	/*
 
 #pragma region PEmitter1
 
@@ -864,7 +1375,7 @@ void main(int argc, char** argv)
 #pragma region - Colour
 
 	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
-	TwAddVarRW(tBar, "E1 Color", TW_TYPE_COLOR4F, &pEmitter.p_colour, " group='Emitter 1'");
+	TwAddVarRW(tBar, "E1 Color", TW_TYPE_COLOR4F, &pEmitter.p_colourStart, " group='Emitter 1'");
 	TwAddSeparator(tBar, NULL, " group='Emitter 1' ");
 
 
@@ -872,7 +1383,6 @@ void main(int argc, char** argv)
 #pragma endregion
 
 #pragma endregion
-
 #pragma region PEmitter2
 
 #pragma region - Velocity
@@ -887,7 +1397,7 @@ void main(int argc, char** argv)
 #pragma region - Colour
 
 	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
-	TwAddVarRW(tBar, "E2 Color", TW_TYPE_COLOR4F, &pEmitter2.p_colour, " group='Emitter 2'");
+	TwAddVarRW(tBar, "E2 Color", TW_TYPE_COLOR4F, &pEmitter2.p_colourStart, " group='Emitter 2'");
 	TwAddSeparator(tBar, NULL, " group='Emitter 2' ");
 
 #pragma endregion
@@ -908,7 +1418,7 @@ void main(int argc, char** argv)
 #pragma region - Colour
 
 	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
-	TwAddVarRW(tBar, "E3 Color", TW_TYPE_COLOR4F, &pEmitter3.p_colour, " group='Emitter 3'");
+	TwAddVarRW(tBar, "E3 Color", TW_TYPE_COLOR4F, &pEmitter3.p_colourStart, " group='Emitter 3'");
 	TwAddSeparator(tBar, NULL, " group='Emitter 3' ");
 
 #pragma endregion
@@ -929,13 +1439,13 @@ void main(int argc, char** argv)
 #pragma region - Colour
 
 	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
-	TwAddVarRW(tBar, "E4 Color", TW_TYPE_COLOR4F, &pEmitter4.p_colour, " group='Emitter 4'");
+	TwAddVarRW(tBar, "E4 Color", TW_TYPE_COLOR4F, &pEmitter4.p_colourStart, " group='Emitter 4'");
 	TwAddSeparator(tBar, NULL, " group='Emitter 4' ");
 
 #pragma endregion
 
 #pragma endregion
-
+	*/
 
 #pragma endregion
 
