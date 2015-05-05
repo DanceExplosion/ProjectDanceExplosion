@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>AntTweakBar</id>
+    <version>1.16</version>
+    <title>AntTweakBar</title>
+    <authors>Philippe Decaudin</authors>
+    <owners>Philippe Decaudin</owners>
+    <licenseUrl>http://anttweakbar.sourceforge.net/doc/tools:anttweakbar:license</licenseUrl>
+    <projectUrl>http://www.sgrottel.de/nuget/anttweakbar</projectUrl>
+    <iconUrl>http://anttweakbar.sourceforge.net/doc/lib/tpl/antisphere/images/aswikilogo.gif</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>AntTweakBar is a small and easy-to-use C/C++ library that allows programmers to quickly add a light and intuitive GUI into OpenGL and DirectX based graphic programs to interactively tweak parameters.</description>
+    <summary>AntTweakBar minimalistic GUI library for OpenGL and DirectX.</summary>
+    <releaseNotes>AntTweakBar 1.16 packaged by S. Grottel (http://www.sgrottel.de)</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>AntTweakBar native CoApp nativepackage</tags>
+    <dependencies>
+      <dependency id="AntTweakBar.redist" version="1.16" />
+    </dependencies>
+    <references />
+  </metadata>
+</package>

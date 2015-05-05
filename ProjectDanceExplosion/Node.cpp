@@ -1,36 +1,64 @@
 #include "Node.h"
 
+// Empty Initializer
 Node::Node() {}
 
+// Basic Constructor
 Node::Node(const aiScene* mS)
 {
+	// Store the pointer to the scene
 	mainScene = mS;
+
+	// Obtain the root node of the skeleton
 	root = mainScene->mRootNode;
+
+	// Set the total number of bones to 0
 	numBones = 0;
 
+	// Call the StoreBones method
 	StoreBones();
+
+	// Print out the hierarchy
+	// PreOrderTraversal();
 }
 
-void Node::StoreBones()
+// Gather the data needed for the skeleton
+std::vector<float> Node::StoreBones()
 {
+	std::vector<float> boneMs = std::vector<float>();
+	numBones = 0;
+	// Loop through each mesh in the scene
 	for(unsigned int m = 0; m < mainScene->mNumMeshes; m++)
 	{
+		// Store the mesh's data
 		aiMesh* modelData = mainScene->mMeshes[m];
+
+		// Add the mesh's bone count to the total number of bones
 		numBones += modelData->mNumBones;
 
+		// Loop through all the mesh's bones
 		for(unsigned int i = 0; i < modelData->mNumBones; i++)
 		{
+			// Store it's location for easy access
 			aiBone* bone1 = modelData->mBones[i];
+
+			// Same again, but for it's name
 			aiString name = bone1->mName;
-			//aiMatrix4x4 bonePlace = bone1->mOffsetMatrix.Inverse().Transpose();
-			aiMatrix4x4 bonePlace = SearchTree(root,name);
-			
+
+			// Get the number of vertices affected by the bone
+			unsigned int numWeights = bone1->mNumWeights;
+
+			// Inverse and Transpose teh bone's data
+			aiMatrix4x4 bonePlace = SearchTree(root, name);
+			bonePlace.Transpose();
+			// *old* Convert to glm's mat4 format
 			/*glm::mat4 boneFinal = glm::mat4(bonePlace.a1, bonePlace.a2, bonePlace.a3, bonePlace.a4,
 												bonePlace.b1, bonePlace.b2, bonePlace.b3, bonePlace.b4,
 												bonePlace.c1, bonePlace.c2, bonePlace.c3, bonePlace.c4,
 												bonePlace.d1, bonePlace.d2, bonePlace.d3, bonePlace.d4);
 												*/
 			
+			// *old* Print out the matrix data
 			/*std::cout << "Bone[" << i << "]" << std::endl;
 			std::cout << "	Bone Name: " << name.data << std::endl;
 			std::cout << "\tTransformation: " << bonePlace.a1 << " " << bonePlace.a2 << " " << bonePlace.a3 << " " << bonePlace.a4 << std::endl;
@@ -38,25 +66,36 @@ void Node::StoreBones()
 			std::cout << "\t \t \t" << bonePlace.c1 << " " << bonePlace.c2 << " " << bonePlace.c3 << " " << bonePlace.c4 << std::endl;
 			std::cout << "\t \t \t" << bonePlace.d1 << " " << bonePlace.d2 << " " << bonePlace.d3 << " " << bonePlace.d4 << std::endl;*/
 
-			boneMatricies.push_back(bonePlace.a1);
-			boneMatricies.push_back(bonePlace.a2);
-			boneMatricies.push_back(bonePlace.a3);
-			boneMatricies.push_back(bonePlace.a4);
+			// *old push the matrices into the list
+			//boneMatricies.push_back(bonePlace);
+			//boneMatricies.push_back(boneFinal);
 
-			boneMatricies.push_back(bonePlace.b1);
-			boneMatricies.push_back(bonePlace.b2);
-			boneMatricies.push_back(bonePlace.b3);
-			boneMatricies.push_back(bonePlace.b4);
+			// Push the matrix values into the float list for passing into the shader
 
-			boneMatricies.push_back(bonePlace.c1);
-			boneMatricies.push_back(bonePlace.c2);
-			boneMatricies.push_back(bonePlace.c3);
-			boneMatricies.push_back(bonePlace.c4);
+			// Row 1
+			boneMs.push_back(bonePlace.a1);
+			boneMs.push_back(bonePlace.a2);
+			boneMs.push_back(bonePlace.a3);
+			boneMs.push_back(bonePlace.a4);
+			
+			// Row 2
+			boneMs.push_back(bonePlace.b1);
+			boneMs.push_back(bonePlace.b2);
+			boneMs.push_back(bonePlace.b3);
+			boneMs.push_back(bonePlace.b4);
 
-			boneMatricies.push_back(bonePlace.d1);
-			boneMatricies.push_back(bonePlace.d2);
-			boneMatricies.push_back(bonePlace.d3);
-			boneMatricies.push_back(bonePlace.d4);
+			// Row 3
+			boneMs.push_back(bonePlace.c1);
+			boneMs.push_back(bonePlace.c2);
+			boneMs.push_back(bonePlace.c3);
+			boneMs.push_back(bonePlace.c4);
+
+			// Row 4
+			boneMs.push_back(bonePlace.d1);
+			boneMs.push_back(bonePlace.d2);
+			boneMs.push_back(bonePlace.d3);
+			boneMs.push_back(bonePlace.d4);
+
 		}
 	}
 
@@ -70,74 +109,27 @@ void Node::StoreBones()
 	std::cout << "\t \t \t" << bonePlace.b1 << " " << bonePlace.b2 << " " << bonePlace.b3 << " " << bonePlace.b4 << std::endl;
 	std::cout << "\t \t \t" << bonePlace.c1 << " " << bonePlace.c2 << " " << bonePlace.c3 << " " << bonePlace.c4 << std::endl;
 	std::cout << "\t \t \t" << bonePlace.d1 << " " << bonePlace.d2 << " " << bonePlace.d3 << " " << bonePlace.d4 << std::endl;*/
-
-	int num = 9;
+	return boneMs;
 }
 
-void Node::SkinBone(int meshIndex, int boneIndex)
-{
-	std::vector<glm::vec3> boneVertices;
-	std::vector<float> boneVertexWeights;
-
-	aiMesh* mesh = mainScene->mMeshes[meshIndex];
-	aiBone* bone = mesh->mBones[boneIndex];
-
-	// taking aiNode as inverse bind
-	aiMatrix4x4 inverseNodePose = SearchTree(root, bone->mName).Inverse();
-
-	aiMatrix4x4 identity;
-	aiIdentityMatrix4(&identity);
-
-	// extracting vertices and vertex weights 
-	for(unsigned int i = 0; i < bone->mNumWeights; i++)
-	{
-		unsigned int vertexIndex = bone->mWeights[i].mVertexId;
-		float weight = bone->mWeights[i].mWeight;
-
-		aiVector3D vTemp = mesh->mVertices[vertexIndex];
-		// multiply by node inverse bind
-		aiTransformVecByMatrix4(&vTemp, &inverseNodePose);
-		glm::vec3 vertex = glm::vec3(vTemp.x, vTemp.y, vTemp.z);
-
-		boneVertices.push_back(vertex);
-		boneVertexWeights.push_back(weight);
-	}
-
-	// aiNode as currentPoseMatrix
-	aiMatrix4x4 currentPose = SearchTree(root, bone->mName);
-
-	glm::mat4 currentPoseMatrix = glm::mat4(
-		currentPose.a1, currentPose.a2, currentPose.a3, currentPose.a4,
-		currentPose.b1, currentPose.b2, currentPose.b3, currentPose.b4,
-		currentPose.c1, currentPose.c2, currentPose.c3, currentPose.c4,
-		currentPose.d1, currentPose.d2, currentPose.d3, currentPose.d4
-		);
-	
-	//glm::mat4 identity =glm::mat4(1.0f);
-
-	for(unsigned int i = 0; i < bone->mNumWeights; i++)
-	{
-		float w = boneVertexWeights.at(i);
-		glm::vec4 finalVertex = glm::vec4(boneVertices.at(i), 1.0f) * currentPoseMatrix;
-		// Green Arrow, Nightwing, Robin, Iron Man
-		knee.push_back(finalVertex.x);
-		knee.push_back(finalVertex.z);
-		knee.push_back(finalVertex.y * -1);
-	}
-}
-
+//Initial method for printing the Hierarchy
 void Node::PreOrderTraversal()
 {
 	int count = 0;
 	PreOrder(root, count);
 }
 
+// Recursive method for printing the hierarchy
 void Node::PreOrder(aiNode* node, int count)
 {
 	count++;
+	// If the parent is null, then this node is the root
 	if(node->mParent == NULL)
 	{
+		// Print out it's name
 		std::cout << "Root: " << node->mName.data << std::endl;
+
+		// *old* Print matrix data
 		/*std::cout << "Transformation: " << node->mTransformation.a1 << " " << node->mTransformation.a2 << " " << node->mTransformation.a3 << " " << node->mTransformation.a4 << std::endl;
 
 		std::cout << "\t \t" << node->mTransformation.b1 << " " << node->mTransformation.b2 << " " << node->mTransformation.b3 << " " << node->mTransformation.b4 << std::endl;
@@ -146,15 +138,23 @@ void Node::PreOrder(aiNode* node, int count)
 
 		std::cout << "\t \t" << node->mTransformation.d1 << " " << node->mTransformation.d2 << " " << node->mTransformation.d3 << " " << node->mTransformation.d4 << std::endl;*/
 	}
+	// If the node isn't the root
 	else
 	{
+		// Print out it's parent, and it's 'depth' in the hierarchy
 		std::cout << "Parent: " << node->mParent->mName.data << " Level: " << count << std::endl;
+
+		// Print out it's name
 		std::cout << "	Node: " << node->mName.data << std::endl;
+
+		// *old* Print out the affected meshes
 		/*if(node->mMeshes != 0)
 		{
 			std::cout << "	Mesh detected" << std::endl;
 			std::cout << "	NumMeshes: " << node->mMeshes << std::endl;
 		}*/
+
+		// Print out it's transformation data
 		std::cout << "\tTransformation: " << node->mTransformation.a1 << " " << node->mTransformation.a2 << " " << node->mTransformation.a3 << " " << node->mTransformation.a4 << std::endl;
 
 		std::cout << "\t \t \t" << node->mTransformation.b1 << " " << node->mTransformation.b2 << " " << node->mTransformation.b3 << " " << node->mTransformation.b4 << std::endl;
@@ -164,67 +164,66 @@ void Node::PreOrder(aiNode* node, int count)
 		std::cout << "\t \t \t" << node->mTransformation.d1 << " " << node->mTransformation.d2 << " " << node->mTransformation.d3 << " " << node->mTransformation.d4 << std::endl;
 	}
 	
+	// If the node has children
 	if(node->mNumChildren > 0)
 	{
+		// Recursively call this function for all it's children
 		for(unsigned int i = 0; i < node->mNumChildren; i++)
 			PreOrder(node->mChildren[i], count);
 	}
 }
 
+// Recursive method for finding the node with a requested name
 aiMatrix4x4 Node::SearchTree(aiNode* node, aiString name)
 {
+	// Store the name for easy access
 	aiString currentName = node->mName;
+
+	// Matrix to be returned
 	aiMatrix4x4 mat;
 
-	//corresponding node found
+	// Corresponding node found
 	if (name == currentName)
 	{
+		// *old* Report that the node was found
 		//std::cout << name.data << " was found" << std::endl;
+
+		// Store the transformation
 		aiMatrix4x4 finalTransform = node->mTransformation;
+
+		// Get the total transformation of the node
 		while(node->mParent != NULL)
 		{
+			aiMatrix4x4 temp = node->mParent->mTransformation;
+			finalTransform = temp*finalTransform;
 			node = node->mParent;
-			//finalTransform = finalTransform * node->mTransformation;
-			finalTransform = node->mTransformation * finalTransform;
 		}
-		return finalTransform.Transpose();
+		//Return the total matrix
+		return finalTransform;
 	}
+	// If the name doesn't match
 	else
 	{
+		// Loop through all of the current node's children
 		for(unsigned int i = 0; i < node->mNumChildren; i++)
 		{
+			// Get the return value of the recursive search
 			aiMatrix4x4 mat = SearchTree(node->mChildren[i], name);
+
+			// If it has returned a value that isn't NULL, return it
 			if(mat.a1 != NULL)
 				return mat;
 		}
 	}
+
+	// If nothing has been found, then this branch of the skeleton is a dead end, return NULL for the first value to represent this
 	return aiMatrix4x4(	NULL,0,0,0,
 						0,0,0,0,
 						0,0,0,0,
 						0,0,0,0);
 }
 
-aiNode* Node::SearchTreeForNode(aiNode* node, aiString name)
-{
-	aiString currentName = node->mName;
-	aiNode* n;
-	//corresponding node found
-	if (name == currentName)
-	{
-		return node;
-	}
-	else
-	{
-		for(unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-			aiNode* n = SearchTreeForNode(node->mChildren[i], name);
-			if(n != NULL)
-				return n;
-		}
-	}
-	return NULL;
-}
-
+// *old* Alternate Search Tree Method
 /*aiMatrix4x4 Node::SearchTree(aiNode* node, aiString name)
 {
 	aiString currentName = node->mName;
@@ -248,23 +247,15 @@ aiNode* Node::SearchTreeForNode(aiNode* node, aiString name)
 	}
 }*/
 
-float* Node::GetKnee()
-{
-	return &knee.at(0);
-}
 
-int Node::GetKneeSize()
-{
-	return knee.size();
-}
-
+// Simple return function for the bone matrix
 float* Node::GetBoneMatrix()
 {
-	return &boneMatricies.at(0);
-	//return &boneMatricies.at(0).a1;
+	return &boneMatricies.at(0);//.a1;
 	//return glm::value_ptr(boneMatricies.at(0));
 }
 
+// Simple return for the number of bones
 int Node::GetNumBones()
 {
 	return numBones;

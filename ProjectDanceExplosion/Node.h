@@ -8,7 +8,6 @@
 #include <assimp/Importer.hpp>	// c++ importer interface
 #include <assimp/scene.h>		// output data structure
 #include <assimp/postprocess.h>	// post processing flag
-#include <assimp/cimport.h>
 
 //GLM
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,33 +19,44 @@
 #include <fstream>
 #include <vector>
 
+// Node's contain the data and function needed to represent the skeletons of a model
 class Node
 {
 public:
-	Node();
+	// Empty constructor
+	Node();	
+	// Normal constructor
 	Node(const aiScene* mainScene);
+	// Simple get functions
 	float* GetBoneMatrix();
 	int GetNumBones();
 
-	void StoreBones();
-
+	// Function to print the node hierarchy
 	void PreOrderTraversal();
-	void PreOrder(aiNode* node);
-	void PreOrder(aiNode* node, int count);
-	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
-	aiNode* Node::SearchTreeForNode(aiNode* node, aiString name);
 	
-	void SkinBone(int meshIndex, int boneIndex);
-	float* GetKnee();
-	int Node::GetKneeSize();
+	// Function to build the matrix list
+	std::vector<float> StoreBones();
+
+	// The root node
+	aiNode* root;
 
 private:
-	const aiScene* mainScene;
-	int numBones;
-	aiNode* root;
-	std::vector<float> boneMatricies;
+	
+	
+	// Recursive print functions
+	void PreOrder(aiNode* node);
+	void PreOrder(aiNode* node, int count);
+	// Find a node by name
+	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
 
-	std::vector<float> knee;
+	// The model scene
+	const aiScene* mainScene;
+
+	// The total number of bones
+	int numBones;
+
+	// The array that holds the matrix data
+	std::vector<float> boneMatricies;
 	//std::vector<aiMatrix4x4> boneMatricies;
 	//std::vector<glm::mat4> boneMatricies;
 };

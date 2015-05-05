@@ -44,10 +44,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Amy\QUBThirdYear\Visualisation\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Amy\QUBThirdYear\Visualisation\AntTweakBar\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -66,16 +68,44 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\..\Pictures\TeamDanceExplosion.jpeg" />
+    <Image Include="Models\ant1.jpg" />
+    <Image Include="Models\Ant\ant1.jpg" />
+    <Image Include="Models\Ant\ant2.jpg" />
+    <Image Include="Models\Army Pilot\Tex\body01.png" />
+    <Image Include="Models\Army Pilot\Tex\head01.png" />
+    <Image Include="Models\Army Pilot\Tex\m4tex.png" />
+    <Image Include="Models\Army Pilot\Thumbnail1.png" />
+    <Image Include="Models\Army Pilot\Thumbnail2.png" />
+    <Image Include="Models\Army Pilot\Thumbnail3.png" />
+    <Image Include="Models\Army Pilot\Thumbnail4.png" />
     <Image Include="Models\BumpMapTryout.jpg" />
+    <Image Include="Models\Ninja\nskinbl.jpg" />
+    <Image Include="Models\Ninja\nskinbr.jpg" />
+    <Image Include="Models\Ninja\nskingr.jpg" />
+    <Image Include="Models\Ninja\nskinrd.jpg" />
+    <Image Include="Models\Ninja\nskinwh.jpg" />
+    <Image Include="Models\nskinbl.jpg" />
     <Image Include="Models\Optimus\Optimus_Diffuse.png" />
     <Image Include="Models\Optimus\Optimus_NORMAL.png" />
     <Image Include="Models\Stick Figure\Stick_Figure_by_Swp.BMP" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Animations\nightwing anim.fbx">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="ModelFragmentShader.frag" />
+    <None Include="Models\Ant\ant01.b3d" />
+    <None Include="Models\Ant\ant01.ms3d" />
+    <None Include="Models\Ant\ant01Edit.ms3d" />
+    <None Include="Models\Ant\ant02.b3d" />
+    <None Include="Models\Ant\ant02.ms3d" />
+    <None Include="Models\Ant\antviewer.bb" />
+    <None Include="Models\Army Pilot\ArmyPilot.bvh" />
+    <None Include="Models\Army Pilot\ArmyPilot.dae" />
+    <None Include="Models\Army Pilot\ArmyPilot.dxf" />
+    <None Include="Models\Army Pilot\ArmyPilot.fbx" />
+    <None Include="Models\Army Pilot\ArmyPilot.material" />
+    <None Include="Models\Army Pilot\ArmyPilot.mesh" />
+    <None Include="Models\Army Pilot\ArmyPilot.ms3d" />
+    <None Include="Models\Army Pilot\ArmyPilot.mtl" />
+    <None Include="Models\Army Pilot\ArmyPilot.x" />
     <None Include="Models\Bear_Brown\Bear_Brown.dae" />
     <None Include="Models\Bear_Brown\Bear_D.tga" />
     <None Include="Models\Bear_Brown\Bear_Eye_D.tga" />
@@ -95,8 +125,6 @@
     <None Include="Models\Dog\Dog_N.tga" />
     <None Include="Models\GreenArrow\GreenArrow.dae" />
     <None Include="Models\GreenArrow\GreenArrow_DIFFUSE.tga" />
-    <None Include="Models\GreenArrow\GreenArrow_HAIR_MAT.mat" />
-    <None Include="Models\GreenArrow\GreenArrow_MAT.mat" />
     <None Include="Models\GreenArrow\GreenArrow_NORMAL.tga" />
     <None Include="Models\IronMan\Iron_Man.dae" />
     <None Include="Models\IronMan\Iron_Man_D.tga" />
@@ -104,6 +132,17 @@
     <None Include="Models\Nightwing187\Nightwing187.dae" />
     <None Include="Models\Nightwing187\Nightwing_DIFFUSE.tga" />
     <None Include="Models\Nightwing187\Nightwing_NORMAL.tga" />
+    <None Include="Models\NightWingAS\anim - Copy.bvh" />
+    <None Include="Models\NightWingAS\anim.bvh" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga" />
+    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga" />
+    <None Include="Models\NightWingAS\nightwing anim.dae" />
+    <None Include="Models\NightWingAS\nightwing anim.fbx" />
+    <None Include="Models\Ninja\ninja.b3d" />
+    <None Include="Models\Ninja\ninja.cfx" />
+    <None Include="Models\Ninja\ninja.ms3d" />
+    <None Include="Models\Ninja\ninjaEdit.ms3d" />
     <None Include="Models\Optimus\Optimus.DAE">
       <SubType>Designer</SubType>
     </None>
@@ -122,31 +161,41 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationController.cpp" />
+    <ClCompile Include="BoneMesh.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
+    <ClCompile Include="Skinning.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="BasicFragmentShader.txt" />
     <Text Include="BasicVertexShader.txt" />
-    <Text Include="NodeFragmentShader.txt" />
-    <Text Include="NodeVertexShader.txt" />
+    <Text Include="Models\Ant\animation info.txt" />
+    <Text Include="Models\Ninja\ninja animation ranges.txt" />
     <Text Include="ParticleFragmentShader.txt" />
     <Text Include="ParticleVertexShader.txt" />
     <Text Include="RedrawFragmentShader.txt" />
     <Text Include="RedrawVertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoneMesh.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="ModelAnimation.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="ParticleEmitter.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderLoader.h" />
+    <ClInclude Include="Skinning.h" />
+    <ClInclude Include="SkyBox.h" />
+    <ClInclude Include="TextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ProjectDanceExplosion.rc" />
+    <Xml Include="Models\Army Pilot\ArmyPilot.mesh.xml" />
+    <Xml Include="Models\Army Pilot\ArmyPilot.skeleton.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

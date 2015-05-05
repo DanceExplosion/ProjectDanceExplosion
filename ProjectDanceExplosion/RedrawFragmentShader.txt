@@ -1,8 +1,15 @@
 #version 330 core
 
+in vec2 textureCoord;
+
+uniform sampler2D diffuseSampler;
+uniform sampler2D normalSampler;
+
 out vec4 finalColour;
 
 void main()
 {
-	finalColour = vec4(0.3, 0.0, 0.5, 1.0);
+	vec4 normalFromTexture = normalize(texture2D(normalSampler, textureCoord) * 2.0 - 1.0);
+
+	finalColour = texture2D(diffuseSampler, textureCoord);// * normalFromTexture;
 }
