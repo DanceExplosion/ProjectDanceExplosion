@@ -134,11 +134,11 @@
     <None Include="Models\Nightwing187\Nightwing_NORMAL.tga" />
     <None Include="Models\NightWingAS\anim - Copy.bvh" />
     <None Include="Models\NightWingAS\anim.bvh" />
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga" />
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga" />
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga" />
     <None Include="Models\NightWingAS\nightwing anim.dae" />
     <None Include="Models\NightWingAS\nightwing anim.fbx" />
+    <None Include="Models\NightWingAS\NightwingAS_DIFFUSE.tga" />
+    <None Include="Models\NightWingAS\NightwingAS_FX.tga" />
+    <None Include="Models\NightWingAS\NightwingAS_NORMAL.tga" />
     <None Include="Models\Ninja\ninja.b3d" />
     <None Include="Models\Ninja\ninja.cfx" />
     <None Include="Models\Ninja\ninja.ms3d" />
@@ -177,6 +177,8 @@
     <Text Include="BasicVertexShader.txt" />
     <Text Include="Models\Ant\animation info.txt" />
     <Text Include="Models\Ninja\ninja animation ranges.txt" />
+    <Text Include="NodeFragmentShader.txt" />
+    <Text Include="NodeVertexShader.txt" />
     <Text Include="ParticleFragmentShader.txt" />
     <Text Include="ParticleVertexShader.txt" />
     <Text Include="RedrawFragmentShader.txt" />

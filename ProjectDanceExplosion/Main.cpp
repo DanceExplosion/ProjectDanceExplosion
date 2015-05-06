@@ -164,7 +164,6 @@ void LoadModelData()
 
 	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Primal Beast/PrimalBeast.ms3d";
-	//std::string file = fileRoot + "Beast/beast.ms3d";
 	//std::string file = fileRoot + "Beast/beastedit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";

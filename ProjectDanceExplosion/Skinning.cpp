@@ -255,9 +255,9 @@ void Skinning::StoreNormalMapData(aiMaterial* mat)
 	//std::string path = "Optimus/Optimus_NORMAL.png";
 	//std::string path = "Robin188/Robin_N.tga";
 
-	//std::string path = "NightwingAS/NightwingAS_NORMAL.tga";
+	std::string path = "NightwingAS/NightwingAS_NORMAL.tga";
 	//std::string path = "Beast/n_beast.png";
-	std::string path = "Zombie/zombieDDS/zombie_normal.dds";
+	//std::string path = "Zombie/zombieDDS/zombie_normal.dds";
 
 	std::string filePath = fileRoot + path;
 

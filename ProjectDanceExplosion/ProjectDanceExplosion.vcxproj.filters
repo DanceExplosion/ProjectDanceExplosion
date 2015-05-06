@@ -288,21 +288,15 @@
     <None Include="Models\NightWingAS\anim.bvh">
       <Filter>Models\NightwingAS</Filter>
     </None>
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_DIFFUSE.tga">
-      <Filter>Models\NightwingAS</Filter>
-    </None>
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_FX.tga">
-      <Filter>Models\NightwingAS</Filter>
-    </None>
-    <None Include="Models\NightWingAS\CHRNPCICOHER154_NORMAL.tga">
-      <Filter>Models\NightwingAS</Filter>
-    </None>
     <None Include="Models\NightWingAS\nightwing anim.dae">
       <Filter>Models\NightwingAS</Filter>
     </None>
     <None Include="Models\NightWingAS\nightwing anim.fbx">
       <Filter>Models\NightwingAS</Filter>
     </None>
+    <None Include="Models\NightWingAS\NightwingAS_DIFFUSE.tga" />
+    <None Include="Models\NightWingAS\NightwingAS_FX.tga" />
+    <None Include="Models\NightWingAS\NightwingAS_NORMAL.tga" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -357,6 +351,8 @@
     </Text>
     <Text Include="RedrawFragmentShader.txt" />
     <Text Include="RedrawVertexShader.txt" />
+    <Text Include="NodeFragmentShader.txt" />
+    <Text Include="NodeVertexShader.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderLoader.h">

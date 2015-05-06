@@ -5,9 +5,9 @@
 	// Simple update function
 void AnimationController::Update(float delta){
 	// Advance the animation's time
-	//timePassed = timePassed+(delta*0.016);
+	//timePassed = timePassed + (delta * 0.016);
 	timePassed = timePassed + (delta * 0.001);
-	//timePassed = timePassed + (delta * 3.0);
+	//timePassed = timePassed + (delta * 2.0);
 
 	// Loop the animation
 	if(timePassed >= endTime){
