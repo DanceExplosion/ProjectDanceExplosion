@@ -37,7 +37,7 @@ void Skinning::StoreBoneMeshes(int meshIndex)
 
 	// worldSpaceVertices is the same size as boneSpaceVertices
 	worldSpaceVertices.resize(mesh->mNumVertices);
-	//
+	// guarentee textureCoordData is empty
 	textureCoordData.clear();
 	// fill Changed with FALSE
 	ResetChanged();
@@ -58,12 +58,8 @@ void Skinning::MoveMeshToWorldSpace(int meshIndex, int boneIndex)
 		// vertices in BoneMesh are stored in the same order as they appear in aiBone->mWeights
 		aiVector3D currentVertex = currentMesh.GetVertexAt(v); // vertex in boneSpace
 		unsigned int vertexIndex = bone->mWeights[v].mVertexId;
-		aiVector3D matchingVertex = mainScene->mMeshes[meshIndex]->mVertices[vertexIndex];
 		float weight = bone->mWeights[v].mWeight;
 		
-
-		//aiTransformVecByMatrix4(&matchingVertex, &currentPose);
-		glm::vec3 matchingVertexConvert = glm::vec3(matchingVertex.x,matchingVertex.y,matchingVertex.z);
 		
 		//convert currentvertex to glm format
 		glm::vec3 finalVertex = glm::vec3(currentVertex.x, currentVertex.y, currentVertex.z);
@@ -100,7 +96,7 @@ void Skinning::StoreFinalVertexData(int meshIndex)
 
 	aiMesh* modelData = mainScene->mMeshes[meshIndex];
 	int numFaces = modelData->mNumFaces;
-	bool recordTexture = textureCoordData.size() < worldSpaceVertices.size();
+	bool recordTexture = textureCoordData.empty();
 
 	// for each face in mesh...
 	for (int i = 0; i < numFaces; i++)
@@ -132,64 +128,114 @@ void Skinning::StoreTextureCoordData(aiMesh* modelData, aiFace currentFace, int 
 	textureCoordData.push_back(textCo);
 }
 
+// Auto-texture detection
 void Skinning::StoreTextureData(aiMaterial* mat)
 {
-	// What kind of textures?
-	/*unsigned int numTextures = mat->GetTextureCount(aiTextureType_DIFFUSE);
-	std::cout <<"	Number of diffuse textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_AMBIENT);
-	std::cout <<"	Number of ambient textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_DISPLACEMENT);
-	std::cout <<"	Number of displacement textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_EMISSIVE);
-	std::cout <<"	Number of emmisive textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_HEIGHT);
-	std::cout <<"	Number of height textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_LIGHTMAP);
-	std::cout <<"	Number of lightmap textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_NORMALS);
-	std::cout <<"	Number of normal textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_OPACITY);
-	std::cout <<"	Number of opacity textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_REFLECTION);
-	std::cout <<"	Number of reflection textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_SHININESS);
-	std::cout <<"	Number of shininess textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_SPECULAR);
-	std::cout <<"	Number of specular textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_UNKNOWN);
-	std::cout <<"	Number of unknown textures detected: " << numTextures << std::endl;
-	numTextures = mat->GetTextureCount(aiTextureType_NONE);
-	std::cout <<"	Number of NONE? textures detected: " << numTextures << std::endl;*/
-
 	std::string fileRoot = "Models/";
 
 	aiString path;
+	std::string filePath;
+	// If model file contains a pointer to texture file
 	if(mat->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-		std::cout << "Path: " << path.data << std::endl;
+		filePath = fileRoot + path.data;
 	else
 	{
-		//check diffuse texture definitely exists for this model
-		std::cout << "Diffuse texture Count: " << mat->GetTextureCount(aiTextureType_DIFFUSE) << std::endl;
+		std::cout << "No textures detected" << std::endl;
+		return;
 	}
 
-	std::string filePath = fileRoot + path.data;
+	std::cout << "texture filePath: " << filePath << std::endl;
 
-	std::cout << "filePath: " << filePath << std::endl;
+	// Read file given by model
+	filePath = ReadFile(filePath);
+	// 
+	std::string textureFilePath = fileRoot;
 
-	// Auto-texture detection => 
-	/*<library_images>
-		<image id="Image">
-		  <init_from>NightwingAS/NightwingAS_MAT.MAT</init_from>
-		</image>
-	</library_images>
-	NOT <init_from>NightwingAS/NightwingAS_DIFFUSE.tga</init_from>*/
-	//ReadFile(filePath);
+	// Find the filepath of the 1st texture
+	// Remove '=' from string
+	std::size_t pos = filePath.find_first_of('=') + 1;
+	std::size_t pos2 = filePath.find_first_of('\r', pos);	
+	// Substr returns partial filepath for texture, appended to textureFilePath to give full path
+	textureFilePath += filePath.substr(pos, pos2 - pos);
 
+	// Assuming this is the DIFFUSE texture
+	StoreDiffuseTextureData(textureFilePath);
+
+	// if texture file contains more than a DIFFUSE
+	if(filePath.length() >= pos2)
+	{
+		// Reset textureFilePath
+		textureFilePath = fileRoot;
+		// Find next filepath
+		pos = filePath.find_first_of('=', pos) + 1;
+		pos2 = filePath.find_first_of('\r', pos);
+		// Substr returns partial filepath for texture, appended to textureFilePath to give full path
+		textureFilePath += filePath.substr(pos, pos2 - pos);
+
+		// Assuming this is the NORMAL texture
+		StoreNormalMapData(textureFilePath);
+	}
+}
+
+// Read .MAT file
+std::string Skinning::ReadFile(std::string filePath)
+{
+	std::string line;
+	std::ifstream matFile (filePath, std::ios::binary);
+	if (matFile.is_open())
+	{
+		std::cout << "File contents:" << std::endl;
+		std::string readLine;
+		while ( getline (matFile, readLine) )
+		{
+			line.append(readLine);
+			std::cout << "\t" + readLine << std::endl;
+		}
+		matFile.close();
+	}
+
+	else 
+		std::cout << "Unable to open file" ; 
+
+	return line;
+}
+
+void Skinning::StoreDiffuseTextureData(std::string filePath)
+{
+	// Assume DIFFUSE is 1st texture (this seems to be the standard with most of the models we've encounterer)
+	diffuseTextureRef = LoadTexture(filePath, GL_TEXTURE0);
+
+	// check that ptexture is created
+	if(glIsTexture(diffuseTextureRef))
+		std::cout << "diffuse texture success" << std::endl;
+}
+
+void Skinning::StoreNormalMapData(std::string filePath)
+{
+	// Assume NORMAL is 2nd texture (this seems to be the standard with most of the models we've encounterer)
+	normalMapRef = LoadTexture(filePath, GL_TEXTURE1);
+
+	// check that ptexture is created
+	if(glIsTexture(normalMapRef))
+	{
+		std::cout << "normal texture success" << std::endl;
+		std::cout << "" << std::endl;
+	}
+
+	// unbinding & disabling texturing
+	/*glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);*/
+}
+
+GLuint Skinning::LoadTexture(std::string filePath, GLenum activeTexture)
+{
 	// initialising DevIL libraries
 	ilInit();
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
+
+	GLuint textureRef;
 
 	// Load in texture
 	if(ilLoadImage(filePath.c_str()))
@@ -203,7 +249,7 @@ void Skinning::StoreTextureData(aiMaterial* mat)
 			std::cout << "image loaded" << std::endl;
 			// create new texture enum for model
 			glEnable(GL_TEXTURE_2D);
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(activeTexture);
 			glGenTextures(1, &textureRef);	
 			glBindTexture(GL_TEXTURE_2D, textureRef);
 
@@ -226,93 +272,12 @@ void Skinning::StoreTextureData(aiMaterial* mat)
 		std::cout << "error: " << iluErrorString(error) << std::endl;
 	}
 
-	// check that ptexture is created
-	if(glIsTexture(textureRef))
-		std::cout << "texture success" << std::endl;
-
 	// unbinding & disabling texturing
 	glActiveTexture(NULL);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glDisable(GL_TEXTURE_2D);
 
-	StoreNormalMapData(mat);
-}
-
-void Skinning::StoreNormalMapData(aiMaterial* mat)
-{
-	std::string fileRoot = "Models/";
-
-	//std::string path = "BumpMapTryout.jpg";
-	//std::string path = "Bear_Brown/Bear_N.tga";
-	//std::string path = "Bear_Brown/Bear_Fur_N.tga";
-	//std::string path = "Bear_Brown/Bear_Eye_N.tga";
-	//std::string path = "C3P0/C3P0_body_N.tga";
-	//std::string path = "C3P0/C3P0_head_N.tga";
-	//std::string path = "Dog/Dog_N.tga";
-	//std::string path = "GreenArrow/GreenArrow_NORMAL.tga";
-	//std::string path = "IronMan/Iron_Man_N.tga";
-	//std::string path = "Nightwing187/Nightwing_NORMAL.tga";
-	//std::string path = "Optimus/Optimus_NORMAL.png";
-	//std::string path = "Robin188/Robin_N.tga";
-
-	std::string path = "NightwingAS/NightwingAS_NORMAL.tga";
-	//std::string path = "Beast/n_beast.png";
-	//std::string path = "Zombie/zombieDDS/zombie_normal.dds";
-
-	std::string filePath = fileRoot + path;
-
-	std::cout << "normal filePath: " << filePath << std::endl;
-	// initialising DevIL libraries
-	ilInit();
-	iluInit();
-	ilutRenderer(ILUT_OPENGL);
-
-	// Load in texture
-	if(ilLoadImage(filePath.c_str()))
-	{
-		// checking relevant data has been loaded
-		ILubyte* data = ilGetData();
-		if(!data)
-			std::cout << "No normal image data found" << std::endl;
-		else
-		{
-			std::cout << "normal image loaded" << std::endl;
-			// create new texture enum for model
-			glEnable(GL_TEXTURE_2D);
-			glActiveTexture(GL_TEXTURE1);
-			glGenTextures(1, &normalMapRef);	
-			glBindTexture(GL_TEXTURE_2D, normalMapRef);
-
-			// texture wrapping method
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// texture mipmap generation? usage?
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			
-			// bind data to textureRef
-			normalMapRef = ilutGLBindTexImage();
-		}
-	}
-	else
-	{
-		// erro message
-		std::cout << "failed to load normal image" << std::endl;
-		ILenum error = ilGetError();
-		std::cout << "error: " << iluErrorString(error) << std::endl;
-	}
-
-	// check that ptexture is created
-	if(glIsTexture(normalMapRef))
-	{
-		std::cout << "normal texture success" << std::endl;
-		std::cout << "" << std::endl;
-	}
-
-	// unbinding & disabling texturing
-	glActiveTexture(NULL);
-	glBindTexture(GL_TEXTURE_2D, NULL);
-	glDisable(GL_TEXTURE_2D);
+	return textureRef;
 }
 
 // Recursive method for finding the node with a requested name
@@ -384,7 +349,7 @@ float* Skinning::GetTextureCoordinates()
 
 GLuint Skinning::GetTextureRef()
 {
-	return textureRef;
+	return diffuseTextureRef;
 }
 
 GLuint Skinning::GetNormalMapRef()

@@ -168,9 +168,9 @@ void LoadModelData()
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";
 	//std::string file = fileRoot + "Fat/fatdude.x";
-	//std::string file = fileRoot + "Zombie/Zombie_Idle02_roar.X";
+	std::string file = fileRoot + "Zombie/Zombie_Idle02_roar.X";
 
-	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 
 	std::string animation = fileRoot+"NightWingAS/anim.BVH";
@@ -273,6 +273,15 @@ void RenderSkin(glm::mat4 MVP)
 		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, skinList.at(i).GetTextureCoordinates(), GL_STATIC_DRAW);
 
+		// Texturing
+		glEnable(GL_TEXTURE_2D);
+		// diffuse texture for model
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetTextureRef());
+		// normal texture for model
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetNormalMapRef());
+
 		// bind RedrawVertexShader.MVP to this.matrixId
 		GLuint MatrixId = glGetUniformLocation(redrawProgram, "MVP");	
 		// bind RedrawFragmentShader.diffuseSampler to this.diffuseSampler
@@ -283,15 +292,6 @@ void RenderSkin(glm::mat4 MVP)
 		glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);
 		glUniform1i(diffuseSampler, 0);
 		glUniform1i(normalSampler, 1);
-
-		// Texturing
-		glEnable(GL_TEXTURE_2D);
-		// diffuse texture for model
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetTextureRef());
-		// normal texture for model
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetNormalMapRef());
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -743,7 +743,7 @@ void StoreParticleTextureData()
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
 
-	std::string fileRoot = "Models/SmokeShape.png";
+	std::string fileRoot = "Images/SmokeShape.png";
 
 	#pragma region  Loading Smoke Image
 
@@ -946,8 +946,7 @@ aiNode* SearchTree(aiNode* node, aiString name)
 	return NULL;
 }
 
-
-static void display() {}
+static void display() { glutSwapBuffers(); }
 	
 #pragma region Emitter Button Functions
 	// Change Emitter's graphic to Smoke

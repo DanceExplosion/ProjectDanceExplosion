@@ -59,13 +59,16 @@ public:
 private:	
 	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
 
-	void StoreNormalMapData(aiMaterial* mat);
 	void StoreTextureData(aiMaterial* mat);
+	std::string ReadFile(std::string filePath);
+	GLuint LoadTexture(std::string filePath, GLenum activeTexture);
+	void StoreDiffuseTextureData(std::string filePath);
+	void StoreNormalMapData(std::string filePath);
 
 	void StoreTextureCoordData(aiMesh* modelData, aiFace currentFace, int index);
 
-	GLuint textureRef;		// diffuse texture reference for bone
-	GLuint normalMapRef;	// normal texture reference for bone
+	GLuint diffuseTextureRef;	// diffuse texture reference for bone
+	GLuint normalMapRef;		// normal texture reference for bone
 
 	const aiScene* mainScene;
 	aiNode* root;
@@ -81,8 +84,6 @@ private:
 	std::vector<glm::vec3> finalVertexData;
 	// texture co-ordinates for model
 	std::vector<glm::vec2> textureCoordData;
-	// normals for model
-	std::vector<glm::vec3> normalData;
 
 	// has vertex already been move to worldSpace?
 	std::vector<bool> changed; 

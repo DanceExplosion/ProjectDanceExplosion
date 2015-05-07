@@ -6,7 +6,7 @@
   </asset>
   <library_images>
     <image id="Image">
-      <init_from>IronMan/IronMan_MAT.MAT</init_from>
+      <init_from>file://IronMan/Iron_Man_D.tga</init_from>
     </image>
   </library_images>
   <library_materials>

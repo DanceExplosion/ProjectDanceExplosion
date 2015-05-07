@@ -10,6 +10,7 @@ out vec4 finalColour;
 void main()
 {
 	vec4 normalFromTexture = normalize(texture2D(normalSampler, textureCoord) * 2.0 - 1.0);
-
-	finalColour = texture2D(diffuseSampler, textureCoord) * normalFromTexture;
+	finalColour = texture2D(diffuseSampler, textureCoord);
+	
+	//finalColour = finalColour * normalFromTexture;
 }

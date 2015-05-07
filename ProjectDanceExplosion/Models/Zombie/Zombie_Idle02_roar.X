@@ -28681,7 +28681,7 @@ Frame Scene_Root {
       0.000000;0.000000;0.000000;;
 
       TextureFilename {
-       "Zombie/zombieDDS/zombie_diff.dds";
+       "Zombie/Zombie_MAT.MAT";
       }
      }
     }

@@ -12,7 +12,7 @@
   </asset>
   <library_images>
     <image id="Image">
-      <init_from>NightwingAS/NightwingAS_DIFFUSE.tga</init_from>
+      <init_from>NightwingAS/NightwingAS_MAT.MAT</init_from>
     </image>
   </library_images>
   <library_materials>
