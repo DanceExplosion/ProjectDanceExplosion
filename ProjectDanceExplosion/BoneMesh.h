@@ -34,7 +34,7 @@ public:
 	BoneMesh(aiMesh* m, int boneIndex);
 	~BoneMesh();
 
-	void StoreBoneSpaceVertices(aiMatrix4x4 inverseBind);
+	void StoreBoneSpaceVertices();
 
 	// Getters
 	float* GetVertexData();

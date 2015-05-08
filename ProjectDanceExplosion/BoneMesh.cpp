@@ -11,7 +11,7 @@ BoneMesh::BoneMesh(aiMesh* m, int boneIndex)
 	m = NULL;
 }
 
-void BoneMesh::StoreBoneSpaceVertices(aiMatrix4x4 inverseBind)
+void BoneMesh::StoreBoneSpaceVertices()
 {
 	for(unsigned int i = 0; i < meshBone->mNumWeights; i++)
 	{

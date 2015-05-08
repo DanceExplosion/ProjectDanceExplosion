@@ -32,7 +32,13 @@ public:
 	// Normal constructor
 	Skinning(const aiScene* mainScene);
 	
+	// Boolean used to discern wether or not the program should match nodes to their respective bones
+	bool nodesAllocated;
 	
+	// Reference to the nodes, which will be stored at it's respective bone's position in the hierarchy
+	// Is a vector for easier resizing
+	std::vector<aiNode*> nodeReferences;
+
 	// Store all vertices in corresponding bone space
 	void StoreAllVertices();
 
@@ -57,7 +63,8 @@ public:
 	float* GetTextureCoordinates();
 
 private:	
-	aiMatrix4x4 SearchTree(aiNode* node, aiString name);
+	aiMatrix4x4 GetTotalTransform(aiNode* node);
+	aiNode* FindNode(aiNode* node, aiString name);
 
 	void StoreNormalMapData(aiMaterial* mat);
 	void StoreTextureData(aiMaterial* mat);

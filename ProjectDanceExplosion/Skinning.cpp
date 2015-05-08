@@ -4,6 +4,7 @@ Skinning::Skinning() {}
 
 Skinning::Skinning(const aiScene* mS)
 {
+	nodesAllocated = false;
 	// Store the pointer to the scene
 	mainScene = mS;
 	// root node of scene
@@ -14,7 +15,7 @@ void Skinning::StoreBoneMeshes(int meshIndex)
 {
 	aiBone* bone;
 	aiMesh* mesh = mainScene->mMeshes[meshIndex];
-
+	nodeReferences.resize(mesh->mNumBones);
 	// Store texture
 	StoreTextureData(mainScene->mMaterials[mesh->mMaterialIndex]);
 
@@ -23,13 +24,12 @@ void Skinning::StoreBoneMeshes(int meshIndex)
 		{
 			bone = mesh->mBones[i];
 
+			nodeReferences.at(i) = FindNode(root, bone->mName);
 			// create a new Mesh object
 			BoneMesh currentMesh = BoneMesh(mesh, i);
 
-			// taking aiNode as inverse bind
-			aiMatrix4x4 inverseNodePose = SearchTree(root, bone->mName);
 			// Store Mesh vertices in Bone Space
-			currentMesh.StoreBoneSpaceVertices(inverseNodePose);
+			currentMesh.StoreBoneSpaceVertices();
 
 			//Store Mesh Object
 			modelMeshes.push_back(currentMesh);
@@ -48,7 +48,7 @@ void Skinning::MoveMeshToWorldSpace(int meshIndex, int boneIndex)
 	aiMesh* mesh = mainScene->mMeshes[meshIndex];
 	aiBone* bone = mesh->mBones[boneIndex];
 	// get current pose from node
-	aiMatrix4x4 currentPose = SearchTree(root, bone->mName);
+	aiMatrix4x4 currentPose = GetTotalTransform(nodeReferences.at(boneIndex));
 	
 	BoneMesh currentMesh = modelMeshes.at(boneIndex);
 
@@ -315,19 +315,10 @@ void Skinning::StoreNormalMapData(aiMaterial* mat)
 	glDisable(GL_TEXTURE_2D);
 }
 
-// Recursive method for finding the node with a requested name
-// @return returns total mTransformation of Node and all it's ancestors
-aiMatrix4x4 Skinning::SearchTree(aiNode* node, aiString name)
+// Returns total mTransformation of Node and all it's ancestors
+aiMatrix4x4 Skinning::GetTotalTransform(aiNode* node)
 {
-	// Store the name for easy access
-	aiString currentName = node->mName;
-
-	// Matrix to be returned
-	aiMatrix4x4 mat;
-
-	// Corresponding node found
-	if (name == currentName)
-	{
+	
 		// Store the transformation
 		aiMatrix4x4 finalTransform = node->mTransformation;
 
@@ -340,6 +331,22 @@ aiMatrix4x4 Skinning::SearchTree(aiNode* node, aiString name)
 		}
 		//Return the total matrix
 		return finalTransform;
+}
+
+// Recursive method for finding the node with a requested name
+aiNode* Skinning::FindNode(aiNode* node, aiString name)
+{
+	// Store the name for easy access
+	aiString currentName = node->mName;
+
+	// Matrix to be returned
+	aiMatrix4x4 mat;
+
+	// Corresponding node found
+	if (name == currentName)
+	{
+		//Return the node reference
+		return node;
 	}
 	// If the name doesn't match
 	else
@@ -348,18 +355,15 @@ aiMatrix4x4 Skinning::SearchTree(aiNode* node, aiString name)
 		for(unsigned int i = 0; i < node->mNumChildren; i++)
 		{
 			// Get the return value of the recursive search
-			aiMatrix4x4 mat = SearchTree(node->mChildren[i], name);
+			aiNode* mat = FindNode(node->mChildren[i], name);
 
 			// If it has returned a value that isn't NULL, return it
-			if(mat.a1 != NULL)
+			if(mat != NULL)
 				return mat;
 		}
 	}
 	// If nothing has been found, then this branch of the skeleton is a dead end, return NULL for the first value to represent this
-	return aiMatrix4x4(	NULL,0,0,0,
-						0,0,0,0,
-						0,0,0,0,
-						0,0,0,0);
+	return NULL;
 }
 
 void Skinning::ResetChanged()

@@ -28,7 +28,7 @@
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram;
+GLuint basicProgram, particleProgram, skyboxProgram;
 GLuint redrawProgram, skeletonProgram;
 
 // Animation
@@ -45,7 +45,7 @@ GLuint smokeTex,philTex,trollTex;
 
 Node sceneNodes = Node();
 std::vector<Skinning> skinList;
-SkyBox skybox = SkyBox();
+SkyBox skybox;
 
 
 // Camera
@@ -144,6 +144,72 @@ void animationSplit(std::string model)
 		
 	}
 	#pragma endregion
+	
+	#pragma region Beast Animations
+	else if(model == "beast"){
+		
+		// Idle
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(90),
+										animCont.getFrameTime(95)));
+
+		// Walking
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
+										animCont.getFrameTime(5)));
+
+		// Surfacing
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(6),
+										animCont.getFrameTime(16)));
+		
+		// Head bob
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(16),
+										animCont.getFrameTime(20)));
+
+		// Jump
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
+										animCont.getFrameTime(30)));
+		
+		// Roar
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(35),
+										animCont.getFrameTime(42)));
+		
+		// Look around
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(43),
+										animCont.getFrameTime(51)));
+		
+		// Look around 2
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(80),
+										animCont.getFrameTime(89)));
+
+		// Headbutt
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(51),
+										animCont.getFrameTime(55)));
+
+		// Bite
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(55),
+										animCont.getFrameTime(62)));
+		
+		// Bite 2
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(62),
+										animCont.getFrameTime(68)));
+		
+		// Stomp
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(68),
+										animCont.getFrameTime(75)));
+
+		// Hit
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(75),
+										animCont.getFrameTime(80)));
+
+		// Death
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(95),
+										animCont.currentAnimation->mDuration));
+	}
+		#pragma endregion
+	else{
+		// If the model isn't one of the ones listed above, just play the enitre animation
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
+								animCont.currentAnimation->mDuration));
+	}
 }
 
 void LoadModelData()
@@ -165,13 +231,13 @@ void LoadModelData()
 	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Primal Beast/PrimalBeast.ms3d";
 	//std::string file = fileRoot + "Beast/beast.ms3d";
-	//std::string file = fileRoot + "Beast/beastedit.ms3d";
+	std::string file = fileRoot + "Beast/beastedit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";
 	//std::string file = fileRoot + "Fat/fatdude.x";
 	//std::string file = fileRoot + "Zombie/Zombie_Idle02_roar.X";
 
-	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 
 	std::string animation = fileRoot+"NightWingAS/anim.BVH";
@@ -214,8 +280,8 @@ void LoadModelData()
 	std::cout << ""<< std::endl;
 
 	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	//animationSplit("ninja");
-	//animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+	animationSplit("beast");
+	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
 
 	// Pulling required data from scene
 	/*for (int i = 0; i < numModels; i++)
@@ -410,6 +476,7 @@ void RenderBones(glm::mat4 MVP)
 	//glDrawArrays(GL_LINES_ADJACENCY, 0, sceneNodes.GetNumBones());
 	glDrawArrays(GL_POINTS, 0, sceneNodes.GetNumBones());
 	
+	glDeleteBuffers(1, &bonebuffer);
 	// Unload shader program
 	glUseProgram(0);
 	glEnable(GL_DEPTH_TEST);
@@ -456,7 +523,7 @@ void RenderScene()
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
-	//skybox.renderSkybox();
+	skybox.renderSkybox(view, projection);
 
 /*	GLuint vertexBuffer;
 
@@ -561,6 +628,7 @@ void RenderScene()
 
 	// animating skin
 	// for every mesh in scene...
+	
 	for(unsigned int j = 0; j < scene->mNumMeshes; j++)
 	{
 		//
@@ -730,6 +798,7 @@ void initShaders()
 {
 	ShaderLoader loader;
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
+	skyboxProgram = loader.CreateProgram("SkyboxVertexShader.VERT", "SkyboxFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 	skeletonProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 	redrawProgram = loader.CreateProgram("RedrawVertexShader.txt", "RedrawFragmentShader.txt");
@@ -971,6 +1040,9 @@ static void display() {}
 
 #pragma endregion
 
+	void CloseFunction(){
+		TwTerminate();
+	}
 void main(int argc, char** argv)
 {
 	// initialising freeglut
@@ -994,10 +1066,10 @@ void main(int argc, char** argv)
 	glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
 	TwInit(TW_OPENGL, NULL);
-	TwWindowSize(800, 800);
 	// Send window size events to AntTweakBar
 	glutReshapeFunc(MyReshape);
 	glutDisplayFunc(display);
+	//TwWindowSize(800, 800);
 	
 	// send the 'glutGetModifers' function pointer to AntTweakBar
 	TwGLUTModifiersFunc(glutGetModifiers);
@@ -1008,15 +1080,14 @@ void main(int argc, char** argv)
 	initCamera();
 	// loading models from file
 	LoadModelData();
-
-	/*skybox.loadSkybox("Textures/",
-						"jajlands1_ft.jpg",
-						"jajlands1_bk.jpg",
-						"jajlands1_lf.jpg",
-						"jajlands1_rt.jpg",
-						"jajlands1_up.jpg",
-						"jajlands1_dn.jpg");*/
-
+	
+	skybox.loadSkybox(skyboxProgram, "Textures/",
+						"lake1_ft.jpg",
+						"lake1_bk.jpg",
+						"lake1_lf.jpg",
+						"lake1_rt.jpg",
+						"lake1_up.jpg",
+						"lake1_dn.jpg");
 
 	StoreParticleTextureData();
 
@@ -1189,7 +1260,7 @@ void main(int argc, char** argv)
 	*/
 #pragma endregion
 
-	#pragma region TweakBar
+#pragma region TweakBar
 	
 	// Create TweakBar
 	TwBar *tBar;
@@ -1388,8 +1459,7 @@ void main(int argc, char** argv)
 
 	#pragma endregion
 
-	
-	#pragma region Emitter1 GUI
+	#pragma region Emitter4 GUI
 
 	// Window that will store the settings for the emitter and the particles
 	TwBar *emitterBar4;
@@ -1442,15 +1512,18 @@ void main(int argc, char** argv)
 	TwDefine("Emitter4Settings/Position  group='Emitter Properties'  ");
 
 	#pragma endregion
-
+	
 	#pragma endregion
 
+	#pragma endregion
+	
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
 	glutMouseFunc(MouseWheel);
-
+	glutCloseFunc(CloseFunction);
 	glutMainLoop();
+	TwTerminate();
 }
