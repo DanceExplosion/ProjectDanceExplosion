@@ -68,7 +68,7 @@ GLuint vao;
 bool toggleParticles = false;
 bool toggleBones = false;
 bool toggleSkin = false;
-bool ninja = false;
+bool multipleAnimations = false;
 
 // Gotta get that time yo
 int oldTime = 0;
@@ -77,14 +77,19 @@ int currentAnimation = 0;
 // Variables for the FPS and Total Particle Count
 float final_fps, particle_Count = 0.0f;
 
-// Funciton with the animation splits for the Ninja model
+// Funciton with the animation splits for the Ninja and Beast models
 void animationSplit(std::string model)
 {
+	// Clear whatever times were previously loaded.
 	animationTimes.clear();
 
+	// Animation split for the ninja model
 	#pragma region Ninja Animations
 	if(model == "ninja"){
-		ninja = true;
+
+		// Show animation controls
+		multipleAnimations = true;
+
 		// Standing
 		animationTimes.push_back(glm::vec2(animCont.getFrameTime(104),
 								animCont.currentAnimation->mDuration));
@@ -152,11 +157,74 @@ void animationSplit(std::string model)
 		animationTimes.push_back(glm::vec2(animCont.getFrameTime(97),
 										animCont.getFrameTime(104)));
 		
-	}
-	else {
-		ninja = false;
-	}
 	#pragma endregion
+
+	// Animation split for the beast model
+	#pragma region Beast Animations
+	}else if(model == "beast"){
+		// Show animation controls
+		multipleAnimations = true;
+
+		// Idle
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(89),
+										animCont.getFrameTime(93)));
+
+		// Walking
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
+										animCont.getFrameTime(5)));
+
+		// Surfacing
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(6),
+										animCont.getFrameTime(16)));
+		
+		// Jumping
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
+										animCont.getFrameTime(30)));
+
+		// Roar
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(35),
+										animCont.getFrameTime(42)));
+
+		// Crouch and look
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(43),
+										animCont.getFrameTime(50)));
+
+		// Stand and look
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(81),
+										animCont.getFrameTime(88)));
+
+		// Headbutt
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(51),
+										animCont.getFrameTime(56)));
+
+		// Bite
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(56),
+										animCont.getFrameTime(62)));
+
+		// Bite 2
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(62),
+										animCont.getFrameTime(68)));
+
+		// Stomp
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(68),
+										animCont.getFrameTime(74)));
+
+		// Hurt
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(74),
+										animCont.getFrameTime(81)));
+
+		// Dead
+		animationTimes.push_back(glm::vec2(animCont.getFrameTime(93),
+										animCont.currentAnimation->mDuration));
+		#pragma endregion
+	
+		// If the model is neither Beast nor Ninja
+	}else {
+		// Set the only animation as the entire cycle
+		animationTimes.push_back(glm::vec2(0,animCont.currentAnimation->mDuration));
+		// Hide the animation controls
+		multipleAnimations = false;
+	}
 }
 
 // Function for loading the models
@@ -178,13 +246,13 @@ void LoadModelData()
 
 	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Primal Beast/PrimalBeast.ms3d";
-	//std::string file = fileRoot + "Beast/beastedit.ms3d";
+	std::string file = fileRoot + "Beast/beastedit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";
 	//std::string file = fileRoot + "Fat/fatdude.x";
 	//std::string file = fileRoot + "Zombie/Zombie_Idle02_roar.X";
 
-	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 
 	std::string animation = fileRoot+"NightWingAS/anim.BVH";
@@ -227,7 +295,7 @@ void LoadModelData()
 	std::cout << ""<< std::endl;
 
 	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	animationSplit("ninja");
+	animationSplit("beast");
 	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
 
 	// Skinning
@@ -860,8 +928,13 @@ aiNode* SearchTree(aiNode* node, aiString name)
 }
 
 // Blank display function
-static void display() { glutSwapBuffers(); }
+static void display() {  }
 	
+void CloseFunction(){
+		TwTerminate();
+	}
+
+
 #pragma region Emitter Button Functions
 	// Change Emitter's graphic to Smoke
 	void TW_CALL emitSmoke(void *clientData)
@@ -892,7 +965,7 @@ static void display() { glutSwapBuffers(); }
 	}
 
 	// Call that goes to the next stage in the animation
-	void TW_CALL nextAnim(void *clientData)
+	void TW_CALL prevAnim(void *clientData)
 	{
 		if (currentAnimation > 0)
 			currentAnimation--;
@@ -902,7 +975,7 @@ static void display() { glutSwapBuffers(); }
 	}
 
 	// Call that goes to the previous stage in the animation
-	void TW_CALL prevAnim(void *clientData)
+	void TW_CALL nextAnim(void *clientData)
 	{
 		if (currentAnimation < animationTimes.size() - 1)
 			currentAnimation++;
@@ -1091,10 +1164,10 @@ void main(int argc, char** argv)
 	TwAddSeparator(tBar, NULL, " ");
 
 	// Check if model is ninja, allow animation control buttons
-	if (ninja)
+	if (multipleAnimations)
 	{
-		TwAddButton(tBar, "Next Anim | Ninja", nextAnim, NULL, " help='Only use when Ninja is active' ");
-		TwAddButton(tBar, "Prev Anim | Ninja", prevAnim, NULL, " help='Only use when Ninja is active' ");
+		TwAddButton(tBar, "Next Animation", nextAnim, NULL, " help='Only use when Ninja is active' ");
+		TwAddButton(tBar, "Prev Animation", prevAnim, NULL, " help='Only use when Ninja is active' ");
 		TwAddSeparator(tBar, NULL, " ");
 	}
 
@@ -1331,6 +1404,7 @@ void main(int argc, char** argv)
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
+	glutCloseFunc(CloseFunction);
 	glutMouseFunc(MouseWheel);
 
 	glutMainLoop();
