@@ -41,8 +41,6 @@ ParticleEmitter pEmitter2 = ParticleEmitter();
 ParticleEmitter pEmitter3 = ParticleEmitter();
 ParticleEmitter pEmitter4 = ParticleEmitter();
 
-GLuint smokeTex,philTex,trollTex;
-
 Node sceneNodes = Node();
 std::vector<Skinning> skinList;
 SkyBox skybox = SkyBox();
@@ -720,166 +718,6 @@ void initShaders()
 	redrawProgram = loader.CreateProgram("RedrawVertexShader.txt", "RedrawFragmentShader.txt");
 }
 
-//Function to assign the particle texture
-void StoreParticleTextureData()
-{
-	// Particle Texture Name
-
-	// Initialising DevIL libraries
-	ilInit();
-	iluInit();
-	ilutRenderer(ILUT_OPENGL);
-
-	std::string fileRoot = "Models/SmokeShape.png";
-
-#pragma region  Loading Smoke Image
-
-
-	// Load in texture
-	if (ilLoadImage(fileRoot.c_str()))
-	{
-		// checking relevant data has been loaded
-		ILubyte* data = ilGetData();
-		if (!data)
-			std::cout << "No image data found" << std::endl;
-		else
-		{
-			std::cout << "particle image loaded" << std::endl;
-			// Create new texture enum for model
-			glEnable(GL_TEXTURE_2D);
-			glActiveTexture(GL_TEXTURE0);
-			glGenTextures(1, &smokeTex);
-			glBindTexture(GL_TEXTURE_2D, smokeTex);
-
-			// Texture wrapping method
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// Texture mipmap generation? usage?
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			// Bind data to textureRef
-			smokeTex = ilutGLBindTexImage();
-		}
-	}
-	else
-	{
-		// Error message
-		std::cout << "failed to load image" << std::endl;
-		ILenum error = ilGetError();
-		std::cout << "error: " << iluErrorString(error) << std::endl;
-	}
-
-	// Check that ptexture is created
-	if (glIsTexture(smokeTex))
-		std::cout << "particle texture success" << std::endl;
-
-	// Unbinding & disabling texturing
-	glActiveTexture(NULL);
-	glBindTexture(GL_TEXTURE_2D, NULL);
-	glDisable(GL_TEXTURE_2D);
-#pragma endregion
-
-	fileRoot = "Models/p.hanna.jpg";
-
-#pragma region  Loading Phil Image
-	// Load in texture
-	if (ilLoadImage(fileRoot.c_str()))
-	{
-		// Checking relevant data has been loaded
-		ILubyte* data = ilGetData();
-		if (!data)
-			std::cout << "No image data found" << std::endl;
-		else
-		{
-			std::cout << "particle image loaded" << std::endl;
-			// Create new texture enum for model
-			glEnable(GL_TEXTURE_2D);
-			glActiveTexture(GL_TEXTURE0);
-			glGenTextures(1, &philTex);
-			glBindTexture(GL_TEXTURE_2D, philTex);
-
-			// Texture wrapping method
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// Texture mipmap generation? usage?
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			// Bind data to textureRef
-			philTex = ilutGLBindTexImage();
-		}
-	}
-	else
-	{
-		// Error message
-		std::cout << "failed to load image" << std::endl;
-		ILenum error = ilGetError();
-		std::cout << "error: " << iluErrorString(error) << std::endl;
-	}
-
-	// Check that ptexture is created
-	if (glIsTexture(philTex))
-		std::cout << "particle texture success" << std::endl;
-
-	// Unbinding & disabling texturing
-	glActiveTexture(NULL);
-	glBindTexture(GL_TEXTURE_2D, NULL);
-	glDisable(GL_TEXTURE_2D);
-
-#pragma endregion
-
-	fileRoot = "Models/Troll-face.png";
-
-#pragma region  Loading Troll Image
-	// Load in texture
-	if (ilLoadImage(fileRoot.c_str()))
-	{
-		// Checking relevant data has been loaded
-		ILubyte* data = ilGetData();
-		if (!data)
-			std::cout << "No image data found" << std::endl;
-		else
-		{
-			std::cout << "particle image loaded" << std::endl;
-			// Create new texture enum for model
-			glEnable(GL_TEXTURE_2D);
-			glActiveTexture(GL_TEXTURE0);
-			glGenTextures(1, &trollTex);
-			glBindTexture(GL_TEXTURE_2D, trollTex);
-
-			// Texture wrapping method
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// Texture mipmap generation? usage?
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			// Bind data to textureRef
-			trollTex = ilutGLBindTexImage();
-		}
-	}
-	else
-	{
-		// Error message
-		std::cout << "failed to load image" << std::endl;
-		ILenum error = ilGetError();
-		std::cout << "error: " << iluErrorString(error) << std::endl;
-	}
-
-	// Check that ptexture is created
-	if (glIsTexture(trollTex))
-		std::cout << "particle texture success" << std::endl;
-
-	// Unbinding & disabling texturing
-	glActiveTexture(NULL);
-	glBindTexture(GL_TEXTURE_2D, NULL);
-	glDisable(GL_TEXTURE_2D);
-
-#pragma endregion
-
-}
-
 // Function to allow window resizing
 void MyReshape(int width, int height){
 	glViewport(0, 0, width, height);
@@ -939,19 +777,19 @@ void CloseFunction(){
 	// Change Emitter's graphic to Smoke
 	void TW_CALL emitSmoke(void *clientData)
 	{ 
-		pEmitter.textureRef = smokeTex;
+		pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
 	}
 
 	// Change Emitter's graphic to Phil
 	void TW_CALL emitPhil(void *clientData)
 	{ 
-		pEmitter.textureRef = philTex;
+		pEmitter.StoreParticleTextureData("Models/p.hanna.jpg");
 	}
 
 	// Change Emitter's graphic to a trollface
-	void TW_CALL emitTroll(void *clientData)
+	void TW_CALL emitSpark(void *clientData)
 	{ 
-		pEmitter.textureRef = trollTex;
+		pEmitter.StoreParticleTextureData("Models/Spark.png");
 	}
 
 	void TW_CALL scaleUpCallback(void *clientData)
@@ -1033,7 +871,7 @@ void main(int argc, char** argv)
 						"jajlands1_dn.jpg");*/
 
 
-	StoreParticleTextureData();
+	pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
 
 #pragma region Model Node Finding
 
@@ -1062,7 +900,7 @@ void main(int argc, char** argv)
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,	// Shader
 		leftFoot,								// Paired Node
-		smokeTex);								// Texture
+		"Models/SmokeShape.png");				// Texture
 	//Emitter 1 Initial Values
 	pEmitter.emitterDir[0] = 0;						// X direction
 	pEmitter.emitterDir[1] = 1;						// Y Direction
@@ -1078,7 +916,7 @@ void main(int argc, char** argv)
 
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
 		leftHand,									// Paired Node
-		smokeTex);									// Texture
+		"Models/SmokeShape.png");					// Texture
 	//Emitter 2 Initial Values
 	pEmitter2.emitterDir[0] = 0;					// X Direction
 	pEmitter2.emitterDir[1] = 1;					// Y Direction
@@ -1094,7 +932,7 @@ void main(int argc, char** argv)
 
 	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
 		rightFoot,									// Paired Node
-		smokeTex);									// Texture
+		"Models/SmokeShape.png");					// Texture
 	//Emitter 3 Initial Values
 	pEmitter3.emitterDir[0] = 0;					// X Direction
 	pEmitter3.emitterDir[1] = 1;					// Y Direction
@@ -1110,7 +948,7 @@ void main(int argc, char** argv)
 
 	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
 		NULL,										// No paired node
-		smokeTex);									// Texture
+		"Models/SmokeShape.png");					// Texture
 	//Emitter 4 Initial Values
 	pEmitter4.emitterDir[0] = 0;					// X Direction
 	pEmitter4.emitterDir[1] = 0;					// Y Direction
@@ -1155,7 +993,7 @@ void main(int argc, char** argv)
 
 	TwAddButton(tBar, "Emit Smoke", emitSmoke, NULL, " label='Emit Smoke'");
 	TwAddButton(tBar, "Emit Phil", emitPhil, NULL, " label='Emit Phil'");
-	TwAddButton(tBar, "Emit Troll", emitTroll, NULL, " label='Emit Troll'");
+	TwAddButton(tBar, "Emit Spark", emitSpark, NULL, " label='Emit Spark'");
 	TwAddSeparator(tBar, NULL, " ");
 
 	TwAddVarRW(tBar, "Toggle Particle Emitter", TW_TYPE_BOOLCPP, &toggleParticles, " ");

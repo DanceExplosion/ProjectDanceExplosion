@@ -95,7 +95,7 @@ void SortParticles(){
 
 // Main constructor for a Particle Emitter
 // Passes through position, velocity, acceleration, lifeTime and colour
-ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, GLuint texture){
+ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, std::string textureFile){
 
 	// Assignment of parameters
 	programID = shaderProgram;
@@ -116,7 +116,7 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, GLuint text
 	emitterDir[2] = 0;
 	LastUsedParticle = 0;
 
-	textureRef = texture;
+	StoreParticleTextureData(textureFile);
 
 	sPos_Node = node;
 
@@ -558,5 +558,67 @@ void ParticleEmitter::scaleBufferDown() {
 	{
 		g_vertex_buffer_data[i] = g_vertex_buffer_data[i] * 0.9f;
 	}
+
+}
+
+//Function to assign the particle texture
+void ParticleEmitter::StoreParticleTextureData(std::string fileRoot)
+{
+	// Particle Texture Name
+
+	// Initialising DevIL libraries
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+
+#pragma region  Loading Image
+
+
+	// Load in texture
+	if (ilLoadImage(fileRoot.c_str()))
+	{
+		// checking relevant data has been loaded
+		ILubyte* data = ilGetData();
+		if (!data)
+			std::cout << "No image data found" << std::endl;
+		else
+		{
+			std::cout << "particle image loaded" << std::endl;
+			// Create new texture enum for model
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
+			glGenTextures(1, &textureRef);
+			glBindTexture(GL_TEXTURE_2D, textureRef);
+
+			// Texture wrapping method
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			// Texture mipmap generation? usage?
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			// Bind data to textureRef
+			textureRef = ilutGLBindTexImage();
+		}
+	}
+	else
+	{
+		// Error message
+		std::cout << "failed to load image" << std::endl;
+		ILenum error = ilGetError();
+		std::cout << "error: " << iluErrorString(error) << std::endl;
+	}
+
+	// Check that ptexture is created
+	if (glIsTexture(textureRef))
+		std::cout << "particle texture success" << std::endl;
+
+	// Unbinding & disabling texturing
+	glActiveTexture(NULL);
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glDisable(GL_TEXTURE_2D);
+#pragma endregion
+
+	
 
 }

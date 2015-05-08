@@ -133,7 +133,7 @@ public:
 	ParticleEmitter();
 
 	// ParticleEmitter function, passes in the variables from above
-	ParticleEmitter(GLuint shaderProgram, aiNode* node, GLuint texture);
+	ParticleEmitter(GLuint shaderProgram, aiNode* node, std::string textureFile);
 
 	//ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col);
 	
@@ -160,6 +160,8 @@ public:
 
 	// Multiplies the buffer values by 0.9 to make the particle smaller
 	void scaleBufferDown();
+
+	void StoreParticleTextureData(std::string fileRoot);
 
 	GLuint textureRef;
 
