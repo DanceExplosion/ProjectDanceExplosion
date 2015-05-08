@@ -10,6 +10,69 @@
     <unit name="centimeter" meter="0.01"/>
     <up_axis>Z_UP</up_axis>
   </asset>
+  <library_images>
+    <image id="Image">
+      <init_from>NightwingAS/NightwingAS_MAT.MAT</init_from>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="VisualMaterial" name="NightwingAS_DIFFUSE">
+      <instance_effect url="#Effect"/>
+      <extra>
+        <technique profile="FCOLLADA">
+          <user_properties>NightwingAS_DIFFUSE</user_properties>
+        </technique>
+      </extra>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="Effect" name="NightwingAS_DIFFUSE">
+      <profile_COMMON>
+        <newparam sid="Image-surface">
+          <surface type="2D">
+            <init_from>Image</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="Image-sampler">
+          <sampler2D>
+            <source>Image-surface</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+            <minfilter>NONE</minfilter>
+            <magfilter>NONE</magfilter>
+            <mipfilter>NONE</mipfilter>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="Image-sampler" texcoord=""/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra>
+        <technique profile="MAX3D">
+          <double_sided>1</double_sided>
+        </technique>
+      </extra>
+    </effect>
+  </library_effects>
   <library_cameras>
     <camera id="Camera-camera" name="Camera">
       <optics>
@@ -437,40 +500,6 @@
       </extra>
     </light>
   </library_lights>
-  <library_images/>
-  <library_effects>
-    <effect id="Material_001-effect">
-      <profile_COMMON>
-        <technique sid="common">
-          <lambert>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0 0 0 1</color>
-            </ambient>
-            <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
-            </diffuse>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </lambert>
-        </technique>
-        <extra>
-          <technique profile="GOOGLEEARTH">
-            <double_sided>1</double_sided>
-          </technique>
-        </extra>
-      </profile_COMMON>
-      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
-    </effect>
-  </library_effects>
-  <library_materials>
-    <material id="Material_001-material" name="Material_001-material">
-      <instance_effect url="#Material_001-effect"/>
-    </material>
-  </library_materials>
   <library_geometries>
     <geometry id="VisualSceneNode25_GeometryMesh-mesh" name="VisualSceneNode25_GeometryMesh">
       <mesh>

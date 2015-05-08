@@ -18,8 +18,6 @@
 // Header File
 #include "ParticleEmitter.h"
 
-
-
 // Global 
 #pragma region Variables
 
@@ -30,14 +28,14 @@ float fps = 0.0f;
 // Shader ID
 GLuint programID;
 
+// Toggle for Additive Blending
 bool additive;
 
+//Total Particle Limit
+const static int MAXPARTICLES = 10000;
 
-	// Annoying
-	const static int MAXPARTICLES = 10000;
-
-	// Container For Particles
-	Particle ParticleContainer[MAXPARTICLES];
+// Container For Particles
+Particle ParticleContainer[MAXPARTICLES];
 
 // Variables for Buffers
 GLuint billboard_vertex_buffer, particles_position_buffer, particles_colour_buffer, particle_texture_buffer;
@@ -61,10 +59,6 @@ static const GLfloat g_texture_buffer_data[] = {
 static GLfloat* g_particle_position_data = new GLfloat[MAXPARTICLES * 4];
 static GLubyte* g_particle_colour_data = new GLubyte[MAXPARTICLES * 4];
 
-
-// The index of the last particle retrieved from the array
-
-
 // The amount of particles to be drawn
 int ParticlesCount = 0;
 #pragma endregion
@@ -77,12 +71,10 @@ float getRand(){
 
 // Blank constructor
 ParticleEmitter::ParticleEmitter(){}
+int LastUsedParticle;
 
-
-	int LastUsedParticle;
-
-	// Finds a Particle in ParticlesContainer which is dead.
-	int FindUnusedParticle(){
+// Finds a Particle in ParticlesContainer which is dead.
+int FindUnusedParticle(){
 	// Loop through all particles, starting at the location of the last dead particle
 	for (int i = LastUsedParticle; i<MAXPARTICLES; i++){
 		// If the particle is dead, note it's index and return it
@@ -94,11 +86,12 @@ ParticleEmitter::ParticleEmitter(){}
 	// If all particles are used, overwrite the first particle
 	LastUsedParticle = 0;
 	return 0;
-	}
+}
 
-	void SortParticles(){
+// Function to sort particles in container
+void SortParticles(){
 	std::sort(&ParticleContainer[0], &ParticleContainer[MAXPARTICLES]);
-	}
+}
 
 // Main constructor for a Particle Emitter
 // Passes through position, velocity, acceleration, lifeTime and colour
@@ -112,12 +105,12 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, GLuint text
 	velocity = 0.006;
 	velocityRange = 0;
 	p_colourStart = glm::vec4(1);
-	p_colourEnd = glm::vec4(0,0,0,0);
+	p_colourEnd = glm::vec4(0, 0, 0, 0);
 	startScale = 1;
 	endScale = 0.2;
 	rate = 10;
 	rateCounter = 0;
-	angleRange = glm::vec3(0.5,0.5,0.5);
+	angleRange = glm::vec3(0.5, 0.5, 0.5);
 	emitterDir[0] = 1;
 	emitterDir[1] = 0;
 	emitterDir[2] = 0;
@@ -168,80 +161,11 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, GLuint text
 
 #pragma endregion
 
-#pragma region Particle Texture
-
-	// Function call for getting the Texture for the particle
-
-#pragma endregion
-
 }
-
-/*
-// Main constructor for a Particle Emitter
-// Passes through position, velocity, acceleration, lifeTime and colour
-ParticleEmitter::ParticleEmitter(GLuint shaderProgram, glm::vec3 pos, glm::vec3 vel, glm::vec3 accel, float life, glm::vec4 col){
-
-	// Assignment of parameters
-	programID = shaderProgram;
-	position = pos;
-	p_velocity = vel;
-	p_acc = accel;
-	p_lifetime = life;
-	p_colour = col;
-
-	// Loop to initialize all particles
-	for (int i = 0; i < MAXPARTICLES; i++)
-	{
-		ParticleContainer[i] = Particle();
-	}
-
-	// Use the Shader Program
-	glUseProgram(programID);
-
-	// Bind the buffers to their respective arrays
-#pragma region Binding of Buffers
-
-	//Buffers for Drawing Particles
-	glGenBuffers(1, &billboard_vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	//Buffers for Drawing Particles
-	glGenBuffers(1, &particle_texture_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particle_texture_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_texture_buffer_data), g_texture_buffer_data, GL_STATIC_DRAW);
-
-	// The VBO containing the positions of the particles
-	glGenBuffers(1, &particles_position_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 3 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
-
-	// The VBO containing the colours of the particles
-	glGenBuffers(1, &particles_colour_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particles_colour_buffer);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
-
-	// End the shader
-	glUseProgram(0);
-
-#pragma endregion
-
-#pragma region Particle Texture
-
-	// Function call for getting the Texture for the particle
-	StoreParticleTextureData();
-
-#pragma endregion
-
-}
-*/
-
 
 // Main Update Loop
 void ParticleEmitter::Update(float delta, glm::mat4 view){
-	
+
 	// Update Function for the Particle Emitter
 
 	// Use ShaderProgram
@@ -257,55 +181,56 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 	// newparticles will be huge and the next frame even longer.
 	int newparticles = 0;
 	// Increment the counter by the rate, with respect to time
-		rateCounter += delta*rate/100;
+	rateCounter += delta*rate / 100;
 
-		// If the rate reaches the threshold, create new particles
-		if(rateCounter >= 10){
-			// If the rate is high enough, then the rate counter could end up several times higher than 10, so create as many particles as appropriate
-			newparticles = rateCounter/10;
+	// If the rate reaches the threshold, create new particles
+	if (rateCounter >= 10){
+		// If the rate is high enough, then the rate counter could end up several times higher than 10, so create as many particles as appropriate
+		newparticles = rateCounter / 10;
 
-			// Reduce the rate counter to a value lower than 10, but bigger than 0 (in the event of newparticles rounding up)
-			rateCounter = rateCounter-(newparticles*10);
-			if(rateCounter <= 0)
-				rateCounter = 0;
-		}
+		// Reduce the rate counter to a value lower than 10, but bigger than 0 (in the event of newparticles rounding up)
+		rateCounter = rateCounter - (newparticles * 10);
+		if (rateCounter <= 0)
+			rateCounter = 0;
+	}
 
 	//newparticles = 1;
 
 #pragma region Node Positions for Emitters
-		glm::vec3 startPos;
+	glm::vec3 startPos;
 
-		if(sPos_Node != NULL){
-	aiNode* tempNode = sPos_Node;
-	aiMatrix4x4 sPos = sPos_Node->mTransformation;
+	if (sPos_Node != NULL){
+		aiNode* tempNode = sPos_Node;
+		aiMatrix4x4 sPos = sPos_Node->mTransformation;
 
-	// Get the total transformation of the node
-	while (tempNode->mParent != NULL)
-	{
-		aiMatrix4x4 temp = tempNode->mParent->mTransformation;
-		sPos = temp*sPos;
-		tempNode = tempNode->mParent;
-	}
-
-	sPos = sPos.Transpose();
-
-	glm::mat4 sPos_Converted = glm::mat4(
-		sPos.a1, sPos.a2, sPos.a3, sPos.a4,
-		sPos.b1, sPos.b2, sPos.b3, sPos.b4,
-		sPos.c1, sPos.c2, sPos.c3, sPos.c4,
-		sPos.d1, sPos.d2, sPos.d3, sPos.d4);
-
-	glm::vec4 temp = sPos_Converted * glm::vec4(position, 1);
-
-	startPos = glm::vec3(temp.x, temp.y, temp.z);
-		}else{
-			startPos = position;
+		// Get the total transformation of the node
+		while (tempNode->mParent != NULL)
+		{
+			aiMatrix4x4 temp = tempNode->mParent->mTransformation;
+			sPos = temp*sPos;
+			tempNode = tempNode->mParent;
 		}
 
+		sPos = sPos.Transpose();
+
+		glm::mat4 sPos_Converted = glm::mat4(
+			sPos.a1, sPos.a2, sPos.a3, sPos.a4,
+			sPos.b1, sPos.b2, sPos.b3, sPos.b4,
+			sPos.c1, sPos.c2, sPos.c3, sPos.c4,
+			sPos.d1, sPos.d2, sPos.d3, sPos.d4);
+
+		glm::vec4 temp = sPos_Converted * glm::vec4(position, 1);
+
+		startPos = glm::vec3(temp.x, temp.y, temp.z);
+	}
+	else{
+		startPos = position;
+	}
+
 #pragma endregion
-		
-		// Get the vector position of the camera
-		glm::vec3 CameraPosition(glm::inverse(view)[3]);
+
+	// Get the vector position of the camera
+	glm::vec3 CameraPosition(glm::inverse(view)[3]);
 
 	// Loops through every new particle
 	for (int i = 0; i < newparticles; i++){
@@ -313,20 +238,20 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 		// Sets the Index to the value returned from the FindUsedParticle() function
 		// Goes throug the ParticleContainer and sets the necessary variables
 		int particleIndex = FindUnusedParticle();
-		
+
 
 		if (particleIndex != -1)
 		{
 			// Generate a random velocity based on the velocity range
-			float currentVel = velocity+ (velocityRange*getRand() - velocityRange*getRand());
+			float currentVel = velocity + (velocityRange*getRand() - velocityRange*getRand());
 
 			// Generate random angles for the X, Y and Z directions
-			float xAngle = emitterDir[0]+(angleRange.x*getRand() - angleRange.x*getRand());
-			float yAngle = emitterDir[1]+(angleRange.y*getRand() - angleRange.y*getRand());
-			float zAngle = emitterDir[2]+(angleRange.z*getRand() - angleRange.z*getRand());
+			float xAngle = emitterDir[0] + (angleRange.x*getRand() - angleRange.x*getRand());
+			float yAngle = emitterDir[1] + (angleRange.y*getRand() - angleRange.y*getRand());
+			float zAngle = emitterDir[2] + (angleRange.z*getRand() - angleRange.z*getRand());
 
 			// Normalize the angles to make the speed of each particle the same
-			glm::vec3 angle = glm::normalize(glm::vec3(xAngle,yAngle,zAngle));
+			glm::vec3 angle = glm::normalize(glm::vec3(xAngle, yAngle, zAngle));
 
 			// Set the speed of the particle to the randomly generated values
 			ParticleContainer[particleIndex].velocity.x = -angle.x*currentVel;
@@ -340,11 +265,11 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 			ParticleContainer[particleIndex].position = startPos;
 			//ParticleContainer[particleIndex].velocity = p_velocity;
 			ParticleContainer[particleIndex].acc = p_acc;
-			
+
 			// Set the RGBA values of Particles in the container to the passed in values 
 			ParticleContainer[particleIndex].currentColour = glm::vec4(0);
 			ParticleContainer[particleIndex].startColour = p_colourStart;
-				ParticleContainer[particleIndex].endColour = p_colourEnd;
+			ParticleContainer[particleIndex].endColour = p_colourEnd;
 
 			// Store the starting, current and ending values of the particle's scale
 			ParticleContainer[particleIndex].startSize = startScale;
@@ -374,33 +299,34 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 			if (!p.isDead()){
 				// Set p's cameradistance to its lifetime, unless it has just been created, in which case, make sure it isn't drawn
 				// This avoids a glitch that caused newly created particles to always be drawn in front
-				if(p.lifetime < p.startLifetime - 0.016f*delta)
-				p.cameradistance = glm::length2(p.position - CameraPosition);
+				if (p.lifetime < p.startLifetime - 0.016f*delta)
+					p.cameradistance = glm::length2(p.position - CameraPosition);
 				else
 					p.cameradistance = INFINITE;
 				//p.cameradistance = p.lifetime;
-				
+
 				// Fill the GPU buffer
 				// Positional data and size for each particle (xyzw)
-				if(p.cameradistance != INFINITE){
-				g_particle_position_data[4 * ParticlesCount + 0] = p.position.x;
-				g_particle_position_data[4 * ParticlesCount + 1] = p.position.y;
-				g_particle_position_data[4 * ParticlesCount + 2] = p.position.z;
-				g_particle_position_data[4 * ParticlesCount + 3] = p.currentSize;
+				if (p.cameradistance != INFINITE){
+					g_particle_position_data[4 * ParticlesCount + 0] = p.position.x;
+					g_particle_position_data[4 * ParticlesCount + 1] = p.position.y;
+					g_particle_position_data[4 * ParticlesCount + 2] = p.position.z;
+					g_particle_position_data[4 * ParticlesCount + 3] = p.currentSize;
 
-				// Colour data for each particle (rgba)
-				g_particle_colour_data[4 * ParticlesCount + 0] = p.currentColour.r*255;
-				g_particle_colour_data[4 * ParticlesCount + 1] = p.currentColour.g*255;
-				g_particle_colour_data[4 * ParticlesCount + 2] = p.currentColour.b*255;
-				g_particle_colour_data[4 * ParticlesCount + 3] = p.currentColour.a*255;
+					// Colour data for each particle (rgba)
+					g_particle_colour_data[4 * ParticlesCount + 0] = p.currentColour.r * 255;
+					g_particle_colour_data[4 * ParticlesCount + 1] = p.currentColour.g * 255;
+					g_particle_colour_data[4 * ParticlesCount + 2] = p.currentColour.b * 255;
+					g_particle_colour_data[4 * ParticlesCount + 3] = p.currentColour.a * 255;
 
-				// Increment ParticleCount
-				ParticlesCount++;
-				}else{
-				g_particle_colour_data[4 * ParticlesCount + 0] = 0;
-				g_particle_colour_data[4 * ParticlesCount + 1] = 0;
-				g_particle_colour_data[4 * ParticlesCount + 2] = 0;
-				g_particle_colour_data[4 * ParticlesCount + 3] = 0;
+					// Increment ParticleCount
+					ParticlesCount++;
+				}
+				else{
+					g_particle_colour_data[4 * ParticlesCount + 0] = 0;
+					g_particle_colour_data[4 * ParticlesCount + 1] = 0;
+					g_particle_colour_data[4 * ParticlesCount + 2] = 0;
+					g_particle_colour_data[4 * ParticlesCount + 3] = 0;
 				}
 			}
 			else{
@@ -467,7 +393,7 @@ void ParticleEmitter::Draw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		else
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		
+
 
 		// Vertex shader
 		GLuint VP_Matrix_ID = glGetUniformLocation(programID, "VP");
@@ -580,7 +506,7 @@ void ParticleEmitter::Cleanup(){
 
 
 // Function to print out the number of Particles currently active
-void ParticleEmitter::particleCount() {
+int ParticleEmitter::particleCount() {
 
 	int count = 0;
 	for (int i = 0; i < MAXPARTICLES; i++) {
@@ -589,7 +515,7 @@ void ParticleEmitter::particleCount() {
 			count++;
 		}
 	}
-	std::cout << "\nParticleCount: " << count << std::endl;
+	return count;
 }
 
 // Function to set all particles in the container dead.
@@ -609,7 +535,7 @@ float ParticleEmitter::whatIsFPS() {
 	// FPS
 	// Get the stored delta value [d_Store] - should be around 16 - 18ms
 	// So 1/0.016 = ~60 frames per second
-	return fps = 1 / ((d_Store/1000.0f));
+	return fps = 1 / ((d_Store / 1000.0f));
 
 	std::cout << "\nFPS: " << fps << std::endl;
 

@@ -129,11 +129,6 @@ public:
 	aiNode* sPos_Node;
 	float emitterDir[3];
 	
-
-	//Value for max number of Particles in the system
-	//10 is hardcore
-	//const static int MaxParticles = 10;
-	
 	// Default Constructor
 	ParticleEmitter();
 
@@ -152,7 +147,7 @@ public:
 	void Cleanup();
 
 	// Function for printing out the current particle count
-	void particleCount();
+	int particleCount();
 
 	// Function to disable emitter (doesnt work)
 	void disable();

@@ -28,7 +28,7 @@
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram, skyboxProgram;
+GLuint basicProgram, particleProgram;
 GLuint redrawProgram, skeletonProgram;
 
 // Animation
@@ -45,7 +45,7 @@ GLuint smokeTex,philTex,trollTex;
 
 Node sceneNodes = Node();
 std::vector<Skinning> skinList;
-SkyBox skybox;
+SkyBox skybox = SkyBox();
 
 
 // Camera
@@ -64,17 +64,27 @@ const aiScene* scene, *animScene;
 
 GLuint vao;
 
+// Toggles for drawing the individual systems
+bool toggleParticles = false;
+bool toggleBones = false;
+bool toggleSkin = false;
+bool ninja = false;
+
 // Gotta get that time yo
 int oldTime = 0;
 int currentAnimation = 0;
-float final_fps = 0.0f;
 
+// Variables for the FPS and Total Particle Count
+float final_fps, particle_Count = 0.0f;
+
+// Funciton with the animation splits for the Ninja model
 void animationSplit(std::string model)
 {
 	animationTimes.clear();
 
 	#pragma region Ninja Animations
 	if(model == "ninja"){
+		ninja = true;
 		// Standing
 		animationTimes.push_back(glm::vec2(animCont.getFrameTime(104),
 								animCont.currentAnimation->mDuration));
@@ -143,75 +153,13 @@ void animationSplit(std::string model)
 										animCont.getFrameTime(104)));
 		
 	}
+	else {
+		ninja = false;
+	}
 	#pragma endregion
-	
-	#pragma region Beast Animations
-	else if(model == "beast"){
-		
-		// Idle
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(90),
-										animCont.getFrameTime(95)));
-
-		// Walking
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
-										animCont.getFrameTime(5)));
-
-		// Surfacing
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(6),
-										animCont.getFrameTime(16)));
-		
-		// Head bob
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(16),
-										animCont.getFrameTime(20)));
-
-		// Jump
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
-										animCont.getFrameTime(30)));
-		
-		// Roar
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(35),
-										animCont.getFrameTime(42)));
-		
-		// Look around
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(43),
-										animCont.getFrameTime(51)));
-		
-		// Look around 2
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(80),
-										animCont.getFrameTime(89)));
-
-		// Headbutt
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(51),
-										animCont.getFrameTime(55)));
-
-		// Bite
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(55),
-										animCont.getFrameTime(62)));
-		
-		// Bite 2
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(62),
-										animCont.getFrameTime(68)));
-		
-		// Stomp
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(68),
-										animCont.getFrameTime(75)));
-
-		// Hit
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(75),
-										animCont.getFrameTime(80)));
-
-		// Death
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(95),
-										animCont.currentAnimation->mDuration));
-	}
-		#pragma endregion
-	else{
-		// If the model isn't one of the ones listed above, just play the enitre animation
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
-								animCont.currentAnimation->mDuration));
-	}
 }
 
+// Function for loading the models
 void LoadModelData()
 {
 	// set background colour //black
@@ -230,14 +178,13 @@ void LoadModelData()
 
 	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Primal Beast/PrimalBeast.ms3d";
-	//std::string file = fileRoot + "Beast/beast.ms3d";
-	std::string file = fileRoot + "Beast/beastedit.ms3d";
+	//std::string file = fileRoot + "Beast/beastedit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";
 	//std::string file = fileRoot + "Fat/fatdude.x";
 	//std::string file = fileRoot + "Zombie/Zombie_Idle02_roar.X";
 
-	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
+	std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 
 	std::string animation = fileRoot+"NightWingAS/anim.BVH";
@@ -280,22 +227,8 @@ void LoadModelData()
 	std::cout << ""<< std::endl;
 
 	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	animationSplit("beast");
+	animationSplit("ninja");
 	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-
-	// Pulling required data from scene
-	/*for (int i = 0; i < numModels; i++)
-	{
-		aiMesh* mesh1 = scene->mMeshes[i];
-		aiBone* bone1 = mesh1->mBones[0];
-		std::cout << "Number of bones in model "<< i << " : "<< mesh1->mNumBones << std::endl;
-		std::cout << "Number of faces in model "<< i << " : "<< mesh1->mNumFaces << std::endl;
-		
-		if (mesh1->HasTextureCoords(0))
-			modelList.push_back(Mesh(mesh1, scene->mMaterials[mesh1->mMaterialIndex]));
-		else
-			modelList.push_back(Mesh(mesh1, NULL));
-	}*/
 
 	// Skinning
 	sceneNodes = Node(scene);
@@ -319,6 +252,7 @@ void LoadModelData()
 
 }
 
+// Function to render the Skin of each model
 void RenderSkin(glm::mat4 MVP)
 {
 	// Use skeleton drawing program
@@ -340,6 +274,15 @@ void RenderSkin(glm::mat4 MVP)
 		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize, skinList.at(i).GetTextureCoordinates(), GL_STATIC_DRAW);
 
+		// Texturing
+		glEnable(GL_TEXTURE_2D);
+		// diffuse texture for model
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetTextureRef());
+		// normal texture for model
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetNormalMapRef());
+
 		// bind RedrawVertexShader.MVP to this.matrixId
 		GLuint MatrixId = glGetUniformLocation(redrawProgram, "MVP");	
 		// bind RedrawFragmentShader.diffuseSampler to this.diffuseSampler
@@ -350,15 +293,6 @@ void RenderSkin(glm::mat4 MVP)
 		glUniformMatrix4fv(MatrixId, 1, GL_FALSE, &MVP[0][0]);
 		glUniform1i(diffuseSampler, 0);
 		glUniform1i(normalSampler, 1);
-
-		// Texturing
-		glEnable(GL_TEXTURE_2D);
-		// diffuse texture for model
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetTextureRef());
-		// normal texture for model
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetNormalMapRef());
 
 		// pass vertex data
 		glEnableVertexAttribArray(0);
@@ -404,6 +338,7 @@ void RenderSkin(glm::mat4 MVP)
 	glUseProgram(0);
 }
 
+// Function to render the bones of the models
 void RenderBones(glm::mat4 MVP)
 {
 	// Use skeleton drawing program
@@ -469,19 +404,14 @@ void RenderBones(glm::mat4 MVP)
 
 	glLineWidth(4.0f);
 	glPointSize(5.0f);
-	//glDrawArrays(GL_LINES, 0, sceneNodes.GetNumBones());
-	//glDrawArrays(GL_LINE_STRIP, 0, sceneNodes.GetNumBones());
-	//glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, sceneNodes.GetNumBones());
-	//glDrawArrays(GL_LINE_LOOP, 0, sceneNodes.GetNumBones());
-	//glDrawArrays(GL_LINES_ADJACENCY, 0, sceneNodes.GetNumBones());
 	glDrawArrays(GL_POINTS, 0, sceneNodes.GetNumBones());
 	
-	glDeleteBuffers(1, &bonebuffer);
 	// Unload shader program
 	glUseProgram(0);
 	glEnable(GL_DEPTH_TEST);
 }
 
+// Function to render the main scene
 void RenderScene()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -523,99 +453,8 @@ void RenderScene()
 	
 	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
 
-	skybox.renderSkybox(view, projection);
+	//skybox.renderSkybox();
 
-/*	GLuint vertexBuffer;
-
-	for(int i = 0; i < numModels; i++)
-	{
-		// vertex buffer		
-		int bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts(x, y & z), each part is 4 bytes long
-		glGenBuffers(1, &vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetVertexData(), GL_STATIC_DRAW);
-
-		// texture buffer
-		bufferSize = modelList.at(i).GetNumVertices() * 2 * 4; // each texture coordinate has 2 parts(x & y), each part is 4 bytes long
-		GLuint texturebuffer;
-		glGenBuffers(1, &texturebuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetTextureCoords(), GL_STATIC_DRAW);
-		
-		// normal buffer
-		bufferSize = modelList.at(i).GetNumVertices() * 3 * 4; // each normal has 3 parts(x, y & z), each part is 4 bytes long
-		GLuint normalbuffer;
-		glGenBuffers(1, &normalbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, modelList.at(i).GetNormalData(), GL_STATIC_DRAW);
-
-		// Texturing
-		// diffuse texture for model
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetTextureData());
-
-		// normal texture for model
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, modelList.at(i).GetNormalMapData());
-		// bind fragmentShader.textureSampler to this.textureSampler
-		GLuint normalSampler = glGetUniformLocation(basicProgram, "normalSampler");
-		// pass in texture data
-		glUniform1i(normalSampler, 1);
-
-
-		// pass vertex data
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexAttribPointer(
-			0,				// VertexArrayAttrib
-			3,				// size
-			GL_FLOAT,		// type
-			GL_FALSE,		// normalised?
-			0,				// stride
-			(void*)0		// array buffer offset
-			);
-
-		// pass texture coordinate data
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
-		glVertexAttribPointer(
-			1,				// VertexArrayAttrib
-			2,				// size
-			GL_FLOAT,		// type
-			GL_TRUE,		// normalised?
-			0,				// stride
-			(void*)0		// array buffer offset
-			);
-
-		// pass texture coordinate data
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-		glVertexAttribPointer(
-			2,				// VertexArrayAttrib
-			3,				// size
-			GL_FLOAT,		// type
-			GL_FALSE,		// normalised?
-			0,				// stride
-			(void*)0		// array buffer offset
-			);
-
-		// draw model
-		int numVertices = modelList.at(i).GetNumVertices();
-		//glDrawArrays(GL_TRIANGLES, 0, numVertices);
-
-		// Texturing
-		glBindTexture(GL_TEXTURE_2D, NULL);
-		glActiveTexture(NULL);
-
-		// disable & delete vbo, texturebuffer & normalbuffer
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-
-		glDeleteBuffers(1, &vertexBuffer);
-		glDeleteBuffers(1, &texturebuffer);
-		glDeleteBuffers(1, &normalbuffer);
-	}*/
 	// Unload model shader program, pEmitter uses its own 
 	glUseProgram(0);
 
@@ -628,7 +467,6 @@ void RenderScene()
 
 	// animating skin
 	// for every mesh in scene...
-	
 	for(unsigned int j = 0; j < scene->mNumMeshes; j++)
 	{
 		//
@@ -639,19 +477,30 @@ void RenderScene()
 		skinList.at(j).StoreFinalVertexData(j);
 	}
 
-	// draw skinned bones
-	RenderSkin(MVP);
-	// draw skeleton
-	RenderBones(MVP);
+	if (!toggleSkin) {
+		// Draw skinned bones
+		RenderSkin(MVP);
+	}
 
-	// Particle Emitter Updates
-	pEmitter.Update(delta, view);
-	pEmitter2.Update(delta,view);
-	pEmitter3.Update(delta, view);
-	pEmitter4.Update(delta, view);
+	if (!toggleBones) {
+		// Draw skeleton
+		RenderBones(MVP);
+	}
 
-	// Emitter Draw
-	pEmitter.Draw(view, projection * view);
+	// Update Variables with data from ParticleEmitter 
+	final_fps = pEmitter.whatIsFPS();
+	particle_Count = pEmitter.particleCount() + pEmitter2.particleCount() + pEmitter3.particleCount() + pEmitter4.particleCount();
+
+	if (!toggleParticles) {
+		// Draw Emitter
+		pEmitter.Draw(view, projection * view);
+
+		// Particle Emitter Updates
+		pEmitter.Update(delta, view);
+		pEmitter2.Update(delta, view);
+		pEmitter3.Update(delta, view);
+		pEmitter4.Update(delta, view);
+	}
 
 	// Emitter Cleanups
 	pEmitter.Cleanup();
@@ -685,7 +534,7 @@ void MoveCamera(/*int x, int y*/)
 }
 
 // Keyboard controls
-void KeyPress(unsigned char key, int x, int y )
+void KeyPress(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
@@ -726,7 +575,7 @@ void KeyPress(unsigned char key, int x, int y )
 }
 
 // Keyboard controls for camera movement
-void CameraControls(int key, int x , int y)
+void CameraControls(int key, int x, int y)
 {
 	switch (key)
 	{
@@ -762,7 +611,7 @@ void CameraControls(int key, int x , int y)
 // Mouse Controll for Zooming [a lot handier than dealing with Sticky based keys for windows
 void MouseWheel(int button, int dir, int x, int y)
 {
-	if( !TwEventMouseButtonGLUT(button, dir, x, y) )
+	if (!TwEventMouseButtonGLUT(button, dir, x, y))
 	{
 		// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
 		if (button == 3)
@@ -773,10 +622,10 @@ void MouseWheel(int button, int dir, int x, int y)
 
 		MoveCamera();
 	}
-		
+
 }
 
-// setting up initial camera values
+// Setting up initial camera values
 void initCamera()
 {
 	// projection matrix
@@ -793,29 +642,29 @@ void initCamera()
 	MoveCamera();
 }
 
-// compiling shader code
+// Compiling shader code
 void initShaders()
 {
 	ShaderLoader loader;
 	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
-	skyboxProgram = loader.CreateProgram("SkyboxVertexShader.VERT", "SkyboxFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 	skeletonProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 	redrawProgram = loader.CreateProgram("RedrawVertexShader.txt", "RedrawFragmentShader.txt");
 }
 
+//Function to assign the particle texture
 void StoreParticleTextureData()
 {
-	//Particle Texture Name
-	
-	// initialising DevIL libraries
+	// Particle Texture Name
+
+	// Initialising DevIL libraries
 	ilInit();
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
 
 	std::string fileRoot = "Models/SmokeShape.png";
 
-	#pragma region  Loading Smoke Image
+#pragma region  Loading Smoke Image
 
 
 	// Load in texture
@@ -828,151 +677,144 @@ void StoreParticleTextureData()
 		else
 		{
 			std::cout << "particle image loaded" << std::endl;
-			// create new texture enum for model
+			// Create new texture enum for model
 			glEnable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE0);
 			glGenTextures(1, &smokeTex);
 			glBindTexture(GL_TEXTURE_2D, smokeTex);
 
-			// texture wrapping method
+			// Texture wrapping method
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// texture mipmap generation? usage?
+			// Texture mipmap generation? usage?
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			// bind data to textureRef
+			// Bind data to textureRef
 			smokeTex = ilutGLBindTexImage();
 		}
 	}
 	else
 	{
-		// erro message
+		// Error message
 		std::cout << "failed to load image" << std::endl;
 		ILenum error = ilGetError();
 		std::cout << "error: " << iluErrorString(error) << std::endl;
 	}
 
-	// check that ptexture is created
+	// Check that ptexture is created
 	if (glIsTexture(smokeTex))
 		std::cout << "particle texture success" << std::endl;
-	
-	// unbinding & disabling texturing
+
+	// Unbinding & disabling texturing
 	glActiveTexture(NULL);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glDisable(GL_TEXTURE_2D);
 #pragma endregion
-	
+
 	fileRoot = "Models/p.hanna.jpg";
-	
-	#pragma region  Loading Phil Image
+
+#pragma region  Loading Phil Image
 	// Load in texture
 	if (ilLoadImage(fileRoot.c_str()))
 	{
-		// checking relevant data has been loaded
+		// Checking relevant data has been loaded
 		ILubyte* data = ilGetData();
 		if (!data)
 			std::cout << "No image data found" << std::endl;
 		else
 		{
 			std::cout << "particle image loaded" << std::endl;
-			// create new texture enum for model
+			// Create new texture enum for model
 			glEnable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE0);
 			glGenTextures(1, &philTex);
 			glBindTexture(GL_TEXTURE_2D, philTex);
 
-			// texture wrapping method
+			// Texture wrapping method
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// texture mipmap generation? usage?
+			// Texture mipmap generation? usage?
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			// bind data to textureRef
+			// Bind data to textureRef
 			philTex = ilutGLBindTexImage();
 		}
 	}
 	else
 	{
-		// erro message
+		// Error message
 		std::cout << "failed to load image" << std::endl;
 		ILenum error = ilGetError();
 		std::cout << "error: " << iluErrorString(error) << std::endl;
 	}
 
-	// check that ptexture is created
+	// Check that ptexture is created
 	if (glIsTexture(philTex))
 		std::cout << "particle texture success" << std::endl;
 
-	
-	// unbinding & disabling texturing
+	// Unbinding & disabling texturing
 	glActiveTexture(NULL);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glDisable(GL_TEXTURE_2D);
+
 #pragma endregion
-	
+
 	fileRoot = "Models/Troll-face.png";
-	
-	#pragma region  Loading Troll Image
+
+#pragma region  Loading Troll Image
 	// Load in texture
 	if (ilLoadImage(fileRoot.c_str()))
 	{
-		// checking relevant data has been loaded
+		// Checking relevant data has been loaded
 		ILubyte* data = ilGetData();
 		if (!data)
 			std::cout << "No image data found" << std::endl;
 		else
 		{
 			std::cout << "particle image loaded" << std::endl;
-			// create new texture enum for model
+			// Create new texture enum for model
 			glEnable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE0);
 			glGenTextures(1, &trollTex);
 			glBindTexture(GL_TEXTURE_2D, trollTex);
 
-			// texture wrapping method
+			// Texture wrapping method
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// texture mipmap generation? usage?
+			// Texture mipmap generation? usage?
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			// bind data to textureRef
+			// Bind data to textureRef
 			trollTex = ilutGLBindTexImage();
 		}
 	}
 	else
 	{
-		// erro message
+		// Error message
 		std::cout << "failed to load image" << std::endl;
 		ILenum error = ilGetError();
 		std::cout << "error: " << iluErrorString(error) << std::endl;
 	}
 
-	// check that ptexture is created
+	// Check that ptexture is created
 	if (glIsTexture(trollTex))
 		std::cout << "particle texture success" << std::endl;
-	// unbinding & disabling texturing
+
+	// Unbinding & disabling texturing
 	glActiveTexture(NULL);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glDisable(GL_TEXTURE_2D);
+
 #pragma endregion
 
 }
 
-void TW_CALL scaleUpCallback(void *clientData)
-{
-	pEmitter.scaleBufferUp();
-}
-
-void TW_CALL scaleDownCallback(void *clientData)
-{
-	pEmitter.scaleBufferDown();
-}
-
+// Function to allow window resizing
 void MyReshape(int width, int height){
-	glViewport(0,0,width,height);
+	glViewport(0, 0, width, height);
 	// Set up projection matrix
 	projection = glm::perspective(
 		45.0f,						// field of view
@@ -983,6 +825,7 @@ void MyReshape(int width, int height){
 	TwWindowSize(width, height);
 }
 
+// Function for searching Model node trees to get node names for particle emitter assigning
 aiNode* SearchTree(aiNode* node, aiString name)
 {
 	// Store the name for easy access
@@ -1016,8 +859,8 @@ aiNode* SearchTree(aiNode* node, aiString name)
 	return NULL;
 }
 
-
-static void display() {}
+// Blank display function
+static void display() { glutSwapBuffers(); }
 	
 #pragma region Emitter Button Functions
 	// Change Emitter's graphic to Smoke
@@ -1038,11 +881,38 @@ static void display() {}
 		pEmitter.textureRef = trollTex;
 	}
 
+	void TW_CALL scaleUpCallback(void *clientData)
+	{
+		pEmitter.scaleBufferUp();
+	}
+
+	void TW_CALL scaleDownCallback(void *clientData)
+	{
+		pEmitter.scaleBufferDown();
+	}
+
+	// Call that goes to the next stage in the animation
+	void TW_CALL nextAnim(void *clientData)
+	{
+		if (currentAnimation > 0)
+			currentAnimation--;
+		else
+			currentAnimation = animationTimes.size() - 1;
+		animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
+	}
+
+	// Call that goes to the previous stage in the animation
+	void TW_CALL prevAnim(void *clientData)
+	{
+		if (currentAnimation < animationTimes.size() - 1)
+			currentAnimation++;
+		else
+			currentAnimation = 0;
+		animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
+	}
+
 #pragma endregion
 
-	void CloseFunction(){
-		TwTerminate();
-	}
 void main(int argc, char** argv)
 {
 	// initialising freeglut
@@ -1066,10 +936,10 @@ void main(int argc, char** argv)
 	glutSpecialFunc((GLUTspecialfun)TwEventSpecialGLUT);
 
 	TwInit(TW_OPENGL, NULL);
+	TwWindowSize(800, 800);
 	// Send window size events to AntTweakBar
 	glutReshapeFunc(MyReshape);
 	glutDisplayFunc(display);
-	//TwWindowSize(800, 800);
 	
 	// send the 'glutGetModifers' function pointer to AntTweakBar
 	TwGLUTModifiersFunc(glutGetModifiers);
@@ -1080,14 +950,15 @@ void main(int argc, char** argv)
 	initCamera();
 	// loading models from file
 	LoadModelData();
-	
-	skybox.loadSkybox(skyboxProgram, "Textures/",
-						"lake1_ft.jpg",
-						"lake1_bk.jpg",
-						"lake1_lf.jpg",
-						"lake1_rt.jpg",
-						"lake1_up.jpg",
-						"lake1_dn.jpg");
+
+	/*skybox.loadSkybox("Textures/",
+						"jajlands1_ft.jpg",
+						"jajlands1_bk.jpg",
+						"jajlands1_lf.jpg",
+						"jajlands1_rt.jpg",
+						"jajlands1_up.jpg",
+						"jajlands1_dn.jpg");*/
+
 
 	StoreParticleTextureData();
 
@@ -1101,166 +972,89 @@ void main(int argc, char** argv)
 	aiString rightHandBase = aiString("mixamorig_RightHand");
 #pragma endregion
 
-	aiString joint = aiString("Joint6");
-	aiString joint2 = aiString("Joint5");
-
-
-#pragma endregion
-
 	// Assigning a node pointer the value of a node from the node tree
 	aiNode* leftFoot = SearchTree(sceneNodes.root, leftToeBase);
 	aiNode* rightFoot = SearchTree(sceneNodes.root, rightToeBase);
 	aiNode* leftHand = SearchTree(sceneNodes.root, leftHandBase);
 	aiNode* rightHand = SearchTree(sceneNodes.root, rightHandBase);
 
-	//aiNode* yes = SearchTree(node.root, joint);
-	//aiNode* no = SearchTree(node.root, joint2);
-
 	// Use this to find names of bones in current loaded model
 	//node.PreOrderTraversal();
-
-#pragma region Iron Man examples
-	/*
-	
-	//Feet Thruster Particles
-	//Create a particle emitter
-	pEmitter = ParticleEmitter(particleProgram,		// Shader
-		glm::vec3(0.2f, 0, 0),						// Start Position
-		glm::vec3(0, 0, 0.01),						// Velocity
-		glm::vec3(0, 0, -0.004f),					// Accelleration
-		170.0f,										// Lifetime
-		glm::vec4(255, 255, 255, 255));				// Colour
-
-	//Create a second particle emitter
-	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(-0.2f, 0, 0),						// Start Position
-		glm::vec3(0, 0, 0.01),						// Velocity
-		glm::vec3(0, 0, -0.0004f),					// Accelleration
-		170.0f,										// Lifetime
-		glm::vec4(0, 255, 255, 255));				// Colour
-
-	// Hand Thruster Particles
-	//Create a second particle emitter
-	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(1.8f, 0, 2.9f),					// Start Position
-		glm::vec3(0, 0, 0.01),						// Velocity
-		glm::vec3(0, 0, -0.0004f),					// Accelleration
-		170.0f,										// Lifetime
-		glm::vec4(255, 255, 0, 255));					// Colour
-
-	//Create a second particle emitter
-	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(-1.8f, 0, 2.9f),					// Start Position
-		glm::vec3(0, 0, 0.01),						// Velocity
-		glm::vec3(0, 0, -0.0004f),					// Accelleration
-		170.0f,										// Lifetime
-		glm::vec4(255, 0, 255, 255));				// Colour
-		*/
 #pragma endregion
+
 
 	
 #pragma region NightWing examples
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,	// Shader
-		leftFoot,
-		smokeTex);									// Node to pair with
+		leftFoot,								// Paired Node
+		smokeTex);								// Texture
 	//Emitter 1 Initial Values
-	pEmitter.emitterDir[0] = 0;
-	pEmitter.emitterDir[1] = 1;
-	pEmitter.emitterDir[2] = 0;
-	pEmitter.velocity = 0.004;
-	pEmitter.p_lifetime = 50;
-	pEmitter.startScale = 1;
-	pEmitter.endScale = .5;
-	pEmitter.p_colourStart = glm::vec4(1,0,0,1);
-	pEmitter.p_colourEnd = glm::vec4(0,0,1,0);
-	pEmitter.angleRange = glm::vec3(0);
-	pEmitter.rate = 100;
+	pEmitter.emitterDir[0] = 0;						// X direction
+	pEmitter.emitterDir[1] = 1;						// Y Direction
+	pEmitter.emitterDir[2] = 0;						// Z Direction
+	pEmitter.velocity = -0.004;						// Initial velocity
+	pEmitter.p_lifetime = 50;						// Lifetime of Particles
+	pEmitter.startScale = 1;						// Initial size
+	pEmitter.endScale = .5;							// Size before death
+	pEmitter.p_colourStart = glm::vec4(1, 0, 0, 1);	// Start colour, Red
+	pEmitter.p_colourEnd = glm::vec4(0, 0, 1, 0);	// End colour, Blue
+	pEmitter.angleRange = glm::vec3(0);				// Angle of emitter
+	pEmitter.rate = 100;							// Rate of Spawn
 
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		leftHand,
-		smokeTex);									// Node to pair with
-									// Node to pair with
+		leftHand,									// Paired Node
+		smokeTex);									// Texture
 	//Emitter 2 Initial Values
-	pEmitter2.emitterDir[0] = 0;
-	pEmitter2.emitterDir[1] = 1;
-	pEmitter2.emitterDir[2] = 0;
-	pEmitter2.velocity = 0.001;
-	pEmitter2.p_lifetime = 15;
-	pEmitter2.startScale = 0.7;
-	pEmitter2.endScale = 0;
-	pEmitter2.p_colourStart = glm::vec4(1,0.5,0,1);
-	pEmitter2.p_colourEnd = glm::vec4(0,0,0,0);
-	pEmitter2.angleRange = glm::vec3(4);
-	pEmitter2.rate = 100;
+	pEmitter2.emitterDir[0] = 0;					// X Direction
+	pEmitter2.emitterDir[1] = 1;					// Y Direction
+	pEmitter2.emitterDir[2] = 0;					// Z Direction
+	pEmitter2.velocity = -0.001;					// Initial Velocity
+	pEmitter2.p_lifetime = 15;						// Lifetime of Particles
+	pEmitter2.startScale = 0.7;						// Initial size
+	pEmitter2.endScale = 0;							// Size before death
+	pEmitter2.p_colourStart = glm::vec4(1, 0.5, 0, 1);// Start colour, 
+	pEmitter2.p_colourEnd = glm::vec4(0, 0, 0, 0);	// End colour,
+	pEmitter2.angleRange = glm::vec3(4);			// Angle of emitter
+	pEmitter2.rate = 100;							// Rate of Spawn
 
 	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
-		rightFoot,
-		smokeTex);									// Node to pair with
+		rightFoot,									// Paired Node
+		smokeTex);									// Texture
 	//Emitter 3 Initial Values
-	pEmitter3.emitterDir[0] = 0;
-	pEmitter3.emitterDir[1] = 1;
-	pEmitter3.emitterDir[2] = 0;
-	pEmitter3.velocity = 0.004;
-	pEmitter3.p_lifetime = 50;
-	pEmitter3.startScale = 1;
-	pEmitter3.endScale = .5;
-	pEmitter3.p_colourStart = glm::vec4(0,1,0,1);
-	pEmitter3.p_colourEnd = glm::vec4(1,0,0,0);
-	pEmitter3.angleRange = glm::vec3(0);
-	pEmitter3.rate = 100;
+	pEmitter3.emitterDir[0] = 0;					// X Direction
+	pEmitter3.emitterDir[1] = 1;					// Y Direction
+	pEmitter3.emitterDir[2] = 0;					// Z Direction
+	pEmitter3.velocity = -0.004;					// Initial Velocity
+	pEmitter3.p_lifetime = 50;						// Lifetime of Particles	
+	pEmitter3.startScale = 1;						// Initial size
+	pEmitter3.endScale = .5;						// Size before death
+	pEmitter3.p_colourStart = glm::vec4(0, 1, 0, 1);// Start colour,
+	pEmitter3.p_colourEnd = glm::vec4(1, 0, 0, 0);	// End colour, 
+	pEmitter3.angleRange = glm::vec3(0);			// Angle of emitter
+	pEmitter3.rate = 100;							// Rate of Spawn
 
-	
 	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
-		NULL,
-		smokeTex);									// Node to pair with
+		NULL,										// No paired node
+		smokeTex);									// Texture
 	//Emitter 4 Initial Values
-	pEmitter4.emitterDir[0] = 0;
-	pEmitter4.emitterDir[1] = 0;
-	pEmitter4.emitterDir[2] = -1;
-	pEmitter4.position = glm::vec3(5,0,0);
-	pEmitter4.velocity = 0.001;
-	pEmitter4.p_lifetime = 50;
-	pEmitter4.startScale = 2;
-	pEmitter4.endScale = 0;
-	pEmitter4.p_colourStart = glm::vec4(0,0.7,1,1);
-	pEmitter4.p_colourEnd = glm::vec4(0.5,0,0.5,0);
-	pEmitter4.angleRange = glm::vec3(0.5);
-	pEmitter4.rate = 100;
+	pEmitter4.emitterDir[0] = 0;					// X Direction
+	pEmitter4.emitterDir[1] = 0;					// Y Direction
+	pEmitter4.emitterDir[2] = -1;					// Z Direction
+	pEmitter4.position = glm::vec3(5, 0, 0);		// Position
+	pEmitter4.velocity = -0.001;					// Initial Velocity
+	pEmitter4.p_lifetime = 50;						// Lifetime of Particles
+	pEmitter4.startScale = 2;						// Initial size
+	pEmitter4.endScale = 0;							// Size before death
+	pEmitter4.p_colourStart = glm::vec4(0, 0.7, 1, 1);// Start colour,
+	pEmitter4.p_colourEnd = glm::vec4(0.5, 0, 0.5, 0);// End colour, 
+	pEmitter4.angleRange = glm::vec3(0.5);			// Angle of emitter
+	pEmitter4.rate = 100;							// Rate of Spawn
 
-	/*
-	//Create a particle emitter
-	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 0),							// Start Position offset
-		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, 0),							// Accelleration
-		10.0f,										// Lifetime
-		glm::vec4(0, 255, 0, 255),					// Colour - Magenta
-		rightFoot);									// Node to pair with
-
-
-	//Create a particle emitter
-	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 0),							// Start Position offset
-		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, 0),							// Accelleration
-		10.0f,										// Lifetime
-		glm::vec4(0, 0, 255, 255),
-		leftHand);
-
-	//Create a particle emitter
-	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
-		glm::vec3(0, 0, 0),							// Start Position offset
-		glm::vec3(0, 0, 0.0001f),					// Velocity
-		glm::vec3(0, 0, 0),							// Accelleration
-		10.0f,										// Lifetime
-		glm::vec4(255, 0, 0, 255),
-		rightHand);					// Color
-	*/
 #pragma endregion
 
-#pragma region TweakBar
+	#pragma region TweakBar
 	
 	// Create TweakBar
 	TwBar *tBar;
@@ -1271,6 +1065,8 @@ void main(int argc, char** argv)
 
 	// FPS in UI
 	TwAddVarRO(tBar, "FPS", TW_TYPE_FLOAT, &final_fps, " ");
+	TwAddSeparator(tBar, NULL, " ");
+	TwAddVarRO(tBar, "Particle Count", TW_TYPE_FLOAT, &particle_Count, " ");
 	TwAddSeparator(tBar, NULL, " ");
 
 	// Button to call function to Scale the Particles bigger
@@ -1287,6 +1083,20 @@ void main(int argc, char** argv)
 	TwAddButton(tBar, "Emit Smoke", emitSmoke, NULL, " label='Emit Smoke'");
 	TwAddButton(tBar, "Emit Phil", emitPhil, NULL, " label='Emit Phil'");
 	TwAddButton(tBar, "Emit Troll", emitTroll, NULL, " label='Emit Troll'");
+	TwAddSeparator(tBar, NULL, " ");
+
+	TwAddVarRW(tBar, "Toggle Particle Emitter", TW_TYPE_BOOLCPP, &toggleParticles, " ");
+	TwAddVarRW(tBar, "Toggle Skin", TW_TYPE_BOOLCPP, &toggleSkin, " ");
+	TwAddVarRW(tBar, "Toggle Bones", TW_TYPE_BOOLCPP, &toggleBones, " ");
+	TwAddSeparator(tBar, NULL, " ");
+
+	// Check if model is ninja, allow animation control buttons
+	if (ninja)
+	{
+		TwAddButton(tBar, "Next Anim | Ninja", nextAnim, NULL, " help='Only use when Ninja is active' ");
+		TwAddButton(tBar, "Prev Anim | Ninja", prevAnim, NULL, " help='Only use when Ninja is active' ");
+		TwAddSeparator(tBar, NULL, " ");
+	}
 
 	// GUI Setup
 	
@@ -1459,7 +1269,8 @@ void main(int argc, char** argv)
 
 	#pragma endregion
 
-	#pragma region Emitter4 GUI
+	
+	#pragma region Emitter1 GUI
 
 	// Window that will store the settings for the emitter and the particles
 	TwBar *emitterBar4;
@@ -1512,18 +1323,15 @@ void main(int argc, char** argv)
 	TwDefine("Emitter4Settings/Position  group='Emitter Properties'  ");
 
 	#pragma endregion
-	
-	#pragma endregion
 
 	#pragma endregion
-	
+
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
 	glutKeyboardFunc(KeyPress);
 	glutSpecialFunc(CameraControls);
 	glutMouseFunc(MouseWheel);
-	glutCloseFunc(CloseFunction);
+
 	glutMainLoop();
-	TwTerminate();
 }
