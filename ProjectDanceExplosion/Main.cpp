@@ -34,6 +34,7 @@ SkyBox skybox = SkyBox();
 TwBar *tBar;
 
 // Camera
+glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 projection;
 glm::mat4 view;
 int xCircle = 1, yCircle = 1;
@@ -415,8 +416,6 @@ void RenderScene()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// model's model matrix
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	// calculating MVP
 	glm::mat4 MVP = projection * view * modelMatrix;
 
@@ -714,7 +713,162 @@ void CloseFunction(){
 	}
 
 
+void SetNightwingEmitters()
+{
+	#pragma region Node Finding
+
+	// Strings to be searched in the Node tree
+	aiString leftToeBase = aiString("mixamorig_LeftToeBase");
+	aiString rightToeBase = aiString("mixamorig_RightToeBase");
+	aiString leftHandBase = aiString("mixamorig_LeftHand");
+	aiString rightHandBase = aiString("mixamorig_RightHand");
+
+	// Assigning a node pointer the value of a node from the node tree
+	leftFoot = SearchTree(loadedModel.modelNodes.root, leftToeBase);
+	rightFoot = SearchTree(loadedModel.modelNodes.root, rightToeBase);
+	leftHand = SearchTree(loadedModel.modelNodes.root, leftHandBase);
+	rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
+
+	pEmitter.setEmitterNode(leftFoot, modelMatrix);
+	pEmitter2.setEmitterNode(leftHand, modelMatrix);
+	pEmitter3.setEmitterNode(rightFoot, modelMatrix);
+	pEmitter4.setEmitterNode(NULL, glm::mat4(1.0f));
+
+	// Use this to find names of bones in current loaded model
+	//node.PreOrderTraversal();
+	#pragma endregion
+
+	//Emitter 1 Initial Values
+	pEmitter.emitterDir[0] = 0;						// X direction
+	pEmitter.emitterDir[1] = 0;						// Y Direction
+	pEmitter.emitterDir[2] = -1;					// Z Direction
+	pEmitter.velocity = -0.004;						// Initial velocity
+	pEmitter.p_lifetime = 50;						// Lifetime of Particles
+	pEmitter.startScale = 1;						// Initial size
+	pEmitter.endScale = .5;							// Size before death
+	pEmitter.p_colourStart = glm::vec4(1, 0, 0, 1);	// Start colour, Red
+	pEmitter.p_colourEnd = glm::vec4(0, 0, 1, 0);	// End colour, Blue
+	pEmitter.angleRange = glm::vec3(0);				// Angle of emitter
+	pEmitter.rate = 100;							// Rate of Spawn
+
+	//Emitter 2 Initial Values
+	pEmitter2.emitterDir[0] = 0;					// X Direction
+	pEmitter2.emitterDir[1] = 1;					// Y Direction
+	pEmitter2.emitterDir[2] = 0;					// Z Direction
+	pEmitter2.velocity = -0.001;					// Initial Velocity
+	pEmitter2.p_lifetime = 15;						// Lifetime of Particles
+	pEmitter2.startScale = 0.7;						// Initial size
+	pEmitter2.endScale = 0;							// Size before death
+	pEmitter2.p_colourStart = glm::vec4(1, 0.5, 0, 1);// Start colour, 
+	pEmitter2.p_colourEnd = glm::vec4(0, 0, 0, 0);	// End colour,
+	pEmitter2.angleRange = glm::vec3(4);			// Angle of emitter
+	pEmitter2.rate = 100;							// Rate of Spawn
+
+	//Emitter 3 Initial Values
+	pEmitter3.emitterDir[0] = 0;					// X Direction
+	pEmitter3.emitterDir[1] = 0;					// Y Direction
+	pEmitter3.emitterDir[2] = -1;					// Z Direction
+	pEmitter3.velocity = -0.004;					// Initial Velocity
+	pEmitter3.p_lifetime = 50;						// Lifetime of Particles	
+	pEmitter3.startScale = 1;						// Initial size
+	pEmitter3.endScale = .5;						// Size before death
+	pEmitter3.p_colourStart = glm::vec4(0, 1, 0, 1);// Start colour,
+	pEmitter3.p_colourEnd = glm::vec4(1, 0, 0, 0);	// End colour, 
+	pEmitter3.angleRange = glm::vec3(0);			// Angle of emitter
+	pEmitter3.rate = 100;							// Rate of Spawn
+
+	//Emitter 4 Initial Values
+	pEmitter4.emitterDir[0] = 0;					// X Direction
+	pEmitter4.emitterDir[1] = 0;					// Y Direction
+	pEmitter4.emitterDir[2] = -1;					// Z Direction
+	pEmitter4.position = glm::vec3(5, 0, 0);		// Position
+	pEmitter4.velocity = -0.001;					// Initial Velocity
+	pEmitter4.p_lifetime = 50;						// Lifetime of Particles
+	pEmitter4.startScale = 2;						// Initial size
+	pEmitter4.endScale = 0;							// Size before death
+	pEmitter4.p_colourStart = glm::vec4(0, 0.7, 1, 1);// Start colour,
+	pEmitter4.p_colourEnd = glm::vec4(0.5, 0, 0.5, 0);// End colour, 
+	pEmitter4.angleRange = glm::vec3(0.5);			// Angle of emitter
+	pEmitter4.rate = 100;							// Rate of Spawn
+}
+
+void DisableEmitters(){
+	pEmitter.rate = 0;
+	pEmitter2.rate = 0;
+	pEmitter3.rate = 0;
+	pEmitter4.rate = 0;
+}
+
+void loadModel(int modelNo){
+		modelMatrix = glm::mat4(1.0f);
+		pEmitter.setEmitterNode(NULL, modelMatrix);
+		pEmitter2.setEmitterNode(NULL, modelMatrix);
+		pEmitter3.setEmitterNode(NULL, modelMatrix);
+		pEmitter4.setEmitterNode(NULL, modelMatrix);
+		modelMatrix = glm::translate(glm::vec3(0,-2,0));
+		DisableEmitters();
+		switch(modelNo){
+		// Iron Man (Static Model)
+		case 0:
+				#pragma region Iron Man
+				loadedModel.LoadModelData("Models/IronMan/Iron_Man.dae");
+				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
+				modelMatrix *= glm::translate(glm::vec3(0,2,0));
+				#pragma endregion
+		break;
+		// Ninja
+		case 1:
+				#pragma region Ninja
+				loadedModel.LoadModelData("Models/Ninja/ninjaEdit.ms3d");
+				loadedModel.animCont.animationSpeed = 1;
+				animationSplit("ninja");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+				
+				modelMatrix *= glm::scale(glm::vec3(0.5,0.5,0.5));
+				#pragma endregion
+		break;
+		// Beast
+		case 2:
+				#pragma region Beast
+				loadedModel.LoadModelData("Models/Beast/beastedit.ms3d");
+				loadedModel.animCont.animationSpeed = 1;
+				animationSplit("beast");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
+				modelMatrix *= glm::scale(glm::vec3(0.05,0.05,0.05));
+				modelMatrix *= glm::translate(glm::vec3(0,50,-6));
+				#pragma endregion
+		break;
+		// Zombie
+		case 3:
+				#pragma region Zombie
+				loadedModel.LoadModelData("Models/Zombie/Zombie_Idle02_roar.X");
+				loadedModel.animCont.animationSpeed = 200;
+				animationSplit("none");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
+				modelMatrix *= glm::scale(glm::vec3(0.1,0.1,0.1));
+				modelMatrix *= glm::translate(glm::vec3(0,20,0));
+				#pragma endregion
+		break;
+		// Nightwing
+		case 4:
+				#pragma region Nightwing
+				loadedModel.LoadModelData("Models/NightWingAS/nightwing anim.dae");
+				loadedModel.animCont.animationSpeed = 0.05;
+				animationSplit("none");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+
+				modelMatrix = glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
+				modelMatrix = glm::rotate(modelMatrix,1.55f,glm::vec3(1,0,0));
+				SetNightwingEmitters();
+				#pragma endregion
+		break;
+		}
+	}
+
 #pragma region Emitter Button Functions
+
 	// Change Emitter's graphic to Smoke
 	void TW_CALL emitSmoke(void *clientData)
 	{ 
@@ -761,69 +915,6 @@ void CloseFunction(){
 		else
 			currentAnimation = 0;
 		loadedModel.animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
-	}
-
-	void loadModel(int modelNo){
-		pEmitter.setEmitterNode(NULL);
-		pEmitter2.setEmitterNode(NULL);
-		pEmitter3.setEmitterNode(NULL);
-		pEmitter4.setEmitterNode(NULL);
-		switch(modelNo){
-		// Iron Man (Static Model)
-		case 0:
-				loadedModel.LoadModelData("Models/IronMan/Iron_Man.dae");
-		break;
-		// Ninja
-		case 1:
-				loadedModel.LoadModelData("Models/Ninja/ninjaEdit.ms3d");
-				loadedModel.animCont.animationSpeed = 1;
-				animationSplit("ninja");
-				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-		break;
-		// Beast
-		case 2:
-				loadedModel.LoadModelData("Models/Beast/beastedit.ms3d");
-				loadedModel.animCont.animationSpeed = 1;
-				animationSplit("beast");
-				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-		break;
-		// Zombie
-		case 3:
-				loadedModel.LoadModelData("Models/Zombie/Zombie_Idle02_roar.X");
-				loadedModel.animCont.animationSpeed = 200;
-				animationSplit("none");
-				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-		break;
-		// Nightwing
-		case 4:
-				loadedModel.LoadModelData("Models/NightWingAS/nightwing anim.dae");
-				loadedModel.animCont.animationSpeed = 0.05;
-				animationSplit("none");
-				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-				#pragma region Node Finding
-
-				// Strings to be searched in the Node tree
-				aiString leftToeBase = aiString("mixamorig_LeftToeBase");
-				aiString rightToeBase = aiString("mixamorig_RightToeBase");
-				aiString leftHandBase = aiString("mixamorig_LeftHand");
-				aiString rightHandBase = aiString("mixamorig_RightHand");
-
-				// Assigning a node pointer the value of a node from the node tree
-				leftFoot = SearchTree(loadedModel.modelNodes.root, leftToeBase);
-				rightFoot = SearchTree(loadedModel.modelNodes.root, rightToeBase);
-				leftHand = SearchTree(loadedModel.modelNodes.root, leftHandBase);
-				rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
-
-				pEmitter.setEmitterNode(leftFoot);
-				pEmitter2.setEmitterNode(leftHand);
-				pEmitter3.setEmitterNode(rightFoot);
-				pEmitter4.setEmitterNode(NULL);
-
-				// Use this to find names of bones in current loaded model
-				//node.PreOrderTraversal();
-				#pragma endregion
-		break;
-		}
 	}
 
 	void TW_CALL nextModel(void* clientData)
@@ -887,9 +978,6 @@ void main(int argc, char** argv)
 	// setting up MVP
 	initCamera();
 
-	// loading models from file
-	LoadModelData();
-
 	/*skybox.loadSkybox("Textures/",
 						"jajlands1_ft.jpg",
 						"jajlands1_bk.jpg",
@@ -899,77 +987,30 @@ void main(int argc, char** argv)
 						"jajlands1_dn.jpg");*/
 
 	pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
-
 	
-	#pragma region NightWing examples
+	#pragma region Emitter Creation
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,	// Shader
 		leftFoot,								// Paired Node
 		"Models/SmokeShape.png");				// Texture
-	//Emitter 1 Initial Values
-	pEmitter.emitterDir[0] = 0;						// X direction
-	pEmitter.emitterDir[1] = -1;					// Y Direction
-	pEmitter.emitterDir[2] = 0;						// Z Direction
-	pEmitter.velocity = -0.004;						// Initial velocity
-	pEmitter.p_lifetime = 50;						// Lifetime of Particles
-	pEmitter.startScale = 1;						// Initial size
-	pEmitter.endScale = .5;							// Size before death
-	pEmitter.p_colourStart = glm::vec4(1, 0, 0, 1);	// Start colour, Red
-	pEmitter.p_colourEnd = glm::vec4(0, 0, 1, 0);	// End colour, Blue
-	pEmitter.angleRange = glm::vec3(0);				// Angle of emitter
-	pEmitter.rate = 100;							// Rate of Spawn
 
 	pEmitter2 = ParticleEmitter(particleProgram,	// Shader
 		leftHand,									// Paired Node
 		"Models/SmokeShape.png");					// Texture
-	//Emitter 2 Initial Values
-	pEmitter2.emitterDir[0] = 0;					// X Direction
-	pEmitter2.emitterDir[1] = 1;					// Y Direction
-	pEmitter2.emitterDir[2] = 0;					// Z Direction
-	pEmitter2.velocity = -0.001;					// Initial Velocity
-	pEmitter2.p_lifetime = 15;						// Lifetime of Particles
-	pEmitter2.startScale = 0.7;						// Initial size
-	pEmitter2.endScale = 0;							// Size before death
-	pEmitter2.p_colourStart = glm::vec4(1, 0.5, 0, 1);// Start colour, 
-	pEmitter2.p_colourEnd = glm::vec4(0, 0, 0, 0);	// End colour,
-	pEmitter2.angleRange = glm::vec3(4);			// Angle of emitter
-	pEmitter2.rate = 100;							// Rate of Spawn
 
 	pEmitter3 = ParticleEmitter(particleProgram,	// Shader
 		rightFoot,									// Paired Node
 		"Models/SmokeShape.png");					// Texture
-	//Emitter 3 Initial Values
-	pEmitter3.emitterDir[0] = 0;					// X Direction
-	pEmitter3.emitterDir[1] = -1;					// Y Direction
-	pEmitter3.emitterDir[2] = 0;					// Z Direction
-	pEmitter3.velocity = -0.004;					// Initial Velocity
-	pEmitter3.p_lifetime = 50;						// Lifetime of Particles	
-	pEmitter3.startScale = 1;						// Initial size
-	pEmitter3.endScale = .5;						// Size before death
-	pEmitter3.p_colourStart = glm::vec4(0, 1, 0, 1);// Start colour,
-	pEmitter3.p_colourEnd = glm::vec4(1, 0, 0, 0);	// End colour, 
-	pEmitter3.angleRange = glm::vec3(0);			// Angle of emitter
-	pEmitter3.rate = 100;							// Rate of Spawn
 
 	pEmitter4 = ParticleEmitter(particleProgram,	// Shader
 		NULL,										// No paired node
 		"Models/SmokeShape.png");					// Texture
-	//Emitter 4 Initial Values
-	pEmitter4.emitterDir[0] = 0;					// X Direction
-	pEmitter4.emitterDir[1] = 0;					// Y Direction
-	pEmitter4.emitterDir[2] = -1;					// Z Direction
-	pEmitter4.position = glm::vec3(5, 0, 0);		// Position
-	pEmitter4.velocity = -0.001;					// Initial Velocity
-	pEmitter4.p_lifetime = 50;						// Lifetime of Particles
-	pEmitter4.startScale = 2;						// Initial size
-	pEmitter4.endScale = 0;							// Size before death
-	pEmitter4.p_colourStart = glm::vec4(0, 0.7, 1, 1);// Start colour,
-	pEmitter4.p_colourEnd = glm::vec4(0.5, 0, 0.5, 0);// End colour, 
-	pEmitter4.angleRange = glm::vec3(0.5);			// Angle of emitter
-	pEmitter4.rate = 100;							// Rate of Spawn
 
 	#pragma endregion
+
+	// loading model from file
+	loadModel(0);
 
 	#pragma region TweakBar
 

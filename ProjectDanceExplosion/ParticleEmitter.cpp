@@ -115,7 +115,7 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, std::string
 	emitterDir[1] = 0;
 	emitterDir[2] = 0;
 	LastUsedParticle = 0;
-
+	addedMatrix = glm::mat4(0);
 	StoreParticleTextureData(textureFile);
 
 	sPos_Node = node;
@@ -188,7 +188,7 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 			sPos.c1, sPos.c2, sPos.c3, sPos.c4,
 			sPos.d1, sPos.d2, sPos.d3, sPos.d4);
 
-		glm::vec4 temp = sPos_Converted * glm::vec4(position, 1);
+		glm::vec4 temp = addedMatrix * sPos_Converted * glm::vec4(position, 1);
 
 		startPos = glm::vec3(temp.x, temp.y, temp.z);
 	}
@@ -592,6 +592,7 @@ void ParticleEmitter::StoreParticleTextureData(std::string fileRoot)
 
 }
 
-void ParticleEmitter::setEmitterNode(aiNode* inNode){
+void ParticleEmitter::setEmitterNode(aiNode* inNode, glm::mat4 modelMatrix){
 	sPos_Node = inNode;
+	addedMatrix = modelMatrix;
 }

@@ -162,7 +162,9 @@ public:
 
 	void StoreParticleTextureData(std::string fileRoot);
 
-	void setEmitterNode(aiNode* node);
+	void setEmitterNode(aiNode* node, glm::mat4 modelMatrix);
+
+	glm::mat4 addedMatrix;
 
 	GLuint textureRef;
 
