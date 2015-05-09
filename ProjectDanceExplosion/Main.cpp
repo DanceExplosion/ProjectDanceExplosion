@@ -489,8 +489,12 @@ void RenderScene()
 	pEmitter3.Cleanup();
 	pEmitter4.Cleanup();
 	
+	// Basic error handling
+	glGetError();
+
 	// menu refresh
 	TwDraw();
+
 	// OpenGL refrepsh
 	glutSwapBuffers();
 		

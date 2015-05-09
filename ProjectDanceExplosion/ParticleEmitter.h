@@ -14,7 +14,6 @@
 // Standard Vector Library
 #include <vector>
 #include <iostream>
-#include <AntTweakBar.h>
 
 #include "Node.h"
 
