@@ -58,7 +58,7 @@ typedef struct Particle{
 	};
 
 	// Functions for the Particles
-#pragma region Particle Functions
+	#pragma region Particle Functions
 
 	// Update particles
 	void update(float delta){
@@ -108,7 +108,7 @@ typedef struct Particle{
 		// Set the size
 		currentSize = startSize+addedSize;
 	}
-#pragma endregion
+	#pragma endregion
 
 }Particle; // end of Particle struct
 
@@ -161,6 +161,8 @@ public:
 	void scaleBufferDown();
 
 	void StoreParticleTextureData(std::string fileRoot);
+
+	void setEmitterNode(aiNode* node);
 
 	GLuint textureRef;
 

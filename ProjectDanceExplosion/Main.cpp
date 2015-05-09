@@ -31,6 +31,7 @@ ParticleEmitter pEmitter4 = ParticleEmitter();
 
 SkyBox skybox = SkyBox();
 
+TwBar *tBar;
 
 // Camera
 glm::mat4 projection;
@@ -53,6 +54,12 @@ int modelCycle = 0;
 // Gotta get that time yo
 int oldTime = 0;
 int currentAnimation = 0;
+
+// Node locations for Nightwing's attached emitters
+aiNode* leftFoot;
+aiNode* rightFoot;
+aiNode* leftHand;
+aiNode* rightHand;
 
 // Variables for the FPS and Total Particle Count
 float final_fps, particle_Count = 0.0f;
@@ -489,6 +496,18 @@ void RenderScene()
 	pEmitter3.Cleanup();
 	pEmitter4.Cleanup();
 	
+	if(multipleAnimations)
+	{
+		TwDefine(" GlobalOptions/NoAnimation visible=false ");
+		TwDefine(" GlobalOptions/Animation-Next visible=true ");
+		TwDefine(" GlobalOptions/Animation-Previous visible=true ");
+	}else
+	{
+		TwDefine(" GlobalOptions/NoAnimation visible=true ");
+		TwDefine(" GlobalOptions/Animation-Next visible=false ");
+		TwDefine(" GlobalOptions/Animation-Previous visible=false ");
+	}
+
 	// Basic error handling
 	glGetError();
 
@@ -745,6 +764,10 @@ void CloseFunction(){
 	}
 
 	void loadModel(int modelNo){
+		pEmitter.setEmitterNode(NULL);
+		pEmitter2.setEmitterNode(NULL);
+		pEmitter3.setEmitterNode(NULL);
+		pEmitter4.setEmitterNode(NULL);
 		switch(modelNo){
 		// Iron Man (Static Model)
 		case 0:
@@ -777,6 +800,28 @@ void CloseFunction(){
 				loadedModel.animCont.animationSpeed = 0.05;
 				animationSplit("none");
 				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+				#pragma region Node Finding
+
+				// Strings to be searched in the Node tree
+				aiString leftToeBase = aiString("mixamorig_LeftToeBase");
+				aiString rightToeBase = aiString("mixamorig_RightToeBase");
+				aiString leftHandBase = aiString("mixamorig_LeftHand");
+				aiString rightHandBase = aiString("mixamorig_RightHand");
+
+				// Assigning a node pointer the value of a node from the node tree
+				leftFoot = SearchTree(loadedModel.modelNodes.root, leftToeBase);
+				rightFoot = SearchTree(loadedModel.modelNodes.root, rightToeBase);
+				leftHand = SearchTree(loadedModel.modelNodes.root, leftHandBase);
+				rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
+
+				pEmitter.setEmitterNode(leftFoot);
+				pEmitter2.setEmitterNode(leftHand);
+				pEmitter3.setEmitterNode(rightFoot);
+				pEmitter4.setEmitterNode(NULL);
+
+				// Use this to find names of bones in current loaded model
+				//node.PreOrderTraversal();
+				#pragma endregion
 		break;
 		}
 	}
@@ -855,25 +900,6 @@ void main(int argc, char** argv)
 
 	pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
 
-	#pragma region Model Node Finding
-
-	#pragma region Nightwing
-	// Strings to be searched in the Node tree
-	aiString leftToeBase = aiString("mixamorig_LeftToeBase");
-	aiString rightToeBase = aiString("mixamorig_RightToeBase");
-	aiString leftHandBase = aiString("mixamorig_LeftHand");
-	aiString rightHandBase = aiString("mixamorig_RightHand");
-	#pragma endregion
-
-	// Assigning a node pointer the value of a node from the node tree
-	aiNode* leftFoot = SearchTree(loadedModel.modelNodes.root, leftToeBase);
-	aiNode* rightFoot = SearchTree(loadedModel.modelNodes.root, rightToeBase);
-	aiNode* leftHand = SearchTree(loadedModel.modelNodes.root, leftHandBase);
-	aiNode* rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
-
-	// Use this to find names of bones in current loaded model
-	//node.PreOrderTraversal();
-	#pragma endregion
 	
 	#pragma region NightWing examples
 
@@ -883,7 +909,7 @@ void main(int argc, char** argv)
 		"Models/SmokeShape.png");				// Texture
 	//Emitter 1 Initial Values
 	pEmitter.emitterDir[0] = 0;						// X direction
-	pEmitter.emitterDir[1] = 1;						// Y Direction
+	pEmitter.emitterDir[1] = -1;					// Y Direction
 	pEmitter.emitterDir[2] = 0;						// Z Direction
 	pEmitter.velocity = -0.004;						// Initial velocity
 	pEmitter.p_lifetime = 50;						// Lifetime of Particles
@@ -915,7 +941,7 @@ void main(int argc, char** argv)
 		"Models/SmokeShape.png");					// Texture
 	//Emitter 3 Initial Values
 	pEmitter3.emitterDir[0] = 0;					// X Direction
-	pEmitter3.emitterDir[1] = 1;					// Y Direction
+	pEmitter3.emitterDir[1] = -1;					// Y Direction
 	pEmitter3.emitterDir[2] = 0;					// Z Direction
 	pEmitter3.velocity = -0.004;					// Initial Velocity
 	pEmitter3.p_lifetime = 50;						// Lifetime of Particles	
@@ -946,9 +972,6 @@ void main(int argc, char** argv)
 	#pragma endregion
 
 	#pragma region TweakBar
-	
-	// Create TweakBar
-	TwBar *tBar;
 
 	tBar = TwNewBar("GlobalOptions");
 	TwDefine("GlobalOptions size='200 500'" /*color='96 216 224' "*/);
@@ -986,12 +1009,10 @@ void main(int argc, char** argv)
 	TwAddSeparator(tBar, NULL, " ");
 
 	// Check if model is ninja, allow animation control buttons
-	if (multipleAnimations)
-	{
-		TwAddButton(tBar, "Next Animation", nextAnim, NULL, " help='Only use when Ninja is active' ");
-		TwAddButton(tBar, "Prev Animation", prevAnim, NULL, " help='Only use when Ninja is active' ");
+		TwAddButton(tBar, "NoAnimation", NULL, NULL, " label='No Animation Switching' ");
+		TwAddButton(tBar, "Animation-Next", nextAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
+		TwAddButton(tBar, "Animation-Previous", prevAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
 		TwAddSeparator(tBar, NULL, " ");
-	}
 
 	// GUI Setup
 	

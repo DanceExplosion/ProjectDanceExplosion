@@ -223,8 +223,8 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 			glm::vec3 angle = glm::normalize(glm::vec3(xAngle, yAngle, zAngle));
 
 			// Set the speed of the particle to the randomly generated values
-			ParticleContainer[particleIndex].velocity.x = -angle.x*currentVel;
-			ParticleContainer[particleIndex].velocity.y = angle.y*currentVel;
+			ParticleContainer[particleIndex].velocity.x = angle.x*currentVel;
+			ParticleContainer[particleIndex].velocity.y = -angle.y*currentVel;
 			ParticleContainer[particleIndex].velocity.z = angle.z*currentVel;
 
 			// Checks the Index of the current particle isnt out of bounds
@@ -590,4 +590,8 @@ void ParticleEmitter::StoreParticleTextureData(std::string fileRoot)
 
 	
 
+}
+
+void ParticleEmitter::setEmitterNode(aiNode* inNode){
+	sPos_Node = inNode;
 }
