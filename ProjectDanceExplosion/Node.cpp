@@ -51,24 +51,6 @@ std::vector<float> Node::StoreBones()
 			// Inverse and Transpose teh bone's data
 			aiMatrix4x4 bonePlace = SearchTree(root, name);
 			bonePlace.Transpose();
-			// *old* Convert to glm's mat4 format
-			/*glm::mat4 boneFinal = glm::mat4(bonePlace.a1, bonePlace.a2, bonePlace.a3, bonePlace.a4,
-												bonePlace.b1, bonePlace.b2, bonePlace.b3, bonePlace.b4,
-												bonePlace.c1, bonePlace.c2, bonePlace.c3, bonePlace.c4,
-												bonePlace.d1, bonePlace.d2, bonePlace.d3, bonePlace.d4);
-												*/
-			
-			// *old* Print out the matrix data
-			/*std::cout << "Bone[" << i << "]" << std::endl;
-			std::cout << "	Bone Name: " << name.data << std::endl;
-			std::cout << "\tTransformation: " << bonePlace.a1 << " " << bonePlace.a2 << " " << bonePlace.a3 << " " << bonePlace.a4 << std::endl;
-			std::cout << "\t \t \t" << bonePlace.b1 << " " << bonePlace.b2 << " " << bonePlace.b3 << " " << bonePlace.b4 << std::endl;
-			std::cout << "\t \t \t" << bonePlace.c1 << " " << bonePlace.c2 << " " << bonePlace.c3 << " " << bonePlace.c4 << std::endl;
-			std::cout << "\t \t \t" << bonePlace.d1 << " " << bonePlace.d2 << " " << bonePlace.d3 << " " << bonePlace.d4 << std::endl;*/
-
-			// *old push the matrices into the list
-			//boneMatricies.push_back(bonePlace);
-			//boneMatricies.push_back(boneFinal);
 
 			// Push the matrix values into the float list for passing into the shader
 
@@ -99,16 +81,6 @@ std::vector<float> Node::StoreBones()
 		}
 	}
 
-	/*aiBone* bone1 = modelData->mBones[4];
-	aiString name = bone1->mName;
-	unsigned int numWeights = bone1->mNumWeights;
-	std::cout << "Bone[4]" << std::endl;
-	std::cout << "	Bone Name: " << name.data << std::endl;
-	aiMatrix4x4 bonePlace = SearchTree(root, name); //bone1->mOffsetMatrix;
-	std::cout << "\tTransformation: " << bonePlace.a1 << " " << bonePlace.a2 << " " << bonePlace.a3 << " " << bonePlace.a4 << std::endl;
-	std::cout << "\t \t \t" << bonePlace.b1 << " " << bonePlace.b2 << " " << bonePlace.b3 << " " << bonePlace.b4 << std::endl;
-	std::cout << "\t \t \t" << bonePlace.c1 << " " << bonePlace.c2 << " " << bonePlace.c3 << " " << bonePlace.c4 << std::endl;
-	std::cout << "\t \t \t" << bonePlace.d1 << " " << bonePlace.d2 << " " << bonePlace.d3 << " " << bonePlace.d4 << std::endl;*/
 	return boneMs;
 }
 
@@ -223,36 +195,10 @@ aiMatrix4x4 Node::SearchTree(aiNode* node, aiString name)
 						0,0,0,0);
 }
 
-// *old* Alternate Search Tree Method
-/*aiMatrix4x4 Node::SearchTree(aiNode* node, aiString name)
-{
-	aiString currentName = node->mName;
-
-	//corresponding node found
-	if (name == currentName)
-	{
-		std::cout << name.data << " was found" << std::endl;
-		aiMatrix4x4 finalTransform = node->mTransformation;
-		while(node->mParent != NULL)
-		{
-			node = node->mParent;
-			finalTransform = finalTransform * node->mTransformation;
-		}
-		return finalTransform;
-	}
-	else
-	{
-		for(int i = 0; i < node->mNumChildren; i++)
-			return SearchTree(node->mChildren[i], name);
-	}
-}*/
-
-
 // Simple return function for the bone matrix
 float* Node::GetBoneMatrix()
 {
-	return &boneMatricies.at(0);//.a1;
-	//return glm::value_ptr(boneMatricies.at(0));
+	return &boneMatricies.at(0);;
 }
 
 // Simple return for the number of bones

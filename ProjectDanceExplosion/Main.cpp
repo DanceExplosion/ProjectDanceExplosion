@@ -2,17 +2,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-// Assimp
-#include <assimp/Importer.hpp>	// c++ importer interface
-#include <assimp/scene.h>		// output data structure
-#include <assimp/postprocess.h>	// post processing flag
-
-
-// OpenGL Mathemathics
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/ext.hpp>
-
 // Extra Libraries
 #include <iostream>
 #include <AntTweakBar.h>
@@ -25,14 +14,13 @@
 #include "ModelAnimation.h"
 #include "Skinning.h"
 #include "SkyBox.h"
+#include "ModelData.h"
 
 // OpenGL Essentials
 GLuint window;
 GLuint basicProgram, particleProgram;
 GLuint redrawProgram, skeletonProgram;
 
-// Animation
-AnimationController animCont = AnimationController();
 std::vector<glm::vec2> animationTimes;
 
 // Particle Emitters
@@ -41,8 +29,6 @@ ParticleEmitter pEmitter2 = ParticleEmitter();
 ParticleEmitter pEmitter3 = ParticleEmitter();
 ParticleEmitter pEmitter4 = ParticleEmitter();
 
-Node sceneNodes = Node();
-std::vector<Skinning> skinList;
 SkyBox skybox = SkyBox();
 
 
@@ -53,12 +39,7 @@ int xCircle = 1, yCircle = 1;
 float camX = 0, camY = 0, zoom = -10;
 float lightX = 0,lightY = 0,lightZ = 0;
 
-// Models
-int numModels;
-
-const aiScene* scene, *animScene;
-	Assimp::Importer importer;
-	Assimp::Importer importer2;
+ModelData loadedModel;
 
 GLuint vao;
 
@@ -67,6 +48,7 @@ bool toggleParticles = false;
 bool toggleBones = false;
 bool toggleSkin = false;
 bool multipleAnimations = false;
+int modelCycle = 0;
 
 // Gotta get that time yo
 int oldTime = 0;
@@ -89,71 +71,71 @@ void animationSplit(std::string model)
 		multipleAnimations = true;
 
 		// Standing
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(104),
-								animCont.currentAnimation->mDuration));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(104),
+								loadedModel.animCont.currentAnimation->mDuration));
 
 		// Walking
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
-										animCont.getFrameTime(7)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(0),
+										loadedModel.animCont.getFrameTime(7)));
 		
 		// Sneaking
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(8),
-										animCont.getFrameTime(14)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(8),
+										loadedModel.animCont.getFrameTime(14)));
 
 		// Attacking
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(16),
-										animCont.getFrameTime(24)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(16),
+										loadedModel.animCont.getFrameTime(24)));
 
 		// Attack 2
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
-										animCont.getFrameTime(27)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(24),
+										loadedModel.animCont.getFrameTime(27)));
 
 		// Kick
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(28),
-										animCont.getFrameTime(37)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(28),
+										loadedModel.animCont.getFrameTime(37)));
 		
 		// Pickup
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(38),
-										animCont.getFrameTime(46)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(38),
+										loadedModel.animCont.getFrameTime(46)));
 
 		// Jump with motion
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(47),
-										animCont.getFrameTime(53)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(47),
+										loadedModel.animCont.getFrameTime(53)));
 
 		// Jump with no motion
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(54),
-										animCont.getFrameTime(60)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(54),
+										loadedModel.animCont.getFrameTime(60)));
 
 		// Jump strike
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(60),
-										animCont.getFrameTime(69)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(60),
+										loadedModel.animCont.getFrameTime(69)));
 		
 		// Kick 2
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(69),
-										animCont.getFrameTime(74)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(69),
+										loadedModel.animCont.getFrameTime(74)));
 		
 		// Spin attack
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(74),
-										animCont.getFrameTime(80)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(74),
+										loadedModel.animCont.getFrameTime(80)));
 		
 		// Backflip
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(80),
-										animCont.getFrameTime(85)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(80),
+										loadedModel.animCont.getFrameTime(85)));
 		
 		// Climb/Freak out
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(87),
-										animCont.getFrameTime(89)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(87),
+										loadedModel.animCont.getFrameTime(89)));
 		
 		// Die
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(90),
-										animCont.getFrameTime(92)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(90),
+										loadedModel.animCont.getFrameTime(92)));
 		
 		// Faceplant
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(93),
-										animCont.getFrameTime(96)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(93),
+										loadedModel.animCont.getFrameTime(96)));
 		// Weird standing
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(97),
-										animCont.getFrameTime(104)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(97),
+										loadedModel.animCont.getFrameTime(104)));
 		
 	#pragma endregion
 
@@ -164,87 +146,85 @@ void animationSplit(std::string model)
 		multipleAnimations = true;
 
 		// Idle
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(89),
-										animCont.getFrameTime(93)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(89),
+										loadedModel.animCont.getFrameTime(93)));
 
 		// Walking
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(0),
-										animCont.getFrameTime(5)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(0),
+										loadedModel.animCont.getFrameTime(5)));
 
 		// Surfacing
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(6),
-										animCont.getFrameTime(16)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(6),
+										loadedModel.animCont.getFrameTime(16)));
 		
 		// Jumping
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(24),
-										animCont.getFrameTime(30)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(24),
+										loadedModel.animCont.getFrameTime(30)));
 
 		// Roar
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(35),
-										animCont.getFrameTime(42)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(35),
+										loadedModel.animCont.getFrameTime(42)));
 
 		// Crouch and look
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(43),
-										animCont.getFrameTime(50)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(43),
+										loadedModel.animCont.getFrameTime(50)));
 
 		// Stand and look
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(81),
-										animCont.getFrameTime(88)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(81),
+										loadedModel.animCont.getFrameTime(88)));
 
 		// Headbutt
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(51),
-										animCont.getFrameTime(56)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(51),
+										loadedModel.animCont.getFrameTime(56)));
 
 		// Bite
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(56),
-										animCont.getFrameTime(62)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(56),
+										loadedModel.animCont.getFrameTime(62)));
 
 		// Bite 2
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(62),
-										animCont.getFrameTime(68)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(62),
+										loadedModel.animCont.getFrameTime(68)));
 
 		// Stomp
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(68),
-										animCont.getFrameTime(74)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(68),
+										loadedModel.animCont.getFrameTime(74)));
 
 		// Hurt
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(74),
-										animCont.getFrameTime(81)));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(74),
+										loadedModel.animCont.getFrameTime(81)));
 
 		// Dead
-		animationTimes.push_back(glm::vec2(animCont.getFrameTime(93),
-										animCont.currentAnimation->mDuration));
+		animationTimes.push_back(glm::vec2(loadedModel.animCont.getFrameTime(93),
+										loadedModel.animCont.currentAnimation->mDuration));
 		#pragma endregion
 	
 		// If the model is neither Beast nor Ninja
 	}else {
 		// Set the only animation as the entire cycle
-		animationTimes.push_back(glm::vec2(0,animCont.currentAnimation->mDuration));
+		animationTimes.push_back(glm::vec2(0,loadedModel.animCont.currentAnimation->mDuration));
 		// Hide the animation controls
 		multipleAnimations = false;
 	}
 }
 
+
 // Function for loading the models
 void LoadModelData()
 {
-	// set background colour //black
-	glClearColor(0.3f, 0.3f, 0.6f, 0.0f);
-
 	// Assimp file importer
 	std::string fileRoot = "Models/";
 	//std::string file = fileRoot + "Bear_Brown/Bear_Brown.dae";
 	//std::string file = fileRoot + "C3P0/C3P0.dae";
 	//std::string file = fileRoot + "Dog/Dog.dae";
 	//std::string file = fileRoot + "GreenArrow/GreenArrow.dae";
-	//std::string file = fileRoot + "IronMan/Iron_Man.dae";
+	std::string file = fileRoot + "IronMan/Iron_Man.dae";
 	//std::string file = fileRoot + "Nightwing187/Nightwing187.dae";
 	//std::string file = fileRoot + "Optimus/Optimus.dae";
 	//std::string file = fileRoot + "Robin188/Robin188.dae";
 
 	//std::string file = fileRoot + "Ninja/ninjaEdit.ms3d";
 	//std::string file = fileRoot + "Primal Beast/PrimalBeast.ms3d";
-	std::string file = fileRoot + "Beast/beastedit.ms3d";
+	//std::string file = fileRoot + "Beast/beastedit.ms3d";
 	//std::string file = fileRoot + "Ant/ant01Edit.ms3d";
 	//std::string file = fileRoot + "TestGuy/test_DirectX.X";
 	//std::string file = fileRoot + "Fat/fatdude.x";
@@ -253,68 +233,11 @@ void LoadModelData()
 	//std::string file = fileRoot + "NightWingAS/nightwing anim.dae";
 	//std::string file = fileRoot + "Army Pilot/ArmyPilot.dae";
 
-	std::string animation = fileRoot+"NightWingAS/anim.BVH";
-	//std::string animation = fileRoot+"Army Pilot/ArmyPilot.BVH";
+	loadedModel.LoadModelData(file);
 
-	const char* filePath = file.c_str();
-	const char* animPath = animation.c_str();
-	scene = importer.ReadFile(filePath,
-								aiProcess_CalcTangentSpace |
-								aiProcess_Triangulate |
-								aiProcess_JoinIdenticalVertices |
-								aiProcess_SortByPType |
-								aiProcess_FixInfacingNormals |
-								aiProcess_GenSmoothNormals |
-								aiProcess_GenUVCoords |
-								aiProcess_SortByPType
-								);
-	animScene = importer2.ReadFile(animPath, aiProcess_CalcTangentSpace |
-								aiProcess_Triangulate |
-								aiProcess_JoinIdenticalVertices |
-								aiProcess_SortByPType |
-								aiProcess_FixInfacingNormals |
-								aiProcess_GenSmoothNormals |
-								aiProcess_GenUVCoords |
-								aiProcess_SortByPType);
-	// error checking
-	if(!scene)
-		std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
-	else
-		std::cout << "File loaded successfully" <<std::endl;
-	
-	int anim = animScene->mNumAnimations;	
+	//animationSplit("beast");
+	//loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
 
-	numModels = (scene->mNumMeshes);
-	int numTextures = scene->mNumMaterials;
-	std::cout << "Number of models in file: " << numModels << std::endl;
-	std::cout << "Number of external textures in file: " << numTextures << std::endl;
-	std::cout << "Number of embedded textures in file: " << scene->mNumTextures << std::endl;
-	std::cout << "Number of animations in file: " << scene->mNumAnimations << std::endl;
-	std::cout << ""<< std::endl;
-
-	animCont = AnimationController(scene->mAnimations,scene->mRootNode);
-	animationSplit("beast");
-	animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-
-	// Skinning
-	sceneNodes = Node(scene);
-	// for every mesh in scene...
-	for(int m = 0; m < numModels; m++)
-	{
-		// create a Skinning object
-		Skinning newSkin = Skinning(scene);
-		skinList.push_back(newSkin);
-		skinList.at(m).StoreBoneMeshes(m);
-
-		//
-		for(unsigned int i = 0; i < scene->mMeshes[m]->mNumBones; i++)
-		{
-			skinList.at(m).MoveMeshToWorldSpace(m, i);
-		}
-		skinList.at(m).ResetChanged();
-		skinList.at(m).StoreFinalVertexData(m);
-		std::cout << "" << std::endl;
-	}
 
 }
 
@@ -324,30 +247,30 @@ void RenderSkin(glm::mat4 MVP)
 	// Use skeleton drawing program
 	glUseProgram(redrawProgram);
 
-	for(int i = 0; i < numModels; i++)
+	for(int i = 0; i < loadedModel.skinList.size(); i++)
 	{
 		// vertices
 		GLuint vertexBuffer;
-		int bufferSize = skinList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts (x, y & z), each part is 4 bytes long
+		int bufferSize = loadedModel.skinList.at(i).GetNumVertices() * 3 * 4; // each vertex has 3 parts (x, y & z), each part is 4 bytes long
 		glGenBuffers(1, &vertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, skinList.at(i).GetWorldSpaceVertices(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, loadedModel.skinList.at(i).GetWorldSpaceVertices(), GL_STATIC_DRAW);
 
 		// textures
-		bufferSize = skinList.at(i).GetNumVertices() * 2 * 4; // each texture coordinate has 2 parts(x & y), each part is 4 bytes long
+		bufferSize = loadedModel.skinList.at(i).GetNumVertices() * 2 * 4; // each texture coordinate has 2 parts(x & y), each part is 4 bytes long
 		GLuint texturebuffer;
 		glGenBuffers(1, &texturebuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, texturebuffer);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize, skinList.at(i).GetTextureCoordinates(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, loadedModel.skinList.at(i).GetTextureCoordinates(), GL_STATIC_DRAW);
 
 		// Texturing
 		glEnable(GL_TEXTURE_2D);
 		// diffuse texture for model
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetTextureRef());
+		glBindTexture(GL_TEXTURE_2D, loadedModel.skinList.at(i).GetTextureRef());
 		// normal texture for model
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, skinList.at(i).GetNormalMapRef());
+		glBindTexture(GL_TEXTURE_2D, loadedModel.skinList.at(i).GetNormalMapRef());
 
 		// bind RedrawVertexShader.MVP to this.matrixId
 		GLuint MatrixId = glGetUniformLocation(redrawProgram, "MVP");	
@@ -384,7 +307,7 @@ void RenderSkin(glm::mat4 MVP)
 			(void*)0		// array buffer offset
 			);
 
-		int numVertices = skinList.at(i).GetNumVertices();
+		int numVertices = loadedModel.skinList.at(i).GetNumVertices();
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 
 		// disable texturing
@@ -413,10 +336,10 @@ void RenderBones(glm::mat4 MVP)
 	glDisable(GL_DEPTH_TEST);
 	// Draw model skeleton
 	GLuint bonebuffer;
-	int bufferSize = sceneNodes.GetNumBones() * 16 * 4; // every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
+	int bufferSize = loadedModel.modelNodes.GetNumBones() * 16 * 4; // every bone has a 4x4 matrix, and every value in the matrix is 4 bytes long
 	glGenBuffers(1, &bonebuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, bonebuffer);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize, &sceneNodes.StoreBones().at(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, &loadedModel.modelNodes.StoreBones().at(0), GL_STATIC_DRAW);
 
 	//bind BasicVertexShader.MVP to this.matrixId
 	GLuint MatrixId = glGetUniformLocation(skeletonProgram, "MVP");	
@@ -470,10 +393,11 @@ void RenderBones(glm::mat4 MVP)
 
 	glLineWidth(4.0f);
 	glPointSize(5.0f);
-	glDrawArrays(GL_POINTS, 0, sceneNodes.GetNumBones());
+	glDrawArrays(GL_POINTS, 0, loadedModel.modelNodes.GetNumBones());
 	
 	// Unload shader program
 	glUseProgram(0);
+	glDeleteBuffers(1, &bonebuffer);
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -529,19 +453,10 @@ void RenderScene()
 	// Wibbly wobbly timey-wimey stuff
 	int delta = timeAtStart - oldTime;
 	oldTime = timeAtStart;
-	animCont.Update(delta);
+	if(loadedModel.animCont.animationList != NULL)
+	loadedModel.animCont.Update(delta);
 
-	// animating skin
-	// for every mesh in scene...
-	for(unsigned int j = 0; j < scene->mNumMeshes; j++)
-	{
-		//
-		skinList.at(j).ResetChanged();
-		// for every bone in mesh
-		for(unsigned int i = 0; i < scene->mMeshes[j]->mNumBones; i++)
-			skinList.at(j).MoveMeshToWorldSpace(j, i);
-		skinList.at(j).StoreFinalVertexData(j);
-	}
+	loadedModel.Update();
 
 	if (!toggleSkin) {
 		// Draw skinned bones
@@ -679,6 +594,9 @@ void MouseWheel(int button, int dir, int x, int y)
 {
 	if (!TwEventMouseButtonGLUT(button, dir, x, y))
 	{
+		if(button == 2){
+			
+		}
 		// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
 		if (button == 3)
 			zoom += 0.75f;
@@ -809,7 +727,7 @@ void CloseFunction(){
 			currentAnimation--;
 		else
 			currentAnimation = animationTimes.size() - 1;
-		animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
+		loadedModel.animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
 	}
 
 	// Call that goes to the previous stage in the animation
@@ -819,7 +737,64 @@ void CloseFunction(){
 			currentAnimation++;
 		else
 			currentAnimation = 0;
-		animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
+		loadedModel.animCont.SetLoopTime(animationTimes.at(currentAnimation).x, animationTimes.at(currentAnimation).y);
+	}
+
+	void loadModel(int modelNo){
+		switch(modelNo){
+		// Iron Man (Static Model)
+		case 0:
+				loadedModel.LoadModelData("Models/IronMan/Iron_Man.dae");
+		break;
+		// Ninja
+		case 1:
+				loadedModel.LoadModelData("Models/Ninja/ninjaEdit.ms3d");
+				loadedModel.animCont.animationSpeed = 1;
+				animationSplit("ninja");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+		break;
+		// Beast
+		case 2:
+				loadedModel.LoadModelData("Models/Beast/beastedit.ms3d");
+				loadedModel.animCont.animationSpeed = 1;
+				animationSplit("beast");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+		break;
+		// Zombie
+		case 3:
+				loadedModel.LoadModelData("Models/Zombie/Zombie_Idle02_roar.X");
+				loadedModel.animCont.animationSpeed = 200;
+				animationSplit("none");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+		break;
+		// Nightwing
+		case 4:
+				loadedModel.LoadModelData("Models/NightWingAS/nightwing anim.dae");
+				loadedModel.animCont.animationSpeed = 0.05;
+				animationSplit("none");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+		break;
+		}
+	}
+
+	void TW_CALL nextModel(void* clientData)
+	{
+		if(modelCycle < 4)
+				modelCycle++;
+			else
+				modelCycle = 0;
+
+			loadModel(modelCycle);
+	}
+
+	void TW_CALL prevModel(void* clientData)
+	{
+		if(modelCycle > 0)
+				modelCycle--;
+			else
+				modelCycle = 4;
+
+			loadModel(modelCycle);
 	}
 
 #pragma endregion
@@ -839,7 +814,10 @@ void main(int argc, char** argv)
 		std::cout << "glew error: " << glewGetErrorString(glewOK) << std::endl;
 	else
 		std::cout << "glew running" << std::endl;
-
+	
+	// Set the clear colour to blue
+	glClearColor(0.3f, 0.3f, 0.6f, 0.0f);
+	
 	// directly redirect GLUT events (excluding mouse) to AntTweakBar
 	glutMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
 	glutPassiveMotionFunc((GLUTmousemotionfun)TwEventMouseMotionGLUT);
@@ -859,6 +837,7 @@ void main(int argc, char** argv)
 	initShaders();
 	// setting up MVP
 	initCamera();
+
 	// loading models from file
 	LoadModelData();
 
@@ -870,32 +849,29 @@ void main(int argc, char** argv)
 						"jajlands1_up.jpg",
 						"jajlands1_dn.jpg");*/
 
-
 	pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
 
-#pragma region Model Node Finding
+	#pragma region Model Node Finding
 
-#pragma region Nightwing
+	#pragma region Nightwing
 	// Strings to be searched in the Node tree
 	aiString leftToeBase = aiString("mixamorig_LeftToeBase");
 	aiString rightToeBase = aiString("mixamorig_RightToeBase");
 	aiString leftHandBase = aiString("mixamorig_LeftHand");
 	aiString rightHandBase = aiString("mixamorig_RightHand");
-#pragma endregion
+	#pragma endregion
 
 	// Assigning a node pointer the value of a node from the node tree
-	aiNode* leftFoot = SearchTree(sceneNodes.root, leftToeBase);
-	aiNode* rightFoot = SearchTree(sceneNodes.root, rightToeBase);
-	aiNode* leftHand = SearchTree(sceneNodes.root, leftHandBase);
-	aiNode* rightHand = SearchTree(sceneNodes.root, rightHandBase);
+	aiNode* leftFoot = SearchTree(loadedModel.modelNodes.root, leftToeBase);
+	aiNode* rightFoot = SearchTree(loadedModel.modelNodes.root, rightToeBase);
+	aiNode* leftHand = SearchTree(loadedModel.modelNodes.root, leftHandBase);
+	aiNode* rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
 
 	// Use this to find names of bones in current loaded model
 	//node.PreOrderTraversal();
-#pragma endregion
-
-
+	#pragma endregion
 	
-#pragma region NightWing examples
+	#pragma region NightWing examples
 
 	//Create a particle emitter
 	pEmitter = ParticleEmitter(particleProgram,	// Shader
@@ -963,7 +939,7 @@ void main(int argc, char** argv)
 	pEmitter4.angleRange = glm::vec3(0.5);			// Angle of emitter
 	pEmitter4.rate = 100;							// Rate of Spawn
 
-#pragma endregion
+	#pragma endregion
 
 	#pragma region TweakBar
 	
@@ -971,8 +947,8 @@ void main(int argc, char** argv)
 	TwBar *tBar;
 
 	tBar = TwNewBar("GlobalOptions");
-	TwDefine("GlobalOptions size='200 300'" /*color='96 216 224' "*/);
-	TwDefine("GlobalOptions position='10 10' ");
+	TwDefine("GlobalOptions size='200 500'" /*color='96 216 224' "*/);
+	TwDefine("GlobalOptions position='20 20' ");
 
 	// FPS in UI
 	TwAddVarRO(tBar, "FPS", TW_TYPE_FLOAT, &final_fps, " ");
@@ -999,6 +975,10 @@ void main(int argc, char** argv)
 	TwAddVarRW(tBar, "Toggle Particle Emitter", TW_TYPE_BOOLCPP, &toggleParticles, " ");
 	TwAddVarRW(tBar, "Toggle Skin", TW_TYPE_BOOLCPP, &toggleSkin, " ");
 	TwAddVarRW(tBar, "Toggle Bones", TW_TYPE_BOOLCPP, &toggleBones, " ");
+	TwAddSeparator(tBar, NULL, " ");
+
+	TwAddButton(tBar, "Next Model", nextModel, NULL, " ");
+	TwAddButton(tBar, "Previous Model", prevModel, NULL, " ");
 	TwAddSeparator(tBar, NULL, " ");
 
 	// Check if model is ninja, allow animation control buttons
@@ -1122,7 +1102,6 @@ void main(int argc, char** argv)
 	#pragma endregion
 
 	#pragma endregion
-
 	
 	#pragma region Emitter3 GUI
 
@@ -1180,8 +1159,7 @@ void main(int argc, char** argv)
 
 	#pragma endregion
 
-	
-	#pragma region Emitter1 GUI
+	#pragma region Emitter4 GUI
 
 	// Window that will store the settings for the emitter and the particles
 	TwBar *emitterBar4;
@@ -1232,6 +1210,8 @@ void main(int argc, char** argv)
 
 	// Add the position group to the emitter section
 	TwDefine("Emitter4Settings/Position  group='Emitter Properties'  ");
+
+	#pragma endregion
 
 	#pragma endregion
 

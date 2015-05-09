@@ -40,7 +40,7 @@ class AnimationController{
 			
 
 	// The elapsed time of the animation
-	double timePassed;
+	double timePassed, animationSpeed;
 
 	// The starting and ending point of the looped animation
 	double startTime;
@@ -50,7 +50,7 @@ class AnimationController{
 	aiNode* rootNode;
 
 	// Empty Constructor
-	AnimationController(){}
+	AnimationController(){animationList = NULL;}
 
 	// Basic Constructor
 	AnimationController(aiAnimation** aList, aiNode* root){
@@ -58,6 +58,7 @@ class AnimationController{
 		SetCurrentAnimation(0);
 		rootNode = root;
 		startTime = 0;
+		animationSpeed = 1;
 		endTime = currentAnimation->mDuration;
 	}
 

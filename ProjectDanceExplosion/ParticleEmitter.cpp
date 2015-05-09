@@ -128,38 +128,7 @@ ParticleEmitter::ParticleEmitter(GLuint shaderProgram, aiNode* node, std::string
 		ParticleContainer[i] = Particle();
 	}
 
-	// Use the Shader Program
-	glUseProgram(programID);
-
-	// Bind the buffers to their respective arrays
-#pragma region Binding of Buffers
-
-	//Buffers for Drawing Particles
-	glGenBuffers(1, &billboard_vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, billboard_vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	//Buffers for Drawing Particles
-	glGenBuffers(1, &particle_texture_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particle_texture_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_texture_buffer_data), g_texture_buffer_data, GL_STATIC_DRAW);
-
-	// The VBO containing the positions of the particles
-	glGenBuffers(1, &particles_position_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 3 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
-
-	// The VBO containing the colours of the particles
-	glGenBuffers(1, &particles_colour_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particles_colour_buffer);
-	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MAXPARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
-
-	// End the shader
-	glUseProgram(0);
-
-#pragma endregion
+	
 
 }
 
