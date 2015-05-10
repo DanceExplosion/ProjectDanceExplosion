@@ -223,9 +223,9 @@ void ParticleEmitter::Update(float delta, glm::mat4 view){
 			glm::vec3 angle = glm::normalize(glm::vec3(xAngle, yAngle, zAngle));
 
 			// Set the speed of the particle to the randomly generated values
-			ParticleContainer[particleIndex].velocity.x = angle.x*currentVel;
-			ParticleContainer[particleIndex].velocity.y = -angle.y*currentVel;
-			ParticleContainer[particleIndex].velocity.z = angle.z*currentVel;
+			ParticleContainer[particleIndex].velocity.x = -angle.x*currentVel;
+			ParticleContainer[particleIndex].velocity.y = angle.y*currentVel;
+			ParticleContainer[particleIndex].velocity.z = -angle.z*currentVel;
 
 			// Checks the Index of the current particle isnt out of bounds
 			// Sets the values of each particle to the parameter values from the Emitter initialisation
@@ -395,7 +395,7 @@ void ParticleEmitter::Draw(glm::mat4 viewMatrix, glm::mat4 vp_maxtrix){
 		glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
 		glVertexAttribPointer(
 			1, // attribute. No particular reason for 1, but must match the layout in the shader.
-			4, // size : x + y + z => 3
+			4, // size : x + y + z + scale => 4
 			GL_FLOAT, // type
 			GL_FALSE, // normalized?
 			0, // stride

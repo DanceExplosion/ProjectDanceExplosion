@@ -18,7 +18,7 @@
 
 // OpenGL Essentials
 GLuint window;
-GLuint basicProgram, particleProgram;
+GLuint particleProgram, skyboxProgram;
 GLuint redrawProgram, skeletonProgram;
 
 std::vector<glm::vec2> animationTimes;
@@ -37,8 +37,9 @@ TwBar *tBar;
 glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 projection;
 glm::mat4 view;
+float UIQuat[4] = {0,0,0,1};
 int xCircle = 1, yCircle = 1;
-float camX = 0, camY = 0, zoom = -10;
+float camX = 0, camY = 0, zoom = 10;
 float lightX = 0,lightY = 0,lightZ = 0;
 
 ModelData loadedModel;
@@ -46,9 +47,10 @@ ModelData loadedModel;
 GLuint vao;
 
 // Toggles for drawing the individual systems
-bool toggleParticles = false;
-bool toggleBones = false;
-bool toggleSkin = false;
+bool toggleParticles = true;
+bool toggleBones = true;
+bool toggleSkin = true;
+bool toggleSkybox = true;
 bool multipleAnimations = false;
 int modelCycle = 0;
 
@@ -214,7 +216,6 @@ void animationSplit(std::string model)
 		multipleAnimations = false;
 	}
 }
-
 
 // Function for loading the models
 void LoadModelData()
@@ -416,40 +417,27 @@ void RenderScene()
 
 	glEnable(GL_DEPTH_TEST);
 
+	glm::quat UIConvert = -glm::quat(UIQuat[0],UIQuat[3],UIQuat[2],UIQuat[1]);
+
+	view = glm::lookAt(
+		glm::vec3(0,0, zoom),// camera position in world space
+		glm::vec3(0, 0, 0), // where camera is viewing in world space
+		glm::vec3(0, -1, 0)  // Y is up (in world space)
+		);
+	view *= glm::toMat4(UIConvert);
+
 	// calculating MVP
 	glm::mat4 MVP = projection * view * modelMatrix;
 
 	glm::mat4 MV = view * modelMatrix;
-
-	// set shader program
-	glUseProgram(basicProgram);	
 	
 	// buffers
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	// Bind various matrices to the shader
-	GLuint matrixId = glGetUniformLocation(basicProgram, "MVP");
-	GLuint modelMId = glGetUniformLocation(basicProgram, "M");
-	GLuint viewMId = glGetUniformLocation(basicProgram, "V");
-	GLuint modelViewMId = glGetUniformLocation(basicProgram, "MV");
-
-	// Get the light position
-	GLuint lightPosId = glGetUniformLocation(basicProgram, "LightPosition_worldspace");
-
-	// Pass in the coordinated for the light
-	glUniform3f(lightPosId, lightX,lightY,lightZ);
-
-	// USING SHADERS
-	glUniformMatrix4fv(matrixId, 1, GL_FALSE, &MVP[0][0]);
-	
-	glUniformMatrix4fv(modelMId, 1, GL_FALSE, &modelMatrix[0][0]);
-	
-	glUniformMatrix4fv(viewMId, 1, GL_FALSE, &view[0][0]);
-	
-	glUniformMatrix4fv(modelViewMId, 1, GL_FALSE, &MV[0][0]);
-
-	//skybox.renderSkybox();
+	//Render skybox if it is toggled
+	if(toggleSkybox)
+	skybox.renderSkybox(view, projection);
 
 	// Unload model shader program, pEmitter uses its own 
 	glUseProgram(0);
@@ -464,12 +452,12 @@ void RenderScene()
 
 	loadedModel.Update();
 
-	if (!toggleSkin) {
+	if (toggleSkin) {
 		// Draw skinned bones
 		RenderSkin(MVP);
 	}
 
-	if (!toggleBones) {
+	if (toggleBones) {
 		// Draw skeleton
 		RenderBones(MVP);
 	}
@@ -478,7 +466,7 @@ void RenderScene()
 	final_fps = pEmitter.whatIsFPS();
 	particle_Count = pEmitter.particleCount() + pEmitter2.particleCount() + pEmitter3.particleCount() + pEmitter4.particleCount();
 
-	if (!toggleParticles) {
+	if (toggleParticles) {
 		// Draw Emitter
 		pEmitter.Draw(view, projection * view);
 
@@ -521,96 +509,6 @@ void RenderScene()
 	glDisable(GL_DEPTH_TEST);
 }
 
-// Calculate view matrix
-void MoveCamera(/*int x, int y*/)
-{
-	view = glm::lookAt(
-		glm::vec3(0,0, zoom),// camera position in world space
-		glm::vec3(0, 0, 0), // where camera is viewing in world space
-		glm::vec3(0, 1, 0)  // Y is up (in world space)
-		);
-	view = glm::rotate(view, camX, glm::vec3(0.0f,1.0f,0.0f));
-	view = glm::rotate(view, camY, glm::vec3(1.0f,0.0f,0.0f));
-
-	// redraw scene immediately
-	glutPostRedisplay();
-}
-
-// Keyboard controls
-void KeyPress(unsigned char key, int x, int y)
-{
-	switch (key)
-	{
-	case 27: // close application by pressing "Esc"
-		glutDestroyWindow(window);
-		exit(0);
-		break;
-	case 'w':
-		lightY++;
-		break;
-	case 's':
-		lightY--;
-		break;
-	case 'd':
-		lightX++;
-		break;
-	case 'a':
-		lightX--;
-		break;
-	case 'r':
-		lightZ++;
-		break;
-	case 'f':
-		lightZ--;
-		break;
-	case 'g':
-		pEmitter.particleCount();
-		break;
-	case 'h':
-		pEmitter.disable();
-		break;
-	case 'j':
-		pEmitter.whatIsFPS();
-		break;
-	default:
-		break;
-	}
-}
-
-// Keyboard controls for camera movement
-void CameraControls(int key, int x, int y)
-{
-	switch (key)
-	{
-	case GLUT_KEY_UP:
-		camY += 0.3f;
-		MoveCamera();
-		break;
-	case GLUT_KEY_DOWN:
-		camY -= 0.3f;
-		MoveCamera();
-		break;
-	case GLUT_KEY_RIGHT:
-		camX += 0.3f;
-		MoveCamera();
-		break;
-	case GLUT_KEY_LEFT:
-		camX -= 0.3f;
-		MoveCamera();
-		break;
-	case GLUT_KEY_SHIFT_L:
-		zoom += 0.75f;
-		MoveCamera();
-		break;
-	case GLUT_KEY_CTRL_L:
-		zoom -= 0.75f;
-		MoveCamera();
-		break;
-	default:
-		break;
-	}
-}
-
 // Mouse Controll for Zooming [a lot handier than dealing with Sticky based keys for windows
 void MouseWheel(int button, int dir, int x, int y)
 {
@@ -621,12 +519,11 @@ void MouseWheel(int button, int dir, int x, int y)
 		}
 		// Checks if the button pressed is button 3; this is the code for positive wheel scrolling
 		if (button == 3)
-			zoom += 0.75f;
+			zoom += 0.5f;
 		// Checks if the button pressed is button 4; this is the code for negative wheel scrolling
 		else if (button == 4)
-			zoom -= 0.75f;
+			zoom -= 0.5f;
 
-		MoveCamera();
 	}
 
 }
@@ -644,18 +541,16 @@ void initCamera()
 
 	// camY needs a default value
 	camY = 0.0f;
-	// view matrix
-	MoveCamera();
 }
 
 // Compiling shader code
 void initShaders()
 {
 	ShaderLoader loader;
-	basicProgram = loader.CreateProgram("ModelVertexShader.VERT", "ModelFragmentShader.FRAG");
 	particleProgram = loader.CreateProgram("ParticleVertexShader.txt", "ParticleFragmentShader.txt");
 	skeletonProgram = loader.CreateProgram("NodeVertexShader.txt", "NodeFragmentShader.txt");
 	redrawProgram = loader.CreateProgram("RedrawVertexShader.txt", "RedrawFragmentShader.txt");
+	skyboxProgram = loader.CreateProgram("SkyboxVertexShader.VERT", "SkyboxFragmentShader.FRAG");
 }
 
 // Function to allow window resizing
@@ -712,7 +607,6 @@ void CloseFunction(){
 		TwTerminate();
 	}
 
-
 void SetNightwingEmitters()
 {
 	#pragma region Node Finding
@@ -730,19 +624,18 @@ void SetNightwingEmitters()
 	rightHand = SearchTree(loadedModel.modelNodes.root, rightHandBase);
 
 	pEmitter.setEmitterNode(leftFoot, modelMatrix);
-	pEmitter2.setEmitterNode(leftHand, modelMatrix);
+	pEmitter4.setEmitterNode(leftHand, modelMatrix);
 	pEmitter3.setEmitterNode(rightFoot, modelMatrix);
-	pEmitter4.setEmitterNode(NULL, glm::mat4(1.0f));
-
-	// Use this to find names of bones in current loaded model
-	//node.PreOrderTraversal();
+	pEmitter2.setEmitterNode(NULL, glm::mat4(1.0f));
 	#pragma endregion
 
 	//Emitter 1 Initial Values
+	#pragma region Emitter 1
 	pEmitter.emitterDir[0] = 0;						// X direction
 	pEmitter.emitterDir[1] = 0;						// Y Direction
-	pEmitter.emitterDir[2] = -1;					// Z Direction
+	pEmitter.emitterDir[2] = 1;						// Z Direction
 	pEmitter.velocity = -0.004;						// Initial velocity
+	pEmitter.p_acc = glm::vec3(0);					// Accelleration
 	pEmitter.p_lifetime = 50;						// Lifetime of Particles
 	pEmitter.startScale = 1;						// Initial size
 	pEmitter.endScale = .5;							// Size before death
@@ -750,24 +643,30 @@ void SetNightwingEmitters()
 	pEmitter.p_colourEnd = glm::vec4(0, 0, 1, 0);	// End colour, Blue
 	pEmitter.angleRange = glm::vec3(0);				// Angle of emitter
 	pEmitter.rate = 100;							// Rate of Spawn
+	pEmitter.additive = false;						// Additive Blending
+	#pragma endregion 
 
 	//Emitter 2 Initial Values
+	#pragma region Emitter 2
 	pEmitter2.emitterDir[0] = 0;					// X Direction
 	pEmitter2.emitterDir[1] = 1;					// Y Direction
 	pEmitter2.emitterDir[2] = 0;					// Z Direction
-	pEmitter2.velocity = -0.001;					// Initial Velocity
-	pEmitter2.p_lifetime = 15;						// Lifetime of Particles
-	pEmitter2.startScale = 0.7;						// Initial size
+	pEmitter2.position = glm::vec3(0,0,10);			// Position
+	pEmitter2.velocity = 0.005;						// Initial Velocity
+	pEmitter2.p_lifetime = 25;						// Lifetime of Particles
+	pEmitter2.startScale = 10;						// Initial size
 	pEmitter2.endScale = 0;							// Size before death
 	pEmitter2.p_colourStart = glm::vec4(1, 0.5, 0, 1);// Start colour, 
 	pEmitter2.p_colourEnd = glm::vec4(0, 0, 0, 0);	// End colour,
 	pEmitter2.angleRange = glm::vec3(4);			// Angle of emitter
 	pEmitter2.rate = 100;							// Rate of Spawn
+	#pragma endregion 
 
 	//Emitter 3 Initial Values
+	#pragma region Emitter 3
 	pEmitter3.emitterDir[0] = 0;					// X Direction
 	pEmitter3.emitterDir[1] = 0;					// Y Direction
-	pEmitter3.emitterDir[2] = -1;					// Z Direction
+	pEmitter3.emitterDir[2] = 1;					// Z Direction
 	pEmitter3.velocity = -0.004;					// Initial Velocity
 	pEmitter3.p_lifetime = 50;						// Lifetime of Particles	
 	pEmitter3.startScale = 1;						// Initial size
@@ -776,20 +675,72 @@ void SetNightwingEmitters()
 	pEmitter3.p_colourEnd = glm::vec4(1, 0, 0, 0);	// End colour, 
 	pEmitter3.angleRange = glm::vec3(0);			// Angle of emitter
 	pEmitter3.rate = 100;							// Rate of Spawn
+	#pragma endregion 
 
 	//Emitter 4 Initial Values
+	#pragma region Emitter 4
 	pEmitter4.emitterDir[0] = 0;					// X Direction
-	pEmitter4.emitterDir[1] = 0;					// Y Direction
-	pEmitter4.emitterDir[2] = -1;					// Z Direction
-	pEmitter4.position = glm::vec3(5, 0, 0);		// Position
-	pEmitter4.velocity = -0.001;					// Initial Velocity
+	pEmitter4.emitterDir[1] = 1;					// Y Direction
+	pEmitter4.emitterDir[2] = 0;					// Z Direction
+	pEmitter4.position = glm::vec3(0);				// Position
+	pEmitter4.velocity = 0.0004;						// Initial Velocity
 	pEmitter4.p_lifetime = 50;						// Lifetime of Particles
-	pEmitter4.startScale = 2;						// Initial size
+	pEmitter4.startScale = 0.5;						// Initial size
 	pEmitter4.endScale = 0;							// Size before death
 	pEmitter4.p_colourStart = glm::vec4(0, 0.7, 1, 1);// Start colour,
 	pEmitter4.p_colourEnd = glm::vec4(0.5, 0, 0.5, 0);// End colour, 
-	pEmitter4.angleRange = glm::vec3(0.5);			// Angle of emitter
+	pEmitter4.angleRange = glm::vec3(4);			// Angle of emitter
 	pEmitter4.rate = 100;							// Rate of Spawn
+	#pragma endregion 
+}
+
+void SetBeastEmitters(){
+
+	#pragma region Node Finding
+
+	// Strings to be searched in the Node tree
+	aiString mouthName = aiString("Joint13");
+	aiString tailName = aiString("Joint18");
+
+	// Assigning a node pointer the value of a node from the node tree
+	aiNode *mouth = SearchTree(loadedModel.modelNodes.root, mouthName);
+	aiNode *tail = SearchTree(loadedModel.modelNodes.root, tailName);
+
+	pEmitter.setEmitterNode(mouth, modelMatrix);
+	pEmitter2.setEmitterNode(tail, modelMatrix);
+	#pragma endregion
+
+	//Emitter 1 Initial Values
+	#pragma region Emitter 1
+	pEmitter.emitterDir[0] = 0;						// X direction
+	pEmitter.emitterDir[1] = 0;						// Y Direction
+	pEmitter.emitterDir[2] = -1;					// Z Direction
+	pEmitter.velocity = 0;							// Initial velocity
+	pEmitter.p_acc = glm::vec3(0,-0.00001,0);		// Accelleration
+	pEmitter.p_lifetime = 50;						// Lifetime of Particles
+	pEmitter.startScale = 0;						// Initial size
+	pEmitter.endScale = .5;							// Size before death
+	pEmitter.p_colourStart = glm::vec4(0, 1, 1, 1);	// Start colour
+	pEmitter.p_colourEnd = glm::vec4(0, 1, 1, 0);	// End colour
+	pEmitter.angleRange = glm::vec3(0);				// Angle of emitter
+	pEmitter.rate = 2;								// Rate of Spawn
+	pEmitter.additive = true;						// Additive Blending
+	#pragma endregion 
+
+	//Emitter 2 Initial Values
+	#pragma region Emitter 2
+	pEmitter2.emitterDir[0] = 0;					// X Direction
+	pEmitter2.emitterDir[1] = 1;					// Y Direction
+	pEmitter2.emitterDir[2] = 0;					// Z Direction
+	pEmitter2.velocity = -0.001;					// Initial Velocity
+	pEmitter2.p_lifetime = 15;						// Lifetime of Particles
+	pEmitter2.startScale = 0.7;						// Initial size
+	pEmitter2.endScale = 0;							// Size before death
+	pEmitter2.p_colourStart = glm::vec4(0, 1, 0, 1);// Start colour, 
+	pEmitter2.p_colourEnd = glm::vec4(0, 1, 1, 0);	// End colour,
+	pEmitter2.angleRange = glm::vec3(4);			// Angle of emitter
+	pEmitter2.rate = 100;							// Rate of Spawn
+	#pragma endregion 
 }
 
 void DisableEmitters(){
@@ -800,6 +751,8 @@ void DisableEmitters(){
 }
 
 void loadModel(int modelNo){
+
+		#pragma region Set Default Values
 		modelMatrix = glm::mat4(1.0f);
 		pEmitter.setEmitterNode(NULL, modelMatrix);
 		pEmitter2.setEmitterNode(NULL, modelMatrix);
@@ -807,6 +760,8 @@ void loadModel(int modelNo){
 		pEmitter4.setEmitterNode(NULL, modelMatrix);
 		modelMatrix = glm::translate(glm::vec3(0,-2,0));
 		DisableEmitters();
+		#pragma endregion
+
 		switch(modelNo){
 		// Iron Man (Static Model)
 		case 0:
@@ -814,10 +769,23 @@ void loadModel(int modelNo){
 				loadedModel.LoadModelData("Models/IronMan/Iron_Man.dae");
 				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
 				modelMatrix *= glm::translate(glm::vec3(0,2,0));
+				multipleAnimations = false;
+				#pragma endregion
+		break;
+		// Zombie
+		case 1:
+				#pragma region Zombie
+				loadedModel.LoadModelData("Models/Zombie/Zombie_Idle02_roar.X");
+				loadedModel.animCont.animationSpeed = 200;
+				animationSplit("none");
+				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
+				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
+				modelMatrix *= glm::scale(glm::vec3(0.1,0.1,0.1));
+				modelMatrix *= glm::translate(glm::vec3(0,20,0));
 				#pragma endregion
 		break;
 		// Ninja
-		case 1:
+		case 2:
 				#pragma region Ninja
 				loadedModel.LoadModelData("Models/Ninja/ninjaEdit.ms3d");
 				loadedModel.animCont.animationSpeed = 1;
@@ -828,7 +796,7 @@ void loadModel(int modelNo){
 				#pragma endregion
 		break;
 		// Beast
-		case 2:
+		case 3:
 				#pragma region Beast
 				loadedModel.LoadModelData("Models/Beast/beastedit.ms3d");
 				loadedModel.animCont.animationSpeed = 1;
@@ -837,18 +805,7 @@ void loadModel(int modelNo){
 				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
 				modelMatrix *= glm::scale(glm::vec3(0.05,0.05,0.05));
 				modelMatrix *= glm::translate(glm::vec3(0,50,-6));
-				#pragma endregion
-		break;
-		// Zombie
-		case 3:
-				#pragma region Zombie
-				loadedModel.LoadModelData("Models/Zombie/Zombie_Idle02_roar.X");
-				loadedModel.animCont.animationSpeed = 200;
-				animationSplit("none");
-				loadedModel.animCont.SetLoopTime(animationTimes.at(0).x,animationTimes.at(0).y);
-				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
-				modelMatrix *= glm::scale(glm::vec3(0.1,0.1,0.1));
-				modelMatrix *= glm::translate(glm::vec3(0,20,0));
+				SetBeastEmitters();
 				#pragma endregion
 		break;
 		// Nightwing
@@ -881,7 +838,7 @@ void loadModel(int modelNo){
 		pEmitter.StoreParticleTextureData("Models/p.hanna.jpg");
 	}
 
-	// Change Emitter's graphic to a trollface
+	// Change Emitter's graphic to a Spark
 	void TW_CALL emitSpark(void *clientData)
 	{ 
 		pEmitter.StoreParticleTextureData("Models/Spark.png");
@@ -936,7 +893,20 @@ void loadModel(int modelNo){
 
 			loadModel(modelCycle);
 	}
-
+	
+	void TW_CALL ListNodes(void* clientData)
+	{
+		loadedModel.modelNodes.PreOrderTraversal();
+	}
+	
+	void TW_CALL resetCamera(void* clientData)
+	{
+		zoom = 10;
+		UIQuat[0] = 0;
+		UIQuat[1] = 0;
+		UIQuat[2] = 0;
+		UIQuat[3] = 1;
+	}
 #pragma endregion
 
 void main(int argc, char** argv)
@@ -978,13 +948,13 @@ void main(int argc, char** argv)
 	// setting up MVP
 	initCamera();
 
-	/*skybox.loadSkybox("Textures/",
-						"jajlands1_ft.jpg",
-						"jajlands1_bk.jpg",
-						"jajlands1_lf.jpg",
-						"jajlands1_rt.jpg",
-						"jajlands1_up.jpg",
-						"jajlands1_dn.jpg");*/
+	skybox.loadSkybox(skyboxProgram, "Textures/Nissi/",
+						"posz.jpg",
+						"negz.jpg",
+						"posx.jpg",
+						"negx.jpg",
+						"posy.jpg",
+						"negy.jpg");
 
 	pEmitter.StoreParticleTextureData("Models/SmokeShape.png");
 	
@@ -1014,6 +984,7 @@ void main(int argc, char** argv)
 
 	#pragma region TweakBar
 
+	#pragma region Global Options Bar
 	tBar = TwNewBar("GlobalOptions");
 	TwDefine("GlobalOptions size='200 500'" /*color='96 216 224' "*/);
 	TwDefine("GlobalOptions position='20 20' ");
@@ -1043,19 +1014,33 @@ void main(int argc, char** argv)
 	TwAddVarRW(tBar, "Toggle Particle Emitter", TW_TYPE_BOOLCPP, &toggleParticles, " ");
 	TwAddVarRW(tBar, "Toggle Skin", TW_TYPE_BOOLCPP, &toggleSkin, " ");
 	TwAddVarRW(tBar, "Toggle Bones", TW_TYPE_BOOLCPP, &toggleBones, " ");
+	TwAddVarRW(tBar, "Toggle Skybox", TW_TYPE_BOOLCPP, &toggleSkybox, " ");
 	TwAddSeparator(tBar, NULL, " ");
 
 	TwAddButton(tBar, "Next Model", nextModel, NULL, " ");
 	TwAddButton(tBar, "Previous Model", prevModel, NULL, " ");
 	TwAddSeparator(tBar, NULL, " ");
 
-	// Check if model is ninja, allow animation control buttons
-		TwAddButton(tBar, "NoAnimation", NULL, NULL, " label='No Animation Switching' ");
-		TwAddButton(tBar, "Animation-Next", nextAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
-		TwAddButton(tBar, "Animation-Previous", prevAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
-		TwAddSeparator(tBar, NULL, " ");
+	// Animation control buttons
+	TwAddButton(tBar, "NoAnimation", NULL, NULL, " label='No Animation Switching' ");
+	TwAddButton(tBar, "Animation-Next", nextAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
+	TwAddButton(tBar, "Animation-Previous", prevAnim, NULL, "visible=false help='Only use when Ninja or Beast is active' ");
+	TwAddSeparator(tBar, NULL, " ");
 
-	// GUI Setup
+	TwAddButton(tBar, "List Model Nodes", ListNodes, NULL, "visible=true help='Lists the nodes of a model, their depth in the tree and their transformations' ");
+	#pragma endregion
+		
+	#pragma region Camera Options Bar
+	
+	TwBar *camBar = TwNewBar("CameraOptions");
+	TwDefine("CameraOptions size='200 150'");
+	TwDefine("CameraOptions position='300 650' ");
+	TwAddVarRW(camBar, "Camera Angle", TW_TYPE_QUAT4F, &UIQuat, "opened=true ");
+	TwAddVarRW(camBar, "Camera Distance", TW_TYPE_FLOAT, &zoom, " ");
+	TwAddButton(camBar, "Reset Camera", resetCamera, NULL, " ");
+	#pragma endregion
+
+	// Emitter GUI Setup
 	
 	#pragma region Emitter1 GUI
 
@@ -1286,8 +1271,6 @@ void main(int argc, char** argv)
 	glutIdleFunc(RenderScene);
 
 	// keyboard control
-	glutKeyboardFunc(KeyPress);
-	glutSpecialFunc(CameraControls);
 	glutCloseFunc(CloseFunction);
 	glutMouseFunc(MouseWheel);
 

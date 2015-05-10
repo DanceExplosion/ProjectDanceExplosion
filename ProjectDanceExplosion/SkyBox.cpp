@@ -1,7 +1,8 @@
 #include "SkyBox.h"
 
-void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::string a_sBack, std::string a_sLeft, std::string a_sRight, std::string a_sTop, std::string a_sBottom)
+void SkyBox::loadSkybox(GLuint program, std::string a_sDirectory, std::string a_sFront, std::string a_sBack, std::string a_sLeft, std::string a_sRight, std::string a_sTop, std::string a_sBottom)
 {
+	shader = program;
 	// Loads in the textures form the 6 sides
 	tTextures[0].loadTexture2D(a_sDirectory + a_sFront);
 	tTextures[1].loadTexture2D(a_sDirectory + a_sBack);
@@ -74,10 +75,21 @@ void SkyBox::loadSkybox(std::string a_sDirectory, std::string a_sFront, std::str
 	
 }
 
-void SkyBox::renderSkybox()
+void SkyBox::renderSkybox(glm::mat4 view, glm::mat4 projection)
 {
-	glGenVertexArrays(1, &uiVAO);
-	glBindVertexArray(uiVAO);
+	//glGenVertexArrays(1, &uiVAO);
+	//glBindVertexArray(uiVAO);
+	
+	glUseProgram(shader);
+
+	GLuint modelVPId = glGetUniformLocation(shader, "VP");
+	GLuint modelVPosId = glGetUniformLocation(shader, "vPos");
+	glm::vec3 CameraPosition(glm::inverse(view)[3]);
+
+	glUniform3f(modelVPosId, CameraPosition.x,CameraPosition.y,CameraPosition.z);
+	glm::mat4 VP = projection*view;
+	// USING SHADERS
+	glUniformMatrix4fv(modelVPId, 1, GL_FALSE, &VP[0][0]);
 
 	glGenBuffers(1, &uiBuffer);
 	data.reserve(0);
@@ -92,12 +104,10 @@ void SkyBox::renderSkybox()
 	// Texture coordinates
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3) + sizeof(glm::vec2), (void*)sizeof(glm::vec3));
-	// Normal vectors
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3) + sizeof(glm::vec2), (void*)(sizeof(glm::vec3) + sizeof(glm::vec2)));
+	
+
 
 	glDepthMask(0);
-	glBindVertexArray(uiVAO);
 	for (int i = 0; i < 6;i++)
 	{
 		tTextures[i].bindTexture();
@@ -105,7 +115,10 @@ void SkyBox::renderSkybox()
 	}
 
 	glDepthMask(1);
-	glDeleteVertexArrays(1, &uiVAO);
+	// disable texturing
+	glBindTexture(GL_TEXTURE_2D, NULL);
+	glActiveTexture(NULL);
+	glDisable(GL_TEXTURE_2D);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);

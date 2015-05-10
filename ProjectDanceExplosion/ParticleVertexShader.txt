@@ -5,7 +5,7 @@
 // These layouts are values passed in from the main program
 
 layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in vec3 particlePosition;
+layout(location = 1) in vec4 particlePosition;
 layout(location = 2) in vec4 particleColour;
 layout(location = 3) in vec2 particleTextureData;
 
@@ -21,9 +21,9 @@ uniform vec3 CamUp_W;
 void main(){	
 	
 	vec3 vertexPosition_worldspace = 
-					particlePosition
-					+ CamRight_W * vertexPosition.x * 1
-					+ CamUp_W * vertexPosition.y * 1;
+					vec3(particlePosition.x,particlePosition.y,particlePosition.z)
+					+ CamRight_W * vertexPosition.x * particlePosition.w
+					+ CamUp_W * vertexPosition.y * particlePosition.w;
 
 	//set the vertex position to the appropriate position plus the particle's position
 	gl_Position =  VP*vec4(vertexPosition_worldspace,1);

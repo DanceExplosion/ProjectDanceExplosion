@@ -98,9 +98,8 @@ void CTexture::setFiltering(int a_tfMagnification, int a_tfMinification)
 // Binding texture to the buffers
 void CTexture::bindTexture(int iTextureUnit)
 {
-	glActiveTexture(GL_TEXTURE0 + iTextureUnit);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, uiTexture);
-	glBindSampler(iTextureUnit, uiSampler);
 }
 
 // Function to remove texture if need be
