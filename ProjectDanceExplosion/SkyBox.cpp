@@ -92,7 +92,7 @@ void SkyBox::renderSkybox(glm::mat4 view, glm::mat4 projection)
 	glUniformMatrix4fv(modelVPId, 1, GL_FALSE, &VP[0][0]);
 
 	glGenBuffers(1, &uiBuffer);
-	data.reserve(0);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, uiBuffer);
 
 	glBufferData(GL_ARRAY_BUFFER, data.size(), &data[0], GL_STATIC_DRAW);
@@ -119,7 +119,9 @@ void SkyBox::renderSkybox(glm::mat4 view, glm::mat4 projection)
 	glBindTexture(GL_TEXTURE_2D, NULL);
 	glActiveTexture(NULL);
 	glDisable(GL_TEXTURE_2D);
+	glDeleteBuffers(1, &uiBuffer);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+	glUseProgram(0);
 }

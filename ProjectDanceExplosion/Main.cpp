@@ -447,10 +447,12 @@ void RenderScene()
 	// Wibbly wobbly timey-wimey stuff
 	int delta = timeAtStart - oldTime;
 	oldTime = timeAtStart;
-	if(loadedModel.animCont.animationList != NULL)
-	loadedModel.animCont.Update(delta);
+	if(loadedModel.animCont.animationList != NULL){
+		loadedModel.animCont.Update(delta);
+		if (toggleSkin)
+			loadedModel.Update();
+	}
 
-	loadedModel.Update();
 
 	if (toggleSkin) {
 		// Draw skinned bones
@@ -770,6 +772,7 @@ void loadModel(int modelNo){
 				modelMatrix *= glm::rotate(modelMatrix,3.1f,glm::vec3(0,1,0));
 				modelMatrix *= glm::translate(glm::vec3(0,2,0));
 				multipleAnimations = false;
+				loadedModel.Update();
 				#pragma endregion
 		break;
 		// Zombie
